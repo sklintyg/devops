@@ -1,0 +1,94 @@
+#!/bin/bash
+
+# Source code provided to directory
+S2I_SOURCE_DIR=${S2I_SOURCE_DIR-"/tmp/src"}
+
+# Resulting WAR files will be copied to this location
+S2I_ARTIFACTS_DIR=${S2I_ARTIFACTS_DIR-"/tmp/artifacts"}
+mkdir -p $S2I_ARTIFACTS_DIR
+
+# Source artifact
+SOURCE_ARTIFACTS_DIR=$S2I_SOURCE_DIR/web/build/libs
+
+# Target artifact WAR
+TARGET_WAR=$S2I_ARTIFACTS_DIR/ROOT.war
+
+# Setup build nev
+export JAVA_TOOL_OPTIONS="$JAVA_TOOL_OPTIONS \
+-DbuildVersion=$BUILD_VERSION  \
+-DinfraVersion=$INFRA_VERSION \
+-DcommonVersion=$COMMON_VERSION \
+-DrefDataVersion=$REF_DATA_VERSION \
+-Dfile.encoding=UTF-8"
+
+# create build info
+function create_build_info() {
+    SHA256=$(sha256sum $S2I_ARTIFACTS_DIR/ROOT.war | awk '{ print $1 }')
+    TIMESTAMP=$(date --iso-8601='seconds')
+cat << EOF > $S2I_ARTIFACTS_DIR/build.info
+TIMESTAMP=$TIMESTAMP
+ARTIFACT=$S2I_ARTIFACTS_DIR/ROOT.war
+ARTIFACT_SHA256=$SHA256
+ARTIFACT_FROM=$WAR
+SOURCE=$OPENSHIFT_BUILD_SOURCE
+REF=$OPENSHIFT_BUILD_REFERENCE
+COMMIT=$OPENSHIFT_BUILD_COMMIT
+OPENSHIFT_BUILD_NAME=$OPENSHIFT_BUILD_NAME
+OPENSHIFT_PROJECT=$OPENSHIFT_BUILD_NAMESPACE
+BUILDER_IMAGE=${BUILDER_IMAGE}
+EOF
+}
+
+# make writeable
+function make_writeable() {
+    for d in $*; do
+        [ -d "$d" ] && chmod -R a+rwx $d
+    done
+}
+
+# gradle stuff
+export GRADLE_USER_HOME=$S2I_SOURCE_DIR/.gradle
+
+# Start build using gradle.
+if [ -f "$S2I_SOURCE_DIR/build.gradle"  -o -f "$S2I_SOURCE_DIR/build.gradle.kts" ]; then
+    echo "---> User $(id) home is $HOME"
+
+    GRADLE_ARGS=${GRADLE_ARGS:-"--no-daemon build -PuseMinifiedJavaScript -Pclient"}
+
+    echo "---> Building application from source with gradle wrapper GRADLE_ARGS=$GRADLE_ARGS"
+    (cd $S2I_SOURCE_DIR; ./gradlew $GRADLE_ARGS)
+    ERR=$?
+    if [ $ERR -ne 0 ]; then
+        echo "Aborting due to error code $ERR from gradle build"
+        exit $ERR
+    fi
+
+    # Copy built file into artifacts
+    WAR=$(ls ${SOURCE_ARTIFACTS_DIR}/*.war)
+    if [ $? -ne 0 ]; then
+        WAR=$(ls ${SOURCE_ARTIFACTS_DIR}/*.jar)
+    fi
+    if [ -f "$WAR" ]; then
+        echo "---> Move output artifact $WAR to $TARGET_WAR"
+        mv $WAR $TARGET_WAR
+        ERR=$?
+        if [ $ERR -ne 0 ]; then
+            echo "Unable to move output artifact, exit code: $ERR"
+            exit $ERR
+        fi
+    else
+        echo "---> Output WAR file $WAR could not be found in directory $SOURCE_ARTIFACTS_DIR"
+        exit 1
+    fi
+
+    echo "---> Create build info"
+    create_build_info
+
+    # add write access
+    make_writeable $GRADLE_USER_HOME $S2I_SOURCE_DIR /opt/app-root/src/.npm /opt/app-root/src/.local
+else
+    echo "---> No such gradle.build file in directory $S2I_SOURCE_DIR"
+    exit 1
+fi
+
+echo "build done."

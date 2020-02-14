@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Resulting WAR files will be copied to this location
+S2I_ARTIFACTS_DIR=${S2I_ARTIFACTS_DIR-"/tmp/artifacts"}
+
+LINUX=$(uname -a)
+
+if [ -f /etc/redhat-release ]; then
+    RELEASE=$(cat /etc/redhat-release)
+else
+    RELEASE=""
+fi
+
+JAVA=$(java -version 2>&1 | head -1)
+
+echo "# This is an openshift S2I Java build container (typically built with a gradle wrapper)."
+echo "# A testrun is initiated with the command line argument \"testrun\". Though, requires a proper environment"
+echo
+echo "# Build Info:"
+cat $S2I_ARTIFACTS_DIR/build.info
+echo
+echo "# Build Platform:"
+echo "$RELEASE"
+echo "$LINUX"
+echo "$JAVA"
