@@ -1,7 +1,7 @@
 kind: Template
 apiVersion: v1
 metadata:
-  name: pipelinetemplate-build-library-2020-2
+  name: pipelinetemplate-build-library
 parameters:
   - name: LIBRARY_NAME
     required: true
