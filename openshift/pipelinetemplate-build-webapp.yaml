@@ -83,7 +83,7 @@ objects:
             def versionFlags = ""
             def testList = []
             def buildArgs = "clean build"
-            def releaseVersion = ${RELEASE_VERSION}
+            def releaseVersion = "${RELEASE_VERSION}"
             def latestTag = "${releaseVersion}.latest"
 
             // function to run database commands
