@@ -5,6 +5,8 @@ metadata:
 parameters:
   - name: APP_NAME
     required: true
+  - name: RELEASE_VERSION
+    required: true
   - name: STAGE
     required: true
     value: "test"
@@ -35,13 +37,11 @@ parameters:
   - name: HEALTH_URI
     required: true
     value: /
-  - name: RELEASE
-    value: "false"
 objects:
   - apiVersion: v1
     kind: BuildConfig
     metadata:
-      name: ${APP_NAME}-pipeline
+      name: ${APP_NAME}-${RELEASE_VERSION}-pipeline
       generation: 1
       labels:
         app: ${APP_NAME}
@@ -63,13 +63,11 @@ objects:
           env:
             - name: "GIT_BRANCH"
               value: "${GIT_CI_BRANCH}"
-            - name: "RELEASE"
-              value: "${RELEASE}"
           jenkinsfile: |-
             // The following variables are expected to exist:
-            // [ GIT_BRANCH, RELEASE ]
+            // [ GIT_BRANCH ]
             //
-            // Build and Deploy temaples must previously have been installed
+            // Build and Deploy templates must previously have been installed
             //
             def dbName = "${APP_NAME}-${new Random().nextInt() % 1000}".replace('-', '')
             def tmpDir = "${APP_NAME}-tmp"
@@ -78,7 +76,6 @@ objects:
             def buildVersion = "${APP_NAME}-${BUILD_NUMBER}"
             def commonVersion = "NA"
             def infraVersion = "NA"
-            def releaseBuild = RELEASE == "true"
             def backingService = ""
             def propagateTo = []
             def artifactFolder = "target"
@@ -86,22 +83,23 @@ objects:
             def versionFlags = ""
             def testList = []
             def buildArgs = "clean build"
-            def uploadArchives = false
+            def releaseVersion = ${RELEASE_VERSION}
+            def latestTag = "${releaseVersion}.latest"
 
             // function to run database commands
             def dbScript(cmd) {
               sh (
                 script: "oc rsh \$(oc get pods | grep mysql- | grep Running | awk \'{ print \$1 }\')  bash -c \"mysql -u root -e \'${cmd}\'\"",
-                returnStatus: true 
-              ) 
+                returnStatus: true
+              )
             }
 
             // run shell command, return status code
             def shell(cmd) {
               sh (
                 script: cmd,
-                returnStatus: true 
-              ) 
+                returnStatus: true
+              )
             }
 
             // run shell command and signal an error on failure
@@ -139,7 +137,7 @@ objects:
                 return tag.substring(1)
               } else {
                 eshell(wd + "git checkout ${ref}")
-                return "latest"
+                return ${latestTag}
               }
             }
 
@@ -152,7 +150,7 @@ objects:
 
               // Just use name
               def targetUrl = "http://${APP_NAME}:${TEST_PORT}"
-              def actuatorUrl = "http://${APP_NAME}:8081"                         
+              def actuatorUrl = "http://${APP_NAME}:8081"
 
               def imageStream = openshift.selector("is", "${APP_NAME}").object().status.dockerImageRepository
               echo "Use ImageStream: ${imageStream}"
@@ -162,18 +160,18 @@ objects:
               def num = (new Random().nextInt() % 100000) + 1
               def suffix = (num < 0) ? "${num}" : "-${num}"
               def pod = openshift.process("${TESTRUNNER_TEMPLATE}",
-                "-p", "APP_NAME=${APP_NAME}", 
-                "-p", "IMAGE='${imageStream}-${ARTIFACT_IMAGE_SUFFIX}:${buildVersion}'", 
-                "-p", "STAGE=${STAGE}",                          
+                "-p", "APP_NAME=${APP_NAME}",
+                "-p", "IMAGE='${imageStream}-${ARTIFACT_IMAGE_SUFFIX}:${buildVersion}'",
+                "-p", "STAGE=${STAGE}",
                 "-p", "TARGET_URL='${targetUrl}'",
                 "-p", "ACTUATOR_URL='${actuatorUrl}'",
-                "-p", "BUILD_VERSION=${buildVersion}", 
+                "-p", "BUILD_VERSION=${buildVersion}",
                 "-p", "JOB_NAME=${JOB_NAME}",
                 "-p", "CALLBACK_URL='${hook.getURL()}'",
                 "-p", "BUILD_TAG=${BUILD_TAG}${suffix}",
                 "-p", "TESTS=${testName}")
               openshift.apply(pod)
-              
+
               def data = ""
               timeout (45) {
                 echo "Waiting (max 45 min) for POST to ${hook.getURL()}"
@@ -202,38 +200,12 @@ objects:
 
             pipeline {
               agent any
-              
+
               environment {
                 JAVA_TOOL_OPTIONS = '-Dfile.encoding=UTF-8'
               }
 
               stages {
-
-                stage('Release') {
-                  when {
-                    expression {
-                      return releaseBuild
-                    }                      
-                  }
-                  steps {
-                    script {
-                      echo "Build release"
-                    }
-                  }
-                }
-
-                stage('Latest') {
-                  when {
-                    expression {
-                      return !releaseBuild
-                    }                      
-                  }
-                  steps {
-                    script {
-                      echo "Build latest"
-                    }
-                  }
-                }
 
                 stage('Checkout Source') {
                   steps {
@@ -257,9 +229,6 @@ objects:
                       if (info.buildArgs) {
                         buildArgs = info.buildArgs
                       }
-                      if (info.uploadArchives) {
-                        uploadArchives = info.uploadArchives
-                      }
                       if (info.tests) {
                         testList = info.tests
                       }
@@ -271,16 +240,12 @@ objects:
                 stage('Prepare') {
                   steps {
                     script {
-                      if (releaseBuild) {
-                        currentBuild.displayName = "Release ${buildVersion}"
-                      } else {
-                        currentBuild.displayName = "Latest ${buildVersion}"
-                      }
+                      currentBuild.displayName = "${releaseVersion} ${buildVersion}"
+
                       echo "Prepare configuration and check pre-conditions"
                       openshift.withCluster() {
                         openshift.withProject() {
                           log "Pipeline started with:"
-                          echo "release: ${releaseBuild}"
                           echo "gitUrl: ${gitUrl}, gitBranch: ${GIT_BRANCH}"
                           echo "buildVersion: ${buildVersion}, infraVersion: ${infraVersion}, commonVersion: ${commonVersion}"
                           echo "backingService: ${backingService}"
@@ -308,7 +273,7 @@ objects:
                           // cleanup app specific redis keys
                           sh (
                             script: "oc rsh \$(oc get pods | grep redis- | grep Running | awk \'{ print \$1 }\')  /opt/rh/rh-redis32/root/usr/bin/redis-cli -a redis  EVAL \"return redis.call(\'del\', unpack(redis.call(\'keys\', ARGV[1])))\" 0 *:${APP_NAME}:*",
-                            returnStatus: true 
+                            returnStatus: true
                           )
                         }
                       }
@@ -329,9 +294,9 @@ objects:
                         publishHTML([
                           allowMissing: true,
                           alwaysLinkToLastBuild: true,
-                          keepAll: true, 
-                          reportDir: 'build/reports/allTests', 
-                          reportFiles: 'index.html', 
+                          keepAll: true,
+                          reportDir: 'build/reports/allTests',
+                          reportFiles: 'index.html',
                           reportName: 'JUnitTests',
                           ])
                       }
@@ -346,10 +311,10 @@ objects:
                     script {
                       openshift.withCluster() {
                         openshift.withProject() {
-                          def models = openshift.process("${BUILD_TEMPLATE}", 
-                            "-p", "APP_NAME=${APP_NAME}", 
+                          def models = openshift.process("${BUILD_TEMPLATE}",
+                            "-p", "APP_NAME=${APP_NAME}",
                             "-p", "STAGE=${STAGE}",
-                            "-p", "BUILD_VERSION=${buildVersion}", 
+                            "-p", "BUILD_VERSION=${buildVersion}",
                             "-p", "INFRA_VERSION=${infraVersion}",
                             "-p", "COMMON_VERSION=${commonVersion}",
                             "-p", "CONTEXT_PATH=${CONTEXT_PATH}",
@@ -367,15 +332,15 @@ objects:
                       openshift.withCluster() {
                         openshift.withProject() {
                           log "Build artifact image ${APP_NAME}-${ARTIFACT_IMAGE_SUFFIX}"
-                          def build = openshift.selector("bc", "${APP_NAME}-${ARTIFACT_IMAGE_SUFFIX}").startBuild("--from-archive=${applicationZip}")                          
+                          def build = openshift.selector("bc", "${APP_NAME}-${ARTIFACT_IMAGE_SUFFIX}").startBuild("--from-archive=${applicationZip}")
                           sleep(time: 1, unit: 'SECONDS')
-                          echo "${build.name()} started" 
+                          echo "${build.name()} started"
                           timeout (30) {
                             def status = ""
                             build.untilEach(1) {
                                 status = it.object().status.phase
-                                echo "Build status: ${status}" 
-                                return !["Running", "Pending", "New"].contains(status)                            
+                                echo "Build status: ${status}"
+                                return !["Running", "Pending", "New"].contains(status)
                             }
                             echo "Logs for artifact build"
                             build.logs()
@@ -398,13 +363,13 @@ objects:
                           log "Build runtime image ${APP_NAME}"
                           def build = openshift.selector("bc", "${APP_NAME}").startBuild()
                           sleep(time: 1, unit: 'SECONDS')
-                          echo "${build.name()} started" 
+                          echo "${build.name()} started"
                           timeout (45) {
                             def status = ""
                             build.untilEach(1) {
                                 status = it.object().status.phase
-                                echo "Build status: ${status}" 
-                                return !["Running", "Pending", "New"].contains(status)                            
+                                echo "Build status: ${status}"
+                                return !["Running", "Pending", "New"].contains(status)
                             }
                             echo "Logs for docker runtime build"
                             build.logs()
@@ -427,10 +392,10 @@ objects:
                           shell("oc delete configmap ${APP_NAME}-config")
                           shell("oc delete secret ${APP_NAME}-env")
                           shell("oc delete configmap ${APP_NAME}-configmap-envvar")
-                          
+
                           // TODO: Finalize handling of secret vars
                           // shell("[ -f ${STAGE}/secret-vars.yaml ] && oc delete secret ${APP_NAME}-secret-envvar || true")
-                          
+
                           def wd = "cd devops/openshift; "
                           eshell(wd + "[ -f ${STAGE}/configmap-vars.yaml ] && oc create -f ${STAGE}/configmap-vars.yaml || true")
                           // eshell(wd + "[ -f ${STAGE}/secret-vars.yaml ] && oc create -f ${STAGE}/secret-vars.yaml || true")
@@ -452,8 +417,8 @@ objects:
                       script {
                           openshift.withCluster() {
                               openshift.withProject() {
-                                  // [ name, tag ] default version is latest
-                                  def svc = (backingService.contains(":") ? backingService : backingService + ":latest").split(":")
+                                  // [ name, tag ] default version is "releaseVersion.latest"
+                                  def svc = (backingService.contains(":") ? backingService : backingService + ":${latestTag}").split(":")
                                   def healthUri = "/"
                                   // FIXME: dirty work-around!
                                   if (svc[0].startsWith("intygstjanst")) {
@@ -470,7 +435,7 @@ objects:
                                   // checkout actual configuration for the base service version, then copy to the actual backing service name.
                                   // Note: not multi-thread safe, implies one build at a time
                                   def svcAppName = "${svc[0]}-${APP_NAME}"
-                                  def svcGitRef = svc[1].equals("latest") ? "develop" : "v${svc[1]}"
+                                  def svcGitRef = svc[1].equals(${latestTag}) ? ${GIT_BRANCH} : "v${svc[1]}"
 
                                   echo "Extract config for intygstjanst ${svcGitRef}"
 
@@ -479,10 +444,10 @@ objects:
                                   shell("oc delete configmap ${svc[0]}-config")
                                   shell("oc delete secret ${svc[0]}-env")
                                   shell("oc delete configmap ${svc[0]}-configmap-envvar")
-                                  
+
                                   // TODO: Finalize handling of secret vars
                                   // shell("[ -f ${STAGE}/secret-vars.yaml ] && oc delete secret ${APP_NAME}-secret-envvar || true")
-                                  
+
                                   def wd = "cd ${tmpDir}/devops/openshift; "
                                   eshell(wd + "[ -f ${STAGE}/configmap-vars.yaml ] && oc create -f ${STAGE}/configmap-vars.yaml || true")
                                   // eshell(wd + "[ -f ${STAGE}/secret-vars.yaml ] && oc create -f ${STAGE}/secret-vars.yaml || true")
@@ -533,12 +498,12 @@ objects:
                       openshift.withProject() {
                         def imageStream = openshift.selector("is", "${APP_NAME}").object().status.dockerImageRepository
                         echo "Use ImageStream: ${imageStream}"
-                        def deployModel = openshift.process("${DEPLOY_TEMPLATE}", 
-                          "-p", "APP_NAME=${APP_NAME}", 
+                        def deployModel = openshift.process("${DEPLOY_TEMPLATE}",
+                          "-p", "APP_NAME=${APP_NAME}",
                           "-p", "IMAGE='$imageStream:${buildVersion}'",
                           "-p", "DATABASE_NAME=${dbName}",
                           "-p", "HEALTH_URI=${HEALTH_URI}",
-                          "-p", "STAGE=${STAGE}")                          
+                          "-p", "STAGE=${STAGE}")
                         log "Wait for rollout (limited to 5 minutes)"
                         timeout (10) {
                           def rm = openshift.apply(deployModel).narrow("dc").rollout()
@@ -550,7 +515,7 @@ objects:
                       }
                     }
                   }
-                }      
+                }
               }
 
               /* START TESTS */
@@ -570,73 +535,17 @@ objects:
                 }
               }
               /* END TESTS */
-                
-              // Promote Release Builds to Nexus
-              stage('Publish Image to Nexus') {
-                
-                when {
-                  expression {
-                    return releaseBuild
-                  }
-                }
-
-                steps {
-                  script {
-                    openshift.withCluster() {
-                      openshift.withProject() {
-                        def imageStream = openshift.selector("is", "${APP_NAME}").object().status.dockerImageRepository
-                        echo "Use ImageStream: ${imageStream}"
-
-                        def nexusName = "${APP_NAME}"
-                        if (nexusName.endsWith("-test")) {
-                          nexusName = nexusName.take(nexusName.lastIndexOf("-test"))
-                        }
-
-                        def model = openshift.process("buildtemplate-nexus",
-                          "-p", "APP_NAME=${APP_NAME}", 
-                          "-p", "NEXUS_NAME=${nexusName}", 
-                          "-p", "IMAGE='${imageStream}'", 
-                          "-p", "STAGE=${STAGE}",                          
-                          "-p", "TAG='${buildVersion}'")
-                        openshift.apply(model)
-
-                        def build = openshift.selector("bc", "${APP_NAME}-nexus").startBuild()
-                        log "${build.name()} started"
-                        def status = ""
-                        timeout (20) {
-                          build.untilEach(1) {
-                              status = it.object().status.phase
-                              echo "Build status: ${status}" 
-                              return !["Running", "Pending", "New"].contains(status)                            
-                          }
-
-                          echo "Logs for nexus build"
-                          build.logs()
-                          if (status != "Complete") {
-                            error("Build terminated with status: ${status}")
-                          }  
-                        }                 
-                      }
-                    }
-                  }
-                }
-              }
 
               stage('Store Verified Image') {
                 steps {
                   script {
                     openshift.withCluster() {
-                      openshift.withProject() { 
+                      openshift.withProject() {
                         def source = openshift.selector("is", "${APP_NAME}").object().status.dockerImageRepository
                         def project = openshift.project()
                         def target = "${project}/${APP_NAME}-verified"
                         echo "Promote image ${source} to is ${APP_NAME}-verified"
-                        // move latest for dev builds only
-                        if (releaseBuild) {
-                          openshift.tag("${source}:${buildVersion}", "${target}:${buildVersion}")
-                        } else { 
-                          openshift.tag("${source}:${buildVersion}", "${target}:${buildVersion}", "${target}:latest")
-                        }
+                        openshift.tag("${source}:${buildVersion}", "${target}:${buildVersion}", "${target}:${latestTag}")
                       }
                     }
                   }
@@ -646,49 +555,17 @@ objects:
               stage('Tag Source') {
                 steps {
                   script {
-                    shgradle "tagRelease ${versionFlags}"
+                    ${BUILD_TOOL} "tagRelease ${versionFlags}"
                   }
                 }
               }
-
-              stage('Publish Artifacts to Nexus') {
-                when {
-                  expression {
-                    return releaseBuild && uploadArchives
-                  }
-                }
-                steps {
-                  script {
-                    shgradle "uploadArchives ${versionFlags}"
-                  }
-                }
-              }
-
-              stage('Propagate') {
-                steps {
-                  script {
-                    openshift.withCluster() {
-                      openshift.withProject() {
-                        propagateTo.each { t ->
-                          try {
-                              build job: "dintyg-${t}-test-pipeline", parameters: [string(name: 'GIT_BRANCH', value: GIT_BRANCH)]
-                          } catch (e) {
-                              echo "Trigger build error (ignored): ${e.message}"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-
             }
 
-            post {             
+            post {
               success {
                 script {
                   util.notifySuccess()
-                }              
+                }
               }
 
               always {
@@ -704,12 +581,12 @@ objects:
 
                       def image = openshift.selector("is", "${APP_NAME}").object()
                       def imageStream = image.status.dockerImageRepository
-                      
+
                       shell("oc process ${DEPLOY_TEMPLATE} -p APP_NAME=\"${APP_NAME}\" -p IMAGE=\"${imageStream}:${buildVersion}\" -p STAGE=${STAGE} -p DATABASE_NAME=${dbName} | oc delete -f -")
 
                       if (!backingService.empty) {
-                          def svc = (backingService.contains(":") ? backingService : backingService + ":latest").split(":")
-                          
+                          def svc = (backingService.contains(":") ? backingService : backingService + ":${latestTag}").split(":")
+
                           def svcAppName = "${svc[0]}-${APP_NAME}"
                           echo "Logs for ${svcAppName}"
                           openshift.selector( "dc", "${svcAppName}" ).logs()
@@ -723,7 +600,7 @@ objects:
                           // Delete /config configmap
                           shell("oc delete configmap ${svcAppName}-config")
                           // Delete /env secret
-                          shell("oc delete secret ${svcAppName}-env")          
+                          shell("oc delete secret ${svcAppName}-env")
                           // Delete /certifikat secret
                           shell("oc delete secret ${svcAppName}-certifikat")
                           // Delete configmap envvar
@@ -733,7 +610,7 @@ objects:
                         }
                       }
                     }
-                  }                  
+                  }
                 }
 
                 failure {
@@ -742,8 +619,8 @@ objects:
                     util.notifyFailed()
                   }
                 }
-                
+
               }
             }
-        
-      
+
+
