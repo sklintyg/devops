@@ -12,13 +12,13 @@ parameters:
     value: "test"
   - name: BUILD_TEMPLATE
     required: true
-    value: "buildtemplate-webapp-binary"
+    value: "buildtemplate-webapp-binary.yaml"
   - name: DEPLOY_TEMPLATE
     required: true
-    value: "deploytemplate-webapp"
+    value: "deploytemplate-webapp.yaml"
   - name: TESTRUNNER_TEMPLATE
     required: true
-    value: "testrunnertemplate-pod"
+    value: "testrunnertemplate-pod.yaml"
   - name: ARTIFACT_IMAGE_SUFFIX
     required: true
     value: "artifact"
@@ -45,6 +45,7 @@ objects:
       generation: 1
       labels:
         app: ${APP_NAME}
+        release: ${RELEASE_VERSION}
         stage: ${STAGE}
     spec:
       runPolicy: "SerialLatestOnly"
@@ -68,23 +69,25 @@ objects:
             // [ GIT_BRANCH ]
             //
             // Build and Deploy templates must previously have been installed
+            // TODO: Make this pre-req as small as possible by using template from file instead
             //
-            def dbName = "${APP_NAME}-${new Random().nextInt() % 1000}".replace('-', '')
-            def tmpDir = "${APP_NAME}-tmp"
+            def appReleaseName = "${APP_NAME}-${RELEASE_VERSION}"
+            def dbName = "${appReleaseName}-${new Random().nextInt() % 1000}".replace('-', '')
+            def tmpDir = "${appReleaseName}-tmp"
             // default values
             def gitUrl = "${GIT_URL}"
-            def buildVersion = "${APP_NAME}-${BUILD_NUMBER}"
+            def gitDevopsUrl = gitUrl.take(gitUrl.lastIndexOf("/")+1) + "devops.git"
+            def gitDevopsDir = "devopsrepo"
+            def buildVersion = "" // From build-info.json
             def commonVersion = "NA"
             def infraVersion = "NA"
             def backingService = ""
-            def propagateTo = []
             def artifactFolder = "target"
-            def applicationZip = "${artifactFolder}/${APP_NAME}-${BUILD_NUMBER}.tar.gz"
+            def applicationZip = "${artifactFolder}/${appReleaseName}-${BUILD_NUMBER}.tar.gz"
             def versionFlags = ""
             def testList = []
             def buildArgs = "clean build"
-            def releaseVersion = "${RELEASE_VERSION}"
-            def latestTag = "${releaseVersion}.latest"
+            def latestTag = "${RELEASE_VERSION}.latest"
 
             // function to run database commands
             def dbScript(cmd) {
@@ -116,7 +119,7 @@ objects:
             }
 
             // function to extract openshift stage configuration only from repo. dir must not exist
-            // returns build version
+            // returns build version. This is only used for Intygstjänst as a backing service
             def extractConfig(dir, url, ref, stage) {
               eshell("rm -rf ${dir}")
               eshell("mkdir ${dir}")
@@ -149,8 +152,8 @@ objects:
               def hook = registerWebhook()
 
               // Just use name
-              def targetUrl = "http://${APP_NAME}:${TEST_PORT}"
-              def actuatorUrl = "http://${APP_NAME}:8081"
+              def targetUrl = "http://${appReleaseName}:${TEST_PORT}"
+              def actuatorUrl = "http://${appReleaseName}:8081"
 
               def imageStream = openshift.selector("is", "${APP_NAME}").object().status.dockerImageRepository
               echo "Use ImageStream: ${imageStream}"
@@ -159,8 +162,9 @@ objects:
               // TODO: use generateName in Pod template, i.e. when it works
               def num = (new Random().nextInt() % 100000) + 1
               def suffix = (num < 0) ? "${num}" : "-${num}"
-              def pod = openshift.process("${TESTRUNNER_TEMPLATE}",
+              def pod = openshift.process("-f", "${gitDevopsDir}/openshift/${TESTRUNNER_TEMPLATE}",
                 "-p", "APP_NAME=${APP_NAME}",
+                "-p", "APP_RELEASE_NAME=${appReleaseName}",
                 "-p", "IMAGE='${imageStream}-${ARTIFACT_IMAGE_SUFFIX}:${buildVersion}'",
                 "-p", "STAGE=${STAGE}",
                 "-p", "TARGET_URL='${targetUrl}'",
@@ -210,7 +214,14 @@ objects:
                 stage('Checkout Source') {
                   steps {
                     script {
+                      // Checkout application source
                       git url: "${gitUrl}", branch: GIT_BRANCH
+
+                      // Checkout devops source
+                      dir (${gitDevopsDir}) {
+                        git url: "${gitDevopsUrl}", branch: GIT_BRANCH
+                      }
+
                       def info = readJSON file: 'build-info.json'
                       echo "${info}"
                       buildVersion = "${info.appVersion}.${BUILD_NUMBER}"
@@ -222,9 +233,6 @@ objects:
                       }
                       if (info.backingService) {
                         backingService = info.backingService
-                      }
-                      if (info.propagate) {
-                        propagateTo = info.propagate
                       }
                       if (info.buildArgs) {
                         buildArgs = info.buildArgs
@@ -240,27 +248,28 @@ objects:
                 stage('Prepare') {
                   steps {
                     script {
-                      currentBuild.displayName = "${releaseVersion} ${buildVersion}"
+                      currentBuild.displayName = "${appReleaseName} ${buildVersion}"
 
                       echo "Prepare configuration and check pre-conditions"
                       openshift.withCluster() {
                         openshift.withProject() {
                           log "Pipeline started with:"
                           echo "gitUrl: ${gitUrl}, gitBranch: ${GIT_BRANCH}"
+                          echo "gitDevopsUrl: ${gitDevopsUrl}, gitBranch: ${GIT_BRANCH}"
                           echo "buildVersion: ${buildVersion}, infraVersion: ${infraVersion}, commonVersion: ${commonVersion}"
                           echo "backingService: ${backingService}"
 
                           // check envrionment
-                          [ gitUrl, GIT_BRANCH, buildVersion ].each {
+                          [ gitUrl, GIT_BRANCH, gitDevopsUrl, buildVersion ].each {
                             if (!it) {
                               error("No such required context variable in environment.")
                             }
                           }
 
+                          // Make sure required template files exists in devops repo
                           [ "${BUILD_TEMPLATE}", "${DEPLOY_TEMPLATE}", "${TESTRUNNER_TEMPLATE}" ].each {
-                            def t = openshift.selector("template", it)
-                            if (!t.exists()) {
-                              error("No such required template: ${it}")
+                            if (!fileExists("${gitDevopsDir}/openshift/${it}")) {
+                              error("Unable to find template file ${it}")
                             }
                           }
 
@@ -272,7 +281,7 @@ objects:
 
                           // cleanup app specific redis keys
                           sh (
-                            script: "oc rsh \$(oc get pods | grep redis- | grep Running | awk \'{ print \$1 }\')  /opt/rh/rh-redis32/root/usr/bin/redis-cli -a redis  EVAL \"return redis.call(\'del\', unpack(redis.call(\'keys\', ARGV[1])))\" 0 *:${APP_NAME}:*",
+                            script: "oc rsh \$(oc get pods | grep redis- | grep Running | awk \'{ print \$1 }\')  /opt/rh/rh-redis32/root/usr/bin/redis-cli -a redis  EVAL \"return redis.call(\'del\', unpack(redis.call(\'keys\', ARGV[1])))\" 0 *:${appReleaseName}:*",
                             returnStatus: true
                           )
                         }
@@ -311,8 +320,9 @@ objects:
                     script {
                       openshift.withCluster() {
                         openshift.withProject() {
-                          def models = openshift.process("${BUILD_TEMPLATE}",
+                          def models = openshift.process("-f", "${gitDevopsDir}/openshift/${BUILD_TEMPLATE}",
                             "-p", "APP_NAME=${APP_NAME}",
+                            "-p", "APP_RELEASE_NAME=${appReleaseName}",
                             "-p", "STAGE=${STAGE}",
                             "-p", "BUILD_VERSION=${buildVersion}",
                             "-p", "INFRA_VERSION=${infraVersion}",
@@ -332,7 +342,7 @@ objects:
                       openshift.withCluster() {
                         openshift.withProject() {
                           log "Build artifact image ${APP_NAME}-${ARTIFACT_IMAGE_SUFFIX}"
-                          def build = openshift.selector("bc", "${APP_NAME}-${ARTIFACT_IMAGE_SUFFIX}").startBuild("--from-archive=${applicationZip}")
+                          def build = openshift.selector("bc", "${appReleaseName}-${ARTIFACT_IMAGE_SUFFIX}").startBuild("--from-archive=${applicationZip}")
                           sleep(time: 1, unit: 'SECONDS')
                           echo "${build.name()} started"
                           timeout (30) {
@@ -361,7 +371,7 @@ objects:
                       openshift.withCluster() {
                         openshift.withProject() {
                           log "Build runtime image ${APP_NAME}"
-                          def build = openshift.selector("bc", "${APP_NAME}").startBuild()
+                          def build = openshift.selector("bc", "${appReleaseName}").startBuild()
                           sleep(time: 1, unit: 'SECONDS')
                           echo "${build.name()} started"
                           timeout (45) {
@@ -389,18 +399,18 @@ objects:
                     script {
                       openshift.withCluster() {
                         openshift.withProject() {
-                          shell("oc delete configmap ${APP_NAME}-config")
-                          shell("oc delete configmap ${APP_NAME}-configmap-envvar")
-                          shell("oc delete secret ${APP_NAME}-env")
-                          shell("oc delete secret ${APP_NAME}-certifikat")
-                          shell("oc delete secret ${APP_NAME}-secret-envvar")
+                          shell("oc delete configmap ${appReleaseName}-config")
+                          shell("oc delete configmap ${appReleaseName}-configmap-envvar")
+                          shell("oc delete secret ${appReleaseName}-env")
+                          shell("oc delete secret ${appReleaseName}-certifikat")
+                          shell("oc delete secret ${appReleaseName}-secret-envvar")
 
                           def wd = "cd devops/openshift; "
-                          eshell(wd + "oc create configmap ${APP_NAME}-configmap-envvar --from-env-file=${STAGE}/configmap-envvar.properties")
-                          eshell(wd + "oc create configmap ${APP_NAME}-config --from-file=${STAGE}/config/")
-                          eshell(wd + "oc create secret generic ${APP_NAME}-secret-envvar --from-env-file=${STAGE}/secret-envvar.properties --type=Opaque")
-                          eshell(wd + "oc create secret generic ${APP_NAME}-env --from-file=${STAGE}/env/ --type=Opaque")
-                          eshell(wd + "oc create secret generic ${APP_NAME}-certifikat --from-file=${STAGE}/certifikat/ --type=Opaque")
+                          eshell(wd + "oc create configmap ${appReleaseName}-configmap-envvar --from-env-file=${STAGE}/configmap-envvar.properties")
+                          eshell(wd + "oc create configmap ${appReleaseName}-config --from-file=${STAGE}/config/")
+                          eshell(wd + "oc create secret generic ${appReleaseName}-secret-envvar --from-env-file=${STAGE}/secret-envvar.properties --type=Opaque")
+                          eshell(wd + "oc create secret generic ${appReleaseName}-env --from-file=${STAGE}/env/ --type=Opaque")
+                          eshell(wd + "oc create secret generic ${appReleaseName}-certifikat --from-file=${STAGE}/certifikat/ --type=Opaque")
                         }
                       }
                     }
@@ -417,7 +427,7 @@ objects:
                       script {
                           openshift.withCluster() {
                               openshift.withProject() {
-                                  // [ name, tag ] default version is "releaseVersion.latest"
+                                  // [ name, tag ] default version is "${RELEASE_VERSION}.latest"
                                   def svc = (backingService.contains(":") ? backingService : backingService + ":${latestTag}").split(":")
                                   def healthUri = "/"
                                   // FIXME: dirty work-around!
@@ -472,8 +482,9 @@ objects:
                                   def imageStream = openshift.selector("is", "${svc[0]}-verified").object().status.dockerImageRepository
                                   echo "Use ImageStream ${imageStream}:${version}"
 
-                                  def deployModel = openshift.process("deploytemplate-webapp",
+                                  def deployModel = openshift.process("-f", "${gitDevopsDir}/openshift/${DEPLOY_TEMPLATE}",
                                           "-p", "APP_NAME=${svcAppName}",
+                                          "-p", "APP_RELEASE_NAME=${svcAppName}",
                                           "-p", "IMAGE='${imageStream}:${version}'",
                                           "-p", "DATABASE_NAME=${backDbName}",
                                           "-p", "HEALTH_URI=${healthUri}",
@@ -498,8 +509,9 @@ objects:
                       openshift.withProject() {
                         def imageStream = openshift.selector("is", "${APP_NAME}").object().status.dockerImageRepository
                         echo "Use ImageStream: ${imageStream}"
-                        def deployModel = openshift.process("${DEPLOY_TEMPLATE}",
+                        def deployModel = openshift.process("-f", "${gitDevopsDir}/openshift/${DEPLOY_TEMPLATE}",
                           "-p", "APP_NAME=${APP_NAME}",
+                          "-p", "APP_RELEASE_NAME=${appReleaseName}",
                           "-p", "IMAGE='$imageStream:${buildVersion}'",
                           "-p", "DATABASE_NAME=${dbName}",
                           "-p", "HEALTH_URI=${HEALTH_URI}",
@@ -541,10 +553,9 @@ objects:
                   script {
                     openshift.withCluster() {
                       openshift.withProject() {
-                        def source = openshift.selector("is", "${APP_NAME}").object().status.dockerImageRepository
-                        def project = openshift.project()
-                        def target = "${project}/${APP_NAME}-verified"
-                        echo "Promote image ${source} to is ${APP_NAME}-verified"
+                        def source = "${APP_NAME}"
+                        def target = "${APP_NAME}-verified"
+                        echo "Promote image ${source} to imagestream ${target}"
                         openshift.tag("${source}:${buildVersion}", "${target}:${buildVersion}", "${target}:${latestTag}")
                       }
                     }
@@ -576,13 +587,13 @@ objects:
                       dbScript("drop database ${dbName};")
                       shell("rm -f ${applicationZip}")
 
-                      echo "Logs for ${APP_NAME}"
-                      openshift.selector( "dc", "${APP_NAME}" ).logs()
+                      echo "Logs for ${appReleaseName}"
+                      openshift.selector( "dc", "${appReleaseName}" ).logs()
 
                       def image = openshift.selector("is", "${APP_NAME}").object()
                       def imageStream = image.status.dockerImageRepository
 
-                      shell("oc process ${DEPLOY_TEMPLATE} -p APP_NAME=\"${APP_NAME}\" -p IMAGE=\"${imageStream}:${buildVersion}\" -p STAGE=${STAGE} -p DATABASE_NAME=${dbName} | oc delete -f -")
+                      shell("oc process -f ${gitDevopsDir}/openshift/${DEPLOY_TEMPLATE} -p APP_NAME=\"${APP_NAME}\" -p APP_RELEASE_NAME=\"${appReleaseName}\" -p IMAGE=\"${imageStream}:${buildVersion}\" -p STAGE=${STAGE} -p DATABASE_NAME=${dbName} | oc delete -f -")
 
                       if (!backingService.empty) {
                           def svc = (backingService.contains(":") ? backingService : backingService + ":${latestTag}").split(":")
@@ -594,7 +605,7 @@ objects:
                           imageStream = openshift.selector("is", "${svc[0]}-verified").object().status.dockerImageRepository
                           def backDbName = "${svc[0].replace('-', '')}${dbName}"
 
-                          shell("oc process ${DEPLOY_TEMPLATE} -p APP_NAME=\"${svcAppName}\" -p IMAGE=\"${imageStream}:${svc[1]}\" -p STAGE=${STAGE} -p DATABASE_NAME=${backDbName} | oc delete -f -")
+                          shell("oc process -f ${gitDevopsDir}/openshift/${DEPLOY_TEMPLATE} -p APP_NAME=\"${svcAppName}\" -p APP_RELEASE_NAME=\"${svcAppName}\" -p IMAGE=\"${imageStream}:${svc[1]}\" -p STAGE=${STAGE} -p DATABASE_NAME=${backDbName} | oc delete -f -")
                           dbScript("drop database ${backDbName};")
 
                           // Delete /config configmap

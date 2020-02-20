@@ -5,6 +5,8 @@ metadata:
 parameters:
 - name: APP_NAME
   required: true
+- name: APP_RELEASE_NAME
+  required: true
 - name: STAGE
   required: true
   value: "test"
@@ -15,7 +17,7 @@ parameters:
 - name: JOB_NAME
   required: true
 - name: BUILD_VERSION
-  required: true  
+  required: true
 - name: CALLBACK_URL
   required: true
 - name: BUILD_TAG
@@ -31,6 +33,7 @@ objects:
     name: "${BUILD_TAG}"
     labels:
       app: ${APP_NAME}
+      release: ${APP_RELEASE_NAME}
       stage: ${STAGE}
   spec:
     containers:

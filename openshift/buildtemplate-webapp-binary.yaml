@@ -5,6 +5,8 @@ metadata:
 parameters:
   - name: APP_NAME
     required: true
+  - name: APP_RELEASE_NAME
+    required: true
   - name: ARTIFACT_IMAGE_SUFFIX
     required: true
     value: "artifact"
@@ -34,9 +36,10 @@ objects:
     kind: BuildConfig
     metadata:
       creationTimestamp: null
-      name: ${APP_NAME}-${ARTIFACT_IMAGE_SUFFIX}
+      name: ${APP_RELEASE_NAME}-${ARTIFACT_IMAGE_SUFFIX}
       labels:
         app: ${APP_NAME}
+        release: ${APP_RELEASE_NAME}
         stage: ${STAGE}
     spec:
       completionDeadlineSeconds: 1200
@@ -52,13 +55,13 @@ objects:
           memory: 4Gi
         requests:
           cpu: 200m
-          memory: 2Gi     
+          memory: 2Gi
       source:
         type: Binary
         dockerfile: |-
           FROM docker.drift.inera.se/intyg/s2i-war-builder:8
           USER root
-          ENV APP_NAME=${APP_NAME} \
+          ENV APP_NAME=${APP_RELEASE_NAME} \
               BUILD_VERSION=${BUILD_VERSION} \
               INFRA_VERSION=${INFRA_VERSION} \
               COMMON_VERSION=${COMMON_VERSION} \
@@ -75,13 +78,14 @@ objects:
         type: Docker
         dockerStrategy:
           pullSecret:
-            name: "nexus-registry"              
+            name: "nexus-registry"
   - apiVersion: v1
     kind: BuildConfig
     metadata:
-      name: ${APP_NAME}
+      name: ${APP_RELEASE_NAME}
       labels:
         app: ${APP_NAME}
+        release: ${APP_RELEASE_NAME}
         stage: ${STAGE}
     spec:
       completionDeadlineSeconds: 600
@@ -94,7 +98,7 @@ objects:
       source:
         dockerfile: |-
           FROM docker.drift.inera.se/intyg/tomcat-base:9
-          ENV APP_NAME=${APP_NAME}
+          ENV APP_NAME=${APP_RELEASE_NAME}
           ADD ROOT.war $JWS_HOME/webapps/${CONTEXT_PATH}.war
         images:
           - from:
@@ -107,7 +111,7 @@ objects:
         type: Docker
         dockerStrategy:
           pullSecret:
-            name: "nexus-registry"       
+            name: "nexus-registry"
   - apiVersion: v1
     kind: ImageStream
     metadata:
