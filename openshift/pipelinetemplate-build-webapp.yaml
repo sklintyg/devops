@@ -390,17 +390,17 @@ objects:
                       openshift.withCluster() {
                         openshift.withProject() {
                           shell("oc delete configmap ${APP_NAME}-config")
-                          shell("oc delete secret ${APP_NAME}-env")
                           shell("oc delete configmap ${APP_NAME}-configmap-envvar")
-
-                          // TODO: Finalize handling of secret vars
-                          // shell("[ -f ${STAGE}/secret-vars.yaml ] && oc delete secret ${APP_NAME}-secret-envvar || true")
+                          shell("oc delete secret ${APP_NAME}-env")
+                          shell("oc delete secret ${APP_NAME}-certifikat")
+                          shell("oc delete secret ${APP_NAME}-secret-envvar")
 
                           def wd = "cd devops/openshift; "
-                          eshell(wd + "[ -f ${STAGE}/configmap-vars.yaml ] && oc create -f ${STAGE}/configmap-vars.yaml || true")
-                          // eshell(wd + "[ -f ${STAGE}/secret-vars.yaml ] && oc create -f ${STAGE}/secret-vars.yaml || true")
+                          eshell(wd + "oc create configmap ${APP_NAME}-configmap-envvar --from-env-file=${STAGE}/configmap-envvar.properties")
                           eshell(wd + "oc create configmap ${APP_NAME}-config --from-file=${STAGE}/config/")
+                          eshell(wd + "oc create secret generic ${APP_NAME}-secret-envvar --from-env-file=${STAGE}/secret-envvar.properties --type=Opaque")
                           eshell(wd + "oc create secret generic ${APP_NAME}-env --from-file=${STAGE}/env/ --type=Opaque")
+                          eshell(wd + "oc create secret generic ${APP_NAME}-certifikat --from-file=${STAGE}/certifikat/ --type=Opaque")
                         }
                       }
                     }
