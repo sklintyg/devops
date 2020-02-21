@@ -218,7 +218,7 @@ objects:
                       git url: "${gitUrl}", branch: GIT_BRANCH
 
                       // Checkout devops source
-                      dir (${gitDevopsDir}) {
+                      dir ("${gitDevopsDir}") {
                         git url: "${gitDevopsUrl}", branch: GIT_BRANCH
                       }
 
