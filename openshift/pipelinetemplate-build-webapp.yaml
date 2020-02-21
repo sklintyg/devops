@@ -608,6 +608,13 @@ objects:
 
                       shell("oc process -f ${gitDevopsDir}/openshift/${DEPLOY_TEMPLATE} -p APP_NAME=\"${appReleaseName}\" -p IMAGE=\"${imageStream}:${buildVersion}\" -p STAGE=${STAGE} -p DATABASE_NAME=${dbName} | oc delete -f -")
 
+                      // Delete resources
+                      shell("oc delete configmap ${appReleaseName}-config")
+                      shell("oc delete configmap ${appReleaseName}-configmap-envvar")
+                      shell("oc delete secret ${appReleaseName}-env")
+                      shell("oc delete secret ${appReleaseName}-certifikat")
+                      shell("oc delete secret ${appReleaseName}-secret-envvar")
+
                       if (!backingService.empty) {
                           echo "Logs for ${backingServiceAppName}"
                           openshift.selector( "dc", "${backingServiceAppName}" ).logs()
@@ -617,7 +624,7 @@ objects:
                           shell("oc process -f ${gitDevopsDir}/openshift/${DEPLOY_TEMPLATE} -p APP_NAME=\"${backingServiceAppName}\" -p IMAGE=\"${imageStream}:${backingServiceAppVersion}\" -p STAGE=${STAGE} -p DATABASE_NAME=${backingServiceDbName} | oc delete -f -")
                           dbScript("drop database ${backingServiceDbName};")
 
-                          // Delete resources
+                          // Delete backingService resources
                           shell("oc delete configmap ${backingServiceAppName}-config")
                           shell("oc delete secret ${backingServiceAppName}-env")
                           shell("oc delete secret ${backingServiceAppName}-certifikat")
