@@ -5,8 +5,6 @@ metadata:
 parameters:
 - name: APP_NAME
   required: true
-- name: APP_RELEASE_NAME
-  required: true
 - name: STAGE
   required: true
   value: "test"
@@ -33,7 +31,6 @@ objects:
     name: "${BUILD_TAG}"
     labels:
       app: ${APP_NAME}
-      release: ${APP_RELEASE_NAME}
       stage: ${STAGE}
   spec:
     containers:

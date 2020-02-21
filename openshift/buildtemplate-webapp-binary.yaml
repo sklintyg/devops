@@ -5,7 +5,7 @@ metadata:
 parameters:
   - name: APP_NAME
     required: true
-  - name: APP_RELEASE_NAME
+  - name: IS_APP_NAME
     required: true
   - name: ARTIFACT_IMAGE_SUFFIX
     required: true
@@ -36,10 +36,9 @@ objects:
     kind: BuildConfig
     metadata:
       creationTimestamp: null
-      name: ${APP_RELEASE_NAME}-${ARTIFACT_IMAGE_SUFFIX}
+      name: ${APP_NAME}-${ARTIFACT_IMAGE_SUFFIX}
       labels:
         app: ${APP_NAME}
-        release: ${APP_RELEASE_NAME}
         stage: ${STAGE}
     spec:
       completionDeadlineSeconds: 1200
@@ -48,7 +47,7 @@ objects:
       output:
         to:
           kind: ImageStreamTag
-          name: ${APP_NAME}-${ARTIFACT_IMAGE_SUFFIX}:${BUILD_VERSION}
+          name: ${IS_APP_NAME}-${ARTIFACT_IMAGE_SUFFIX}:${BUILD_VERSION}
       resources:
         limits:
           cpu: 2
@@ -61,7 +60,7 @@ objects:
         dockerfile: |-
           FROM docker.drift.inera.se/intyg/s2i-war-builder:8
           USER root
-          ENV APP_NAME=${APP_RELEASE_NAME} \
+          ENV APP_NAME=${APP_NAME} \
               BUILD_VERSION=${BUILD_VERSION} \
               INFRA_VERSION=${INFRA_VERSION} \
               COMMON_VERSION=${COMMON_VERSION} \
@@ -82,10 +81,9 @@ objects:
   - apiVersion: v1
     kind: BuildConfig
     metadata:
-      name: ${APP_RELEASE_NAME}
+      name: ${APP_NAME}
       labels:
         app: ${APP_NAME}
-        release: ${APP_RELEASE_NAME}
         stage: ${STAGE}
     spec:
       completionDeadlineSeconds: 600
@@ -94,16 +92,16 @@ objects:
       output:
         to:
           kind: ImageStreamTag
-          name: ${APP_NAME}:${BUILD_VERSION}
+          name: ${IS_APP_NAME}:${BUILD_VERSION}
       source:
         dockerfile: |-
           FROM docker.drift.inera.se/intyg/tomcat-base:9
-          ENV APP_NAME=${APP_RELEASE_NAME}
+          ENV APP_NAME=${APP_NAME}
           ADD ROOT.war $JWS_HOME/webapps/${CONTEXT_PATH}.war
         images:
           - from:
               kind: ImageStreamTag
-              name: ${APP_NAME}-${ARTIFACT_IMAGE_SUFFIX}:${BUILD_VERSION}
+              name: ${IS_APP_NAME}-${ARTIFACT_IMAGE_SUFFIX}:${BUILD_VERSION}
             paths:
               - sourcePath: /tmp/artifacts/.
                 destinationDir: "."
@@ -115,9 +113,9 @@ objects:
   - apiVersion: v1
     kind: ImageStream
     metadata:
-      name: ${APP_NAME}-${ARTIFACT_IMAGE_SUFFIX}
+      name: ${IS_APP_NAME}-${ARTIFACT_IMAGE_SUFFIX}
       labels:
-        app: ${APP_NAME}
+        app: ${IS_APP_NAME}
         stage: ${STAGE}
     spec:
       lookupPolicy:
@@ -125,9 +123,9 @@ objects:
   - apiVersion: v1
     kind: ImageStream
     metadata:
-      name: ${APP_NAME}
+      name: ${IS_APP_NAME}
       labels:
-        app: ${APP_NAME}
+        app: ${IS_APP_NAME}
         stage: ${STAGE}
     spec:
       lookupPolicy:
@@ -135,9 +133,9 @@ objects:
   - apiVersion: v1
     kind: ImageStream
     metadata:
-      name: ${APP_NAME}-verified
+      name: ${IS_APP_NAME}-verified
       labels:
-        app: ${APP_NAME}
+        app: ${IS_APP_NAME}
         stage: ${STAGE}
     spec:
       lookupPolicy:
