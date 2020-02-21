@@ -127,7 +127,7 @@ objects:
 
             // function to extract openshift stage configuration only from repo. dir must not exist
             // returns build version. This is only used for Intygstjänst as a backing service
-            def extractConfig(dir, url, ref, stage) {
+            def extractConfig(dir, url, ref, stage, latestTag) {
               eshell("rm -rf ${dir}")
               eshell("mkdir ${dir}")
               def wd = "cd ${dir}; "
@@ -147,12 +147,12 @@ objects:
                 return tag.substring(1)
               } else {
                 eshell(wd + "git checkout ${ref}")
-                return ${latestTag}
+                return "${latestTag}"
               }
             }
 
             // function to perform a named test
-            def performTest(testName, buildVersion) {
+            def performTest(testName, buildVersion, appReleaseName) {
               echo "Do ${testName}"
 
               // Setup callback webhook
@@ -460,7 +460,7 @@ objects:
 
                                   // Replace configured backingServiceVersion with the version extracted from git tag
                                   echo "Extract config for intygstjanst ${svcGitRef}"
-                                  backingServiceAppVersion = extractConfig(tmpDir, "https://github.com/sklintyg/intygstjanst.git", svcGitRef, "${STAGE}")
+                                  backingServiceAppVersion = extractConfig(tmpDir, "https://github.com/sklintyg/intygstjanst.git", svcGitRef, "${STAGE}", latestTag)
 
                                   // Delete any old resources
                                   shell("oc delete configmap ${backingServiceAppName}-config")
@@ -534,7 +534,7 @@ objects:
                       openshift.withProject() {
                         testList.each { t ->
                           stage(t.capitalize()) {
-                            performTest(t, buildVersion)
+                            performTest(t, buildVersion, appReleaseName)
                           }
                         }
                       }
