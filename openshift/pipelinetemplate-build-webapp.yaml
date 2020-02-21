@@ -152,7 +152,7 @@ objects:
             }
 
             // function to perform a named test
-            def performTest(testName, buildVersion, appReleaseName) {
+            def performTest(testName, buildVersion, appReleaseName, gitDevopsDir) {
               echo "Do ${testName}"
 
               // Setup callback webhook
@@ -534,7 +534,7 @@ objects:
                       openshift.withProject() {
                         testList.each { t ->
                           stage(t.capitalize()) {
-                            performTest(t, buildVersion, appReleaseName)
+                            performTest(t, buildVersion, appReleaseName, gitDevopsDir)
                           }
                         }
                       }
