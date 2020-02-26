@@ -490,7 +490,7 @@ pipeline {
     stage('Tag Source') {
       steps {
         script {
-          '${BUILD_TOOL}' "tagRelease ${versionFlags}"
+          "${BUILD_TOOL}" "tagRelease ${versionFlags}"
         }
       }
     }
