@@ -1,0 +1,45 @@
+kind: Template
+apiVersion: v1
+metadata:
+  name: pipelinetemplate-promoto-images
+objects:
+  - kind: BuildConfig
+    apiVersion: v1
+    metadata:
+      name: promote-${RELEASE_VERSION}-pipeline
+      labels:
+        release: ${RELEASE_VERSION}
+    spec:
+      nodeSelector: {}
+      output: {}
+      postCommit: {}
+      resources: {}
+      runPolicy: Serial
+      source:
+        git:
+          uri: ${GIT_URL}
+          ref: "refs/heads/${GIT_CI_BRANCH}"
+        type: Git
+      strategy:
+        type: JenkinsPipeline
+        jenkinsPipelineStrategy:
+          jenkinsfilePath: openshift/PromoteImagesJenkinsfile
+          env:
+          - name: RELEASE_VERSION
+            value: ${RELEASE_VERSION}
+          - name: IMAGES
+            value: ${IMAGES}
+parameters:
+  - name: RELEASE_VERSION
+    description: Name of this release, ie 2020-2
+    required: true
+  - name: IMAGES
+    description: A list of application image names. With or without specific tag, ie "webcert,intygstjanst:3.12.0.7"
+    required: true
+    value: "webcert,intygstjanst,logsender"
+  - name: GIT_URL
+    required: true
+    value: "https://github.com/sklintyg/devops.git"
+  - name: GIT_CI_BRANCH
+    description: Deploy branch to be used for this build, ie release/2020-2
+    required: true

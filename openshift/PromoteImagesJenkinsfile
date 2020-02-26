@@ -1,0 +1,81 @@
+#!groovy
+
+// Variable behöver vara i buildconfigen
+//
+// - name: RELEASE_VERSION
+// - name: IMAGES
+
+def apps = IMAGES.split(",")
+def releaseVersion = "${RELEASE_VERSION}.latest"
+def appsWithImageTag = []
+
+def getVersion(appName, specificTag, releaseVersion) {
+  def images = openshift.selector("is", "${appName}-verified").object().spec.tags
+
+  if (!specificTag.isEmpty()) {
+    def specificImage = images.find { it.name == "${specificTag}" }
+    if (specificImage == null) {
+      error("${specificTag} for ${appName} not found in imagestream ${appName}-verified")
+    } else {
+      return "${specificTag}"
+    }
+  } else {
+    def latestimage = images.find { it.name == "${releaseVersion}" }
+    log "latestimage is ${latestimage}"
+    def latestimageref = "${latestimage.from.name}"
+
+    def promoteVersion = images.find { it.from.name == "${latestimageref}" && it.name != "${releaseVersion}" }.name
+    log "promoteVersion is ${promoteVersion}"
+    return "${promoteVersion}"
+  }
+
+}
+
+def log(msg) {
+  echo "${new Date()} -- ${msg}"
+}
+
+pipeline {
+  agent any
+
+  environment {
+    JAVA_TOOL_OPTIONS = '-Dfile.encoding=UTF-8'
+  }
+
+  stages {
+    stage('Prepare imagetags') {
+      steps {
+        script {
+          openshift.withCluster() {
+            openshift.withProject() {
+              apps.each { t ->
+                def appName = (t.contains(":") ? t.split(":")[0] : t)
+                def specificTag = (t.contains(":") ? t.split(":")[1] : "")
+                def imagetag = getVersion(appName, specificTag, releaseVersion)
+                appsWithImageTag.add(appName + ":" + imagetag)
+              }
+            }
+          }
+        }
+      }
+
+    }
+
+    stage('Promote to Nexus') {
+      steps {
+        script {
+          openshift.withCluster() {
+            openshift.withProject() {
+              appsWithImageTag.each { t ->
+                stage(t.capitalize()) {
+                  def split = t.split(":")
+                  log "${split[0]}:${split[1]} promoted to Nexus"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
