@@ -1,6 +1,6 @@
 #!groovy
 
-def call(Map<String, String> config) {
+def run(Map<String, String> config) {
   pipeline {
     agent any
 
@@ -27,3 +27,4 @@ def call(Map<String, String> config) {
   }
 }
 
+return this
