@@ -190,6 +190,7 @@ pipeline {
               echo "gitUrl: ${gitUrl}, gitBranch: ${GIT_BRANCH}"
               echo "buildVersion: ${buildVersion}, infraVersion: ${infraVersion}, commonVersion: ${commonVersion}"
               echo "backingService: ${backingService}"
+              echo "gitDevopsDir: ${gitDevopsDir}"
 
               // check envrionment
               [GIT_DEVOPS_DIR, APP_NAME, RELEASE_VERSION, STAGE, BUILD_TEMPLATE, DEPLOY_TEMPLATE, TESTRUNNER_TEMPLATE, ARTIFACT_IMAGE_SUFFIX, GIT_URL, GIT_CI_BRANCH, TEST_PORT, BUILD_TOOL, CONTEXT_PATH, HEALTH_URI, GIT_BRANCH, buildVersion].each {
@@ -197,6 +198,8 @@ pipeline {
                   error("No such required context variable in environment.")
                 }
               }
+
+              echo "All environment variables in place!"
 
               // Make sure required template files exists in devops repo
               ["${BUILD_TEMPLATE}", "${DEPLOY_TEMPLATE}", "${TESTRUNNER_TEMPLATE}"].each {
