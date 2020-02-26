@@ -142,6 +142,7 @@ pipeline {
 
   environment {
     JAVA_TOOL_OPTIONS = '-Dfile.encoding=UTF-8'
+    WORKSPACE = env.BASE_WORKSPACE
   }
 
   stages {
