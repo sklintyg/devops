@@ -67,11 +67,12 @@ objects:
           jenkinsfile: |-
             // Checkout devops source
             // This contains the actual Jenkins file named BuildWebappJenkinsfile
-            def gitUrl = "${GIT_URL}"
-            def gitDevopsUrl = gitUrl.take(gitUrl.lastIndexOf("/")+1) + "devops.git"
-            def gitDevopsDir = "${env.WORKSPACE}/tmp-devopsrepo"
 
             node {
+              def gitUrl = "${GIT_URL}"
+              def gitDevopsUrl = gitUrl.take(gitUrl.lastIndexOf("/")+1) + "devops.git"
+              def gitDevopsDir = "${env.WORKSPACE}/tmp-devopsrepo"
+
               dir ("${gitDevopsDir}") {
                 git url: "${gitDevopsUrl}", branch: GIT_BRANCH
               }
