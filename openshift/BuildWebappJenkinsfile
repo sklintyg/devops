@@ -1,30 +1,26 @@
 #!groovy
 
-def run(Map<String, String> config) {
-  pipeline {
-    agent any
+pipeline {
+  agent any
 
-    environment {
-      JAVA_TOOL_OPTIONS = '-Dfile.encoding=UTF-8'
-    }
+  environment {
+    JAVA_TOOL_OPTIONS = '-Dfile.encoding=UTF-8'
+  }
 
-    stages {
+  stages {
 
-      stage('Checkout Source') {
-        steps {
-          script {
-            // Checkout application source
-            git url: "${config.gitUrl}", branch: GIT_BRANCH
+    stage('Checkout Source') {
+      steps {
+        script {
+          // Checkout application source
+          git url: "${GIT_URL}", branch: GIT_BRANCH
 
-            def info = readJSON file: 'build-info.json'
-            echo "${info}"
-            buildVersion = "${info.appVersion}.${BUILD_NUMBER}"
-            echo "${buildVersion}"
-          }
+          def info = readJSON file: 'build-info.json'
+          echo "${info}"
+          buildVersion = "${info.appVersion}.${BUILD_NUMBER}"
+          echo "${buildVersion}"
         }
       }
     }
   }
 }
-
-return this
