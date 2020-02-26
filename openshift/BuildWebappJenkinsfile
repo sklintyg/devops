@@ -234,8 +234,7 @@ pipeline {
             eshell("mkdir -p ${artifactFolder}")
           }
           try {
-            $ { BUILD_TOOL }
-            "${buildArgs} ${versionFlags}"
+            '${BUILD_TOOL}' "${buildArgs} ${versionFlags}"
           } finally {
             publishHTML([
                     allowMissing         : true,
@@ -490,8 +489,7 @@ pipeline {
     stage('Tag Source') {
       steps {
         script {
-          $ { BUILD_TOOL }
-          "tagRelease ${versionFlags}"
+          '${BUILD_TOOL}' "tagRelease ${versionFlags}"
         }
       }
     }
