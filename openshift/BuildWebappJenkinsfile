@@ -200,6 +200,7 @@ pipeline {
               }
 
               echo "All environment variables in place!"
+              sh "ls -la ${pwd()}"
 
               // Make sure required template files exists in devops repo
               ["${BUILD_TEMPLATE}", "${DEPLOY_TEMPLATE}", "${TESTRUNNER_TEMPLATE}"].each {
