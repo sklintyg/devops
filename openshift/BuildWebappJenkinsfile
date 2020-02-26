@@ -1,0 +1,46 @@
+#!groovy
+
+pipeline {
+  agent any
+
+  environment {
+    JAVA_TOOL_OPTIONS = '-Dfile.encoding=UTF-8'
+  }
+
+  stages {
+
+    stage('Checkout Source') {
+      steps {
+        script {
+          // Checkout application source
+          git url: "${gitUrl}", branch: GIT_BRANCH
+
+          def info = readJSON file: 'build-info.json'
+          echo "${info}"
+          buildVersion = "${info.appVersion}.${BUILD_NUMBER}"
+          if (info.commonVersion) {
+            commonVersion = info.commonVersion
+          }
+          if (info.infraVersion) {
+            infraVersion = info.infraVersion
+          }
+          if (info.backingService) {
+            backingService = info.backingService
+          }
+          if (info.propagate) {
+            propagateTo = info.propagate
+          }
+          if (info.buildArgs) {
+            buildArgs = info.buildArgs
+          }
+          if (info.tests) {
+            testList = info.tests
+          }
+          versionFlags = "-DbuildVersion=${buildVersion} -DcommonVersion=${commonVersion} -DinfraVersion=${infraVersion}"
+        }
+      }
+    }
+  }
+}
+
+
