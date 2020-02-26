@@ -234,7 +234,8 @@ pipeline {
             eshell("mkdir -p ${artifactFolder}")
           }
           try {
-            '${BUILD_TOOL}' "${buildArgs} ${versionFlags}"
+            log("Starting gradle build")
+            BUILD_TOOL "${buildArgs} ${versionFlags}"
           } finally {
             publishHTML([
                     allowMissing         : true,
