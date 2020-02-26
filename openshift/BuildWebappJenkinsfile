@@ -235,7 +235,7 @@ pipeline {
           }
           try {
             log("Starting gradle build")
-            BUILD_TOOL "${buildArgs} ${versionFlags}"
+            "${BUILD_TOOL}" "${buildArgs} ${versionFlags}"
           } finally {
             publishHTML([
                     allowMissing         : true,
