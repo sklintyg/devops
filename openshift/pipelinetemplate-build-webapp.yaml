@@ -76,20 +76,20 @@ objects:
               }
 
               // Must pass all parameters as environment variables
-              withEnv(["GIT_URL=${GIT_URL}", \
-                        "APP_NAME=${APP_NAME}", \
-                        "RELEASE_VERSION=${RELEASE_VERSION}", \
-                        "STAGE=${STAGE}", \
-                        "BUILD_TEMPLATE=${BUILD_TEMPLATE}", \
-                        "DEPLOY_TEMPLATE=${DEPLOY_TEMPLATE}", \
-                        "TESTRUNNER_TEMPLATE=${TESTRUNNER_TEMPLATE}", \
-                        "ARTIFACT_IMAGE_SUFFIX=${ARTIFACT_IMAGE_SUFFIX}", \
-                        "GIT_URL=${GIT_URL}", \
-                        "GIT_CI_BRANCH=${GIT_CI_BRANCH}", \
-                        "TEST_PORT=${TEST_PORT}", \
-                        "BUILD_TOOL=${BUILD_TOOL}", \
-                        "CONTEXT_PATH=${CONTEXT_PATH}", \
-                        "HEALTH_URI=${HEALTH_URI}", \
+              withEnv(["GIT_URL=${GIT_URL}",
+                        "APP_NAME=${APP_NAME}",
+                        "RELEASE_VERSION=${RELEASE_VERSION}",
+                        "STAGE=${STAGE}",
+                        "BUILD_TEMPLATE=${BUILD_TEMPLATE}",
+                        "DEPLOY_TEMPLATE=${DEPLOY_TEMPLATE}",
+                        "TESTRUNNER_TEMPLATE=${TESTRUNNER_TEMPLATE}",
+                        "ARTIFACT_IMAGE_SUFFIX=${ARTIFACT_IMAGE_SUFFIX}",
+                        "GIT_URL=${GIT_URL}",
+                        "GIT_CI_BRANCH=${GIT_CI_BRANCH}",
+                        "TEST_PORT=${TEST_PORT}",
+                        "BUILD_TOOL=${BUILD_TOOL}",
+                        "CONTEXT_PATH=${CONTEXT_PATH}",
+                        "HEALTH_URI=${HEALTH_URI}",
                         "GIT_DEVOPS_DIR=${gitDevopsDir}"]) {
 
                 // This will load and run the actual Pipeline
