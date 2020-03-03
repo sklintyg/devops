@@ -52,7 +52,7 @@ objects:
           memory: 4Gi
         requests:
           cpu: 200m
-          memory: 2Gi     
+          memory: 2Gi
       source:
         type: Binary
         dockerfile: |-
@@ -69,13 +69,14 @@ objects:
           ADD web/build/libs/*-${BUILD_VERSION}.war /tmp/artifacts/ROOT.war
           COPY . /tmp/src/
           RUN chown -R ${E_UID} /tmp/src
+          RUN unset HTTP_PROXY HTTPS_PROXY NO_PROXY http_proxy https_proxy no_proxy
           USER ${E_UID}
           RUN cd /tmp/src && git init && ./gradlew --stacktrace testClasses
       strategy:
         type: Docker
         dockerStrategy:
           pullSecret:
-            name: "nexus-registry"              
+            name: "nexus-registry"
   - apiVersion: v1
     kind: BuildConfig
     metadata:
@@ -95,6 +96,7 @@ objects:
         dockerfile: |-
           FROM docker.drift.inera.se/intyg/srs-base:8
           ENV APP_NAME=${APP_NAME}
+          RUN unset HTTP_PROXY HTTPS_PROXY NO_PROXY http_proxy https_proxy no_proxy
           ADD ROOT.war /deployments/
         images:
           - from:
@@ -107,7 +109,7 @@ objects:
         type: Docker
         dockerStrategy:
           pullSecret:
-            name: "nexus-registry"       
+            name: "nexus-registry"
   - apiVersion: v1
     kind: ImageStream
     metadata:
