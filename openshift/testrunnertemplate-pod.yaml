@@ -46,7 +46,7 @@ objects:
         - name: JAVA_OPTS
           value: "-Xmx512M"
         - name: NO_PROXY
-          value: *
+          value: "*"
         - name: no_proxy
           value: ${NO_PROXY}
         resources:
