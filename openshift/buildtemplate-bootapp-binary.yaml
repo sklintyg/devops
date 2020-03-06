@@ -71,7 +71,6 @@ objects:
           ADD web/build/libs/*-${BUILD_VERSION}.jar /tmp/artifacts/ROOT.war
           COPY . /tmp/src/
           RUN chown -R ${E_UID} /tmp/src
-          ENV HTTP_PROXY="" HTTPS_PROXY="" NO_PROXY="" http_proxy="" https_proxy="" no_proxy=""
           USER ${E_UID}
           RUN cd /tmp/src && git init && ./gradlew --stacktrace testClasses
       strategy:
@@ -98,7 +97,6 @@ objects:
         dockerfile: |-
           FROM docker.drift.inera.se/intyg/springboot-base:11
           ENV APP_NAME=${APP_NAME}
-          ENV HTTP_PROXY="" HTTPS_PROXY="" NO_PROXY="" http_proxy="" https_proxy="" no_proxy=""
           ADD ROOT.war /deployments/
         images:
           - from:

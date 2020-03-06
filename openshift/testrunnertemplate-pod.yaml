@@ -45,6 +45,10 @@ objects:
           value: /mnt/reports/${JOB_NAME}/${BUILD_VERSION}
         - name: JAVA_OPTS
           value: "-Xmx512M"
+        - name: NO_PROXY
+          value: *
+        - name: no_proxy
+          value: ${NO_PROXY}
         resources:
           limits:
             cpu: 500m
