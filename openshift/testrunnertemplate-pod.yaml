@@ -24,6 +24,9 @@ parameters:
   required: true
 - name: TESTS
   required: true
+- name: NO_PROXY
+  required: true
+  value: "*"
 objects:
 - apiVersion: v1
   kind: Pod
@@ -46,7 +49,7 @@ objects:
         - name: JAVA_OPTS
           value: "-Xmx512M"
         - name: NO_PROXY
-          value: "*"
+          value: ${NO_PROXY}
         - name: no_proxy
           value: ${NO_PROXY}
         resources:
