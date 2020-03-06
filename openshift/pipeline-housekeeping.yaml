@@ -19,16 +19,16 @@ items:
       jenkinsPipelineStrategy:
         jenkinsfile: |-
           def images = [
-            'intygstjanst-test': '3.11.0',
-            'logsender-test': '6.6.0',
-            'minaintyg-test': '3.12.0',
-            'webcert-test': '6.6.0',
-            'rehabstod-test': '1.12.0',
-            'privatlakarportal-test': '1.13.0',
-            'statistik-test': '7.5.0',
-            'srs-test': '1.3.0',
-            'intygsbestallning-test': '1.1.0',
-            'intygsadmin-test': '1.2.0'
+            'intygstjanst': '3.12.0',
+            'logsender': '6.7.0',
+            'minaintyg': '3.13.0',
+            'webcert': '6.7.0',
+            'rehabstod': '1.13.0',
+            'privatlakarportal': '1.14.0',
+            'statistik': '7.6.0',
+            'srs': '1.4.0',
+            'intygsbestallning': '1.2.0',
+            'intygsadmin': '1.3.0'
           ]
 
           def suffix = [ "", "-artifact", "-verified" ]
@@ -37,10 +37,10 @@ items:
           def shell(cmd) {
             sh (
               script: cmd,
-              returnStatus: true 
-            ) 
+              returnStatus: true
+            )
           }
-         
+
           // run shell command and signal an error on failure
           def eshell(cmd) {
             def rc = shell(cmd)
@@ -48,14 +48,14 @@ items:
               error("Error: shell command exited with error code ${rc}")
             }
           }
-          
+
           pipeline {
             agent any
             stages {
               stage('Clean Pods') {
                 steps {
                   script {
-                    eshell("curl -s https://raw.githubusercontent.com/sklintyg/tools/develop/devops/openshift/clean-pods.sh > /tmp/clean-pods.sh")
+                    eshell("curl -s https://raw.githubusercontent.com/sklintyg/devops/release/2020-2/openshift/clean-pods.sh > /tmp/clean-pods.sh")
                     shell("bash /tmp/clean-pods.sh")
                   }
                 }
@@ -63,7 +63,7 @@ items:
               stage('Clean Images') {
                 steps {
                   script {
-                    eshell("curl -s https://raw.githubusercontent.com/sklintyg/tools/develop/devops/openshift/clean-istags.sh > /tmp/clean-istags.sh")
+                    eshell("curl -s https://raw.githubusercontent.com/sklintyg/devops/release/2020-2/openshift/clean-istags.sh > /tmp/clean-istags.sh")
                     images.each { k, v ->
                       suffix.each { s ->
                         shell("bash /tmp/clean-istags.sh ${k}${s} ${v}")
