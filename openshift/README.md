@@ -248,21 +248,27 @@ The upload to Nexus is done with:
 ```
 oc process -f buildtemplate-nexus.yaml -p APP_NAME=job-runner -p NEXUS_NAME=job-runner -p IMAGE=dintyg/jobrunner -p TAG=latest | oc apply -f -
 oc start-build job-runner-nexus
+oc process -f buildtemplate-nexus.yaml -p APP_NAME=job-runner -p NEXUS_NAME=job-runner -p IMAGE=dintyg/jobrunner -p TAG=latest | oc delete -f -
 
 oc process -f buildtemplate-nexus.yaml -p APP_NAME=s2i-war-builder -p NEXUS_NAME=s2i-war-builder -p IMAGE=dintyg/s2i-war-builder -p TAG=8 | oc apply -f -
 oc start-build s2i-war-builder-nexus
+oc process -f buildtemplate-nexus.yaml -p APP_NAME=s2i-war-builder -p NEXUS_NAME=s2i-war-builder -p IMAGE=dintyg/s2i-war-builder -p TAG=8 | oc delete -f -
 
 oc process -f buildtemplate-nexus.yaml -p APP_NAME=s2i-war-builder-java11 -p NEXUS_NAME=s2i-war-builder -p IMAGE=dintyg/s2i-war-builder-java11 -p TAG=11 | oc apply -f -
 oc start-build s2i-war-builder-java11-nexus
+oc process -f buildtemplate-nexus.yaml -p APP_NAME=s2i-war-builder-java11 -p NEXUS_NAME=s2i-war-builder -p IMAGE=dintyg/s2i-war-builder-java11 -p TAG=11 | oc delete -f -
 
 oc process -f buildtemplate-nexus.yaml -p APP_NAME=springboot-base -p NEXUS_NAME=springboot-base -p IMAGE=dintyg/springboot-base -p TAG=11 | oc apply -f -
 oc start-build springboot-base-nexus
+oc process -f buildtemplate-nexus.yaml -p APP_NAME=springboot-base -p NEXUS_NAME=springboot-base -p IMAGE=dintyg/springboot-base -p TAG=11 | oc delete -f -
 
 oc process -f buildtemplate-nexus.yaml -p APP_NAME=srs-base -p NEXUS_NAME=srs-base -p IMAGE=dintyg/srs-base -p TAG=8 | oc apply -f -
 oc start-build srs-base-nexus
+oc process -f buildtemplate-nexus.yaml -p APP_NAME=srs-base -p NEXUS_NAME=srs-base -p IMAGE=dintyg/srs-base -p TAG=8 | oc delete -f -
 
 oc process -f buildtemplate-nexus.yaml -p APP_NAME=tomcat-base -p NEXUS_NAME=tomcat-base -p IMAGE=dintyg/tomcat-base -p TAG=9 | oc apply -f -
 oc start-build tomcat-base-nexus
+oc process -f buildtemplate-nexus.yaml -p APP_NAME=tomcat-base -p NEXUS_NAME=tomcat-base -p IMAGE=dintyg/tomcat-base -p TAG=9 | oc delete -f -
 ```
  
 ### Intygstjänster OCP Templates
