@@ -121,6 +121,12 @@ CREATE USER 'statistik'@'%' IDENTIFIED BY 'statistik';
 GRANT ALL PRIVILEGES ON * . * TO 'statistik'@'%' WITH GRANT OPTION;
 CREATE USER 'intygsbestallning'@'%' IDENTIFIED BY 'intygsbestallning';
 GRANT ALL PRIVILEGES ON * . * TO 'intygsbestallning'@'%' WITH GRANT OPTION;
+CREATE USER 'privatlakarportal'@'%' IDENTIFIED BY 'privatlakarportal';
+GRANT ALL PRIVILEGES ON * . * TO 'privatlakarportal'@'%' WITH GRANT OPTION;
+CREATE USER 'webcert'@'%' IDENTIFIED BY 'webcert';
+GRANT ALL PRIVILEGES ON * . * TO 'webcert'@'%' WITH GRANT OPTION;
+CREATE USER 'srs'@'%' IDENTIFIED BY 'srs';
+GRANT ALL PRIVILEGES ON * . * TO 'srs'@'%' WITH GRANT OPTION;
 ```
 
 #### Jenkins (Persistent)
@@ -364,6 +370,10 @@ Privatläkarportal:
 oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=privatlakarportal -p RELEASE_VERSION=2020-2 -p GIT_URL=https://github.com/sklintyg/privatlakarportal.git -p GIT_CI_BRANCH=release/2020-2 | oc apply  -f -
 Statistik:
 oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=statistik -p RELEASE_VERSION=2020-2 -p GIT_URL=https://github.com/sklintyg/statistik.git -p GIT_CI_BRANCH=release/2020-2 | oc apply  -f -
+```
+```
+SRS:
+oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=srs -p RELEASE_VERSION=2020-2 -p GIT_URL=https://github.com/sklintyg/srs.git -p GIT_CI_BRANCH=release/2020-2 -p BUILD_TEMPLATE=buildtemplate-srsapp-binary.yaml -p HEALTH_URI="'/services'" -p TEST_PORT=8080 | oc apply  -f -
 ```
 
 #### GitHub Webhooks
