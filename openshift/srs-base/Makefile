@@ -2,7 +2,7 @@
 
 NAME=$(shell basename `pwd`)
 TEMPLATE=../buildtemplate-image.yaml
-PROCESS=oc process $(TEMPLATE) -p NAME=$(NAME) -p SOURCE="`cat Dockerfile`"
+PROCESS=oc process -f $(TEMPLATE) -p NAME=$(NAME) -p SOURCE="`cat Dockerfile`"
 
 all: build
 

@@ -248,6 +248,7 @@ oc tag s2i-war-builder-java11:latest s2i-war-builder-java11:11
 oc tag springboot-base:latest springboot-base:11
 oc tag srs-base:latest srs-base:8
 oc tag tomcat-base:latest tomcat-base:9
+oc tag tomcat-java11-base:latest tomcat-java11-base:9
 ```
 
 The upload to Nexus is done with:
@@ -275,6 +276,10 @@ oc process -f buildtemplate-nexus.yaml -p APP_NAME=srs-base -p NEXUS_NAME=srs-ba
 oc process -f buildtemplate-nexus.yaml -p APP_NAME=tomcat-base -p NEXUS_NAME=tomcat-base -p IMAGE=dintyg/tomcat-base -p TAG=9 | oc apply -f -
 oc start-build tomcat-base-nexus
 oc process -f buildtemplate-nexus.yaml -p APP_NAME=tomcat-base -p NEXUS_NAME=tomcat-base -p IMAGE=dintyg/tomcat-base -p TAG=9 | oc delete -f -
+
+oc process -f buildtemplate-nexus.yaml -p APP_NAME=tomcat-java11-base -p NEXUS_NAME=tomcat-java11-base -p IMAGE=dintyg/tomcat-java11-base -p TAG=9 | oc apply -f -
+oc start-build tomcat-java11-base-nexus
+oc process -f buildtemplate-nexus.yaml -p APP_NAME=tomcat-java11-base -p NEXUS_NAME=tomcat-java11-base -p IMAGE=dintyg/tomcat-java11-base -p TAG=9 | oc delete -f -
 ```
  
 ### Intygstjänster OCP Templates
@@ -374,6 +379,10 @@ oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=statistik -p RELEAS
 ```
 SRS:
 oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=srs -p RELEASE_VERSION=2020-2 -p GIT_URL=https://github.com/sklintyg/srs.git -p GIT_CI_BRANCH=release/2020-2 -p BUILD_TEMPLATE=buildtemplate-srsapp-binary.yaml -p HEALTH_URI="'/services'" -p TEST_PORT=8080 | oc apply  -f -
+```
+```
+Intygstjanst Java 11 Temporary
+oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=intygstjanst -p RELEASE_VERSION=2020-2-spring5 -p GIT_URL=https://github.com/sklintyg/intygstjanst.git -p GIT_CI_BRANCH=feature/INTYGFV-12005 -p DEVOPS_GIT_CI_BRANCH=release/2020-2 -p BUILD_TEMPLATE=buildtemplate-webapp-java11-binary.yaml -p BUILD_TOOL=shgradle11 -p CONTEXT_PATH="inera-certificate" -p HEALTH_URI="'/inera-certificate/services'" | oc apply  -f -
 ```
 
 #### GitHub Webhooks

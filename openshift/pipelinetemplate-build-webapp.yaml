@@ -26,6 +26,8 @@ parameters:
     required: true
   - name: GIT_CI_BRANCH
     required: true
+  - name: DEVOPS_GIT_CI_BRANCH
+    required: false
   - name: TEST_PORT
     value: "8081"
     required: true
@@ -73,8 +75,15 @@ objects:
               def gitDevopsUrl = gitUrl.take(gitUrl.lastIndexOf("/")+1) + "devops.git"
               def gitDevopsDir = "${env.WORKSPACE}/tmp-devopsrepo"
 
+              def gitDevopsBranch
+              if("${DEVOPS_GIT_CI_BRANCH}") {
+                gitDevopsBranch = "${DEVOPS_GIT_CI_BRANCH}"
+              } else {
+                gitDevopsBranch = "${GIT_CI_BRANCH}"
+              }
+
               dir ("${gitDevopsDir}") {
-                git url: "${gitDevopsUrl}", branch: GIT_BRANCH
+                git url: "${gitDevopsUrl}", branch: "${gitDevopsBranch}"
               }
 
               // Must pass all parameters as environment variables
