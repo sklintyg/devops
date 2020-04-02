@@ -108,6 +108,7 @@ objects:
       strategy:
         type: Docker
         dockerStrategy:
+          forcePull: true
           pullSecret:
             name: "nexus-registry"
   - apiVersion: v1

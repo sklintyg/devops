@@ -1,6 +1,8 @@
 FROM docker-registry.default.svc:5000/openshift/webserver52-openjdk11-tomcat9-openshift-rhel7
 LABEL maintainer="inera.se"
 
+ENV SCRIPT_DEBUG="true"
+
 RUN rm -rf $JWS_HOME/webapps/* \
     $JWS_HOME/lib/mysql-connector-java.jar $JWS_HOME/lib/mongo.jar \
     $JWS_HOME/lib/jolokia.jar $JWS_HOME/lib/postgresql-jdbc.jar
@@ -11,9 +13,9 @@ ADD https://repo1.maven.org/maven2/org/glassfish/web/javax.servlet.jsp.jstl/1.2.
 USER root
 RUN ln -snf /usr/share/zoneinfo/Europe/Stockholm /etc/localtime
 RUN localedef -i en_US -f UTF-8 en_US.UTF-8
-RUN chown jboss $JWS_HOME/lib/*
+RUN chown 185 $JWS_HOME/lib/*
 RUN chmod 644 $JWS_HOME/lib/*
-USER jboss
+USER 185
 
 ADD launch.sh $JWS_HOME/bin/
 ADD conf/server.xml $JWS_HOME/conf/
