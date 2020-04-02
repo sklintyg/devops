@@ -107,7 +107,7 @@ def performTest(testName, buildVersion, appReleaseName, gitDevopsDir) {
           "-p", "BUILD_VERSION=${buildVersion}",
           "-p", "JOB_NAME=${JOB_NAME}",
           "-p", "CALLBACK_URL='${hook.getURL()}'",
-          "-p", "BUILD_TAG=${BUILD_TAG}${suffix}",
+          "-p", "BUILD_TAG=${appReleaseName}${suffix}",
           "-p", "TESTS=${testName}")
   openshift.apply(pod)
 
@@ -127,8 +127,8 @@ def performTest(testName, buildVersion, appReleaseName, gitDevopsDir) {
     ])
   }
 
-  echo "Logs for ${BUILD_TAG}${suffix}"
-  openshift.selector("pod", "${BUILD_TAG}${suffix}").logs()
+  echo "Logs for ${appReleaseName}${suffix}"
+  openshift.selector("pod", "${appReleaseName}${suffix}").logs()
 
   if ("SUCCESS".equals(data)) {
     echo "Test SUCCESS"
