@@ -16,7 +16,7 @@ fi
 # use xmllint to get latest version from maven-metadata
 RESOURCES=/opt/$APP_NAME/env/resources.zip
 if [ -f $RESOURCES ]; then
-    (mkdir -p /tmp/resources; cd /tmp/resources; unzip $RESOURCES)    
+    (mkdir -p /tmp/resources; cd /tmp/resources; unzip $RESOURCES)
 else
     if [ -z $REFDATA_URL ]; then
         NEXUS_SNAPSHOT_URL="https://build-inera.nordicmedtest.se/nexus/repository/snapshots/se/inera/intyg/refdata/refdata/1.0-SNAPSHOT"
@@ -36,7 +36,7 @@ else
         exit 1
     fi
 
-    mv $REFDATA_JAR $JWS_HOME/lib/
+    mv $REFDATA_JAR $JWS_HOME/tomcat/lib/
     if [ $? != 0 ]; then
         echo "Error: unable to provision refdata: $REFDATA_JAR"
         exit 1
@@ -48,6 +48,6 @@ echo "With refdata from ${REFDATA_URL:-resources.zip}"
 
 export CATALINA_OPTS="$CATALINA_OPTS $CATALINA_OPTS_APPEND"
 
-exec $JWS_HOME/bin/catalina.sh run
+exec $JWS_HOME/tomcat/bin/catalina.sh run
 
 

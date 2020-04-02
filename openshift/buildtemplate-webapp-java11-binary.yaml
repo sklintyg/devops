@@ -97,7 +97,7 @@ objects:
         dockerfile: |-
           FROM docker.drift.inera.se/intyg/tomcat-java11-base:9
           ENV APP_NAME=${APP_NAME}
-          ADD ROOT.war $JWS_HOME/webapps/${CONTEXT_PATH}.war
+          ADD ROOT.war $JWS_HOME/tomcat/webapps/${CONTEXT_PATH}.war
         images:
           - from:
               kind: ImageStreamTag
