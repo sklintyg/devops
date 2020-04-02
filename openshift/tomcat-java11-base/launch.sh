@@ -43,7 +43,7 @@ else
     fi
 fi
 
-echo "Running $APP_NAME on $JBOSS_IMAGE_NAME image, version $JBOSS_IMAGE_VERSION"
+echo "Running $APP_NAME on $JBOSS_IMAGE_NAME image, version $JBOSS_IMAGE_VERSION and JAVA_HOME $JAVA_HOME"
 echo "With refdata from ${REFDATA_URL:-resources.zip}"
 
 export CATALINA_OPTS="$CATALINA_OPTS $CATALINA_OPTS_APPEND"
