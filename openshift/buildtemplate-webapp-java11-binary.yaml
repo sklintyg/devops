@@ -96,7 +96,8 @@ objects:
       source:
         dockerfile: |-
           FROM docker.drift.inera.se/intyg/tomcat-java11-base:9
-          ENV APP_NAME=${APP_NAME}
+          ENV APP_NAME=${APP_NAME} \
+              SCRIPT_DEBUG=true
           ADD ROOT.war $JWS_HOME/webapps/${CONTEXT_PATH}.war
         images:
           - from:
