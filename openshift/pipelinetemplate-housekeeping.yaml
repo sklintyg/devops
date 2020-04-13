@@ -26,15 +26,23 @@ objects:
           jenkinsfile: |-
             def images = [
               'intygstjanst': '3.12.0',
+              'intygstjanst': '3.12.1',
               'logsender': '6.7.0',
+              'logsender': '6.7.1',
               'minaintyg': '3.13.0',
+              'minaintyg': '3.13.1',
               'webcert': '6.7.0',
+              'webcert': '6.7.1',
               'rehabstod': '1.13.0',
+              'rehabstod': '1.13.1',
               'privatlakarportal': '1.14.0',
+              'privatlakarportal': '1.14.1',
               'statistik': '7.6.0',
+              'statistik': '7.6.1',
               'srs': '1.4.0',
-              'intygsbestallning': '1.2.0',
-              'intygsadmin': '1.3.0'
+              'srs': '1.4.1',
+              'intygsadmin': '1.3.0',
+              'intygsadmin': '1.3.1'
             ]
 
             def suffix = [ "", "-artifact", "-verified" ]
