@@ -69,7 +69,7 @@ def extractConfig(dir, url, ref, stage, latestTag) {
       ref = ref.replace('+', '')
     }
     def tag = sh(
-            script: wd + "git tag -l | grep ${ref} | sort | tail -1",
+            script: wd + "git tag -l --sort=v:refname | grep ${ref} | tail -1",
             returnStdout: true
     ).trim()
     eshell(wd + "git checkout tags/${tag}")
