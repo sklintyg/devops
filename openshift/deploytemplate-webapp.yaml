@@ -14,6 +14,9 @@ parameters:
   - name: HEALTH_URI
     required: true
     value: /
+  - name: JAVA_OPTS
+    required: true
+    value: "-Xmx512M"
 objects:
   - apiVersion: v1
     kind: DeploymentConfig
@@ -42,7 +45,7 @@ objects:
             - name: STAGE
               value: ${STAGE}
             - name: JAVA_OPTS
-              value: "-Xmx512M"
+              value: ${JAVA_OPTS}
             - name: DATABASE_NAME
               value: ${DATABASE_NAME}
             envFrom:
