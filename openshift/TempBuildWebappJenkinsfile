@@ -523,45 +523,45 @@ pipeline {
 
     always {
       script {
-        echo "cleanup"
-        openshift.withCluster() {
-          openshift.withProject() {
-            dbScript("drop database ${dbName};")
-            shell("rm -f ${applicationZip}")
-
-            echo "Logs for ${appReleaseName}"
-            openshift.selector("dc", "${appReleaseName}").logs()
-
-            def image = openshift.selector("is", "${APP_NAME}").object()
-            def imageStream = image.status.dockerImageRepository
-
-            shell("oc process -f ${gitDevopsDir}/openshift/${DEPLOY_TEMPLATE} -p APP_NAME=\"${appReleaseName}\" -p IMAGE=\"${imageStream}:${buildVersion}\" -p STAGE=${STAGE} -p DATABASE_NAME=${dbName} | oc delete -f -")
-
-            // Delete resources
-            shell("oc delete configmap ${appReleaseName}-config")
-            shell("oc delete configmap ${appReleaseName}-configmap-envvar")
-            shell("oc delete secret ${appReleaseName}-env")
-            shell("oc delete secret ${appReleaseName}-certifikat")
-            shell("oc delete secret ${appReleaseName}-secret-envvar")
-
-            if (!backingService.empty) {
-              echo "Logs for ${backingServiceAppName}"
-              openshift.selector("dc", "${backingServiceAppName}").logs()
-
-              imageStream = openshift.selector("is", "${backingServiceName}-verified").object().status.dockerImageRepository
-
-              shell("oc process -f ${gitDevopsDir}/openshift/${DEPLOY_TEMPLATE} -p APP_NAME=\"${backingServiceAppName}\" -p IMAGE=\"${imageStream}:${backingServiceAppVersion}\" -p STAGE=${STAGE} -p DATABASE_NAME=${backingServiceDbName} | oc delete -f -")
-              dbScript("drop database ${backingServiceDbName};")
-
-              // Delete backingService resources
-              shell("oc delete configmap ${backingServiceAppName}-config")
-              shell("oc delete secret ${backingServiceAppName}-env")
-              shell("oc delete secret ${backingServiceAppName}-certifikat")
-              shell("oc delete configmap ${backingServiceAppName}-configmap-envvar")
-              shell("oc delete secret ${backingServiceAppName}-secret-envvar")
-            }
-          }
-        }
+        echo "NO cleanup!"
+//        openshift.withCluster() {
+//          openshift.withProject() {
+//            dbScript("drop database ${dbName};")
+//            shell("rm -f ${applicationZip}")
+//
+//            echo "Logs for ${appReleaseName}"
+//            openshift.selector("dc", "${appReleaseName}").logs()
+//
+//            def image = openshift.selector("is", "${APP_NAME}").object()
+//            def imageStream = image.status.dockerImageRepository
+//
+//            shell("oc process -f ${gitDevopsDir}/openshift/${DEPLOY_TEMPLATE} -p APP_NAME=\"${appReleaseName}\" -p IMAGE=\"${imageStream}:${buildVersion}\" -p STAGE=${STAGE} -p DATABASE_NAME=${dbName} | oc delete -f -")
+//
+//            // Delete resources
+//            shell("oc delete configmap ${appReleaseName}-config")
+//            shell("oc delete configmap ${appReleaseName}-configmap-envvar")
+//            shell("oc delete secret ${appReleaseName}-env")
+//            shell("oc delete secret ${appReleaseName}-certifikat")
+//            shell("oc delete secret ${appReleaseName}-secret-envvar")
+//
+//            if (!backingService.empty) {
+//              echo "Logs for ${backingServiceAppName}"
+//              openshift.selector("dc", "${backingServiceAppName}").logs()
+//
+//              imageStream = openshift.selector("is", "${backingServiceName}-verified").object().status.dockerImageRepository
+//
+//              shell("oc process -f ${gitDevopsDir}/openshift/${DEPLOY_TEMPLATE} -p APP_NAME=\"${backingServiceAppName}\" -p IMAGE=\"${imageStream}:${backingServiceAppVersion}\" -p STAGE=${STAGE} -p DATABASE_NAME=${backingServiceDbName} | oc delete -f -")
+//              dbScript("drop database ${backingServiceDbName};")
+//
+//              // Delete backingService resources
+//              shell("oc delete configmap ${backingServiceAppName}-config")
+//              shell("oc delete secret ${backingServiceAppName}-env")
+//              shell("oc delete secret ${backingServiceAppName}-certifikat")
+//              shell("oc delete configmap ${backingServiceAppName}-configmap-envvar")
+//              shell("oc delete secret ${backingServiceAppName}-secret-envvar")
+//            }
+//          }
+//        }
       }
     }
 

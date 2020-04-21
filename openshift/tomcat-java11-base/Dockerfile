@@ -11,7 +11,6 @@ ADD https://repo1.maven.org/maven2/org/glassfish/web/javax.servlet.jsp.jstl/1.2.
 USER root
 RUN ln -snf /usr/share/zoneinfo/Europe/Stockholm /etc/localtime
 RUN localedef -i en_US -f UTF-8 en_US.UTF-8
-ENV LANG=en_US.UTF-8
 RUN chown 185 $JWS_HOME/lib/*
 RUN chmod 644 $JWS_HOME/lib/*
 USER 185
