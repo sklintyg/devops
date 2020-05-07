@@ -25,15 +25,15 @@ objects:
         jenkinsPipelineStrategy:
           jenkinsfile: |-
             def images = [
-              'intygstjanst': '3.12',
-              'logsender': '6.7',
-              'minaintyg': '3.13',
-              'webcert': '6.7',
-              'rehabstod': '1.13',
-              'privatlakarportal': '1.14',
-              'statistik': '7.6',
-              'srs': '1.4',
-              'intygsadmin': '1.3',
+              'intygstjanst': '3.12.0',
+              'logsender': '6.7.0',
+              'minaintyg': '3.13.0',
+              'webcert': '6.7.0',
+              'rehabstod': '1.13.0',
+              'privatlakarportal': '1.14.0',
+              'statistik': '7.6.0',
+              'srs': '1.4.0',
+              'intygsadmin': '1.3.0',
             ]
 
             def suffix = [ "", "-artifact", "-verified" ]
@@ -89,7 +89,7 @@ objects:
                     script {
                       // cleanup app specific redis keys
                       sh (
-                        script: "oc rsh \$(oc get pods | grep redis- | grep Running | awk \'{ print \$1 }\')  /opt/rh/rh-redis32/root/usr/bin/redis-cli -a redis  flushall",
+                        script: "oc rsh \$(oc get pods | grep redis- | grep Running | awk \'{ print \$1 }\')  /opt/rh/rh-redis32/root/usr/bin/redis-cli -a redis flushall",
                         returnStatus: true
                       )
                       sh (

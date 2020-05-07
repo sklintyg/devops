@@ -164,6 +164,7 @@ Some additional plugins are needed so start by installing this from the Jenkins 
 * Slack Notification
 * Email Extension Plugin
 * Webhook Step Plugin
+* Next Build version Plugin
 
 JDKs (Tools) for Java8 and Java11 must be installed. Use the Jenkins UI and Global Tool Configuration. Add two `JKD installations` name `JDK8` and `JDK11` with their corresponding jdk packages.
 
@@ -192,7 +193,7 @@ A deployment config, service and route has to be configured, and the following e
 
 _Note: ALLOWEDPATHS shall be empty, and the SECRET value is from a secret with name git-webhook-secret and the key WebhookSecretKey_
 
-#### ACME-controller
+#### ACME-controller (Not cuurently in use)
 This one is used to provide LetsEncrypt Certificates to our routes.
 
 Follow the instructions at: https://github.com/tnozicka/openshift-acme/tree/master/deploy/letsencrypt-live/single-namespace
@@ -204,7 +205,7 @@ Build and test processes generates a lot of artifacts such as images, pods/conta
 * Builds have properties to control history limits, also see `successfulBuildsHistoryLimit` and `failedBuildsHistoryLimit`. Normally are these set to a value in the range `2..4`.
 * A dedicated housekeeping pipeline cleans:
   * Completed pods/containers (> 1 day)
-  * Latest images from image streams (only keep a history of 20 develop builds per stream)
+  * Latest images from image streams (only keep a history of 10 develop builds per stream)
   * Jenkins reports and build logs (only keep a history of 20 days) 
 
 Housekeeping functions are executed as a pipeline, see `pipelinetemplate-housekeeping.yaml`, nightly. (See Jenkins configuration further down).
@@ -237,6 +238,7 @@ They are created with `make` and, which in turn uses `buildtemplate-image.yaml`.
 
 * springboot-base
 * tomcat-base
+* tomcat-java11-base
 * srs-base
 * s2i-war-builder
 * job-runner
@@ -360,29 +362,25 @@ When this is done the new pipeline can be created.
 
 ```
 Intygstjanst:
-oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=intygstjanst -p RELEASE_VERSION=2020-2 -p GIT_URL=https://github.com/sklintyg/intygstjanst.git -p GIT_CI_BRANCH=release/2020-2 -p CONTEXT_PATH="inera-certificate" -p HEALTH_URI="'/inera-certificate/services'" | oc apply  -f -
+oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=intygstjanst -p RELEASE_VERSION=2020-2 -p GIT_URL=https://github.com/sklintyg/intygstjanst.git -p GIT_CI_BRANCH=release/2020-2 -p BUILD_TEMPLATE=buildtemplate-webapp-java11-binary.yaml -p BUILD_TOOL=shgradle11 -p CONTEXT_PATH="inera-certificate" -p HEALTH_URI="'/inera-certificate/services'" | oc apply  -f -
 Intygsadmin:
 oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=intygsadmin -p RELEASE_VERSION=2020-2 -p GIT_URL=https://github.com/sklintyg/intygsadmin.git -p GIT_CI_BRANCH=release/2020-2 -p BUILD_TEMPLATE=buildtemplate-bootapp-binary.yaml -p BUILD_TOOL=shgradle11 -p HEALTH_URI="'/version.html'" -p TEST_PORT=8080 | oc apply  -f -
 Logsender:
-oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=logsender -p RELEASE_VERSION=2020-2 -p GIT_URL=https://github.com/sklintyg/logsender.git -p GIT_CI_BRANCH=release/2020-2 | oc apply  -f -
+oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=logsender -p RELEASE_VERSION=2020-2 -p GIT_URL=https://github.com/sklintyg/logsender.git -p GIT_CI_BRANCH=release/2020-2 -p BUILD_TEMPLATE=buildtemplate-webapp-java11-binary.yaml -p BUILD_TOOL=shgradle11 | oc apply  -f -
 Mina Intyg:
-oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=minaintyg -p RELEASE_VERSION=2020-2 -p GIT_URL=https://github.com/sklintyg/minaintyg.git -p GIT_CI_BRANCH=release/2020-2 | oc apply  -f -
+oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=minaintyg -p RELEASE_VERSION=2020-2 -p GIT_URL=https://github.com/sklintyg/minaintyg.git -p GIT_CI_BRANCH=release/2020-2 -p BUILD_TEMPLATE=buildtemplate-webapp-java11-binary.yaml -p BUILD_TOOL=shgradle11 | oc apply  -f -
 Webcert:
-oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=webcert -p RELEASE_VERSION=2020-2 -p GIT_URL=https://github.com/sklintyg/webcert.git -p GIT_CI_BRANCH=release/2020-2 | oc apply  -f -
+oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=webcert -p RELEASE_VERSION=2020-2 -p GIT_URL=https://github.com/sklintyg/webcert.git -p GIT_CI_BRANCH=release/2020-2 -p BUILD_TEMPLATE=buildtemplate-webapp-java11-binary.yaml -p BUILD_TOOL=shgradle11 | oc apply  -f -
 Rehabstöd:
-oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=rehabstod -p RELEASE_VERSION=2020-2 -p GIT_URL=https://github.com/sklintyg/rehabstod.git -p GIT_CI_BRANCH=release/2020-2 | oc apply  -f -
+oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=rehabstod -p RELEASE_VERSION=2020-2 -p GIT_URL=https://github.com/sklintyg/rehabstod.git -p GIT_CI_BRANCH=release/2020-2 -p BUILD_TEMPLATE=buildtemplate-webapp-java11-binary.yaml -p BUILD_TOOL=shgradle11 | oc apply  -f -
 Privatläkarportal:
-oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=privatlakarportal -p RELEASE_VERSION=2020-2 -p GIT_URL=https://github.com/sklintyg/privatlakarportal.git -p GIT_CI_BRANCH=release/2020-2 | oc apply  -f -
+oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=privatlakarportal -p RELEASE_VERSION=2020-2 -p GIT_URL=https://github.com/sklintyg/privatlakarportal.git -p GIT_CI_BRANCH=release/2020-2 -p BUILD_TEMPLATE=buildtemplate-webapp-java11-binary.yaml -p BUILD_TOOL=shgradle11 | oc apply  -f -
 Statistik:
-oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=statistik -p RELEASE_VERSION=2020-2 -p GIT_URL=https://github.com/sklintyg/statistik.git -p GIT_CI_BRANCH=release/2020-2 | oc apply  -f -
+oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=statistik -p RELEASE_VERSION=2020-2 -p GIT_URL=https://github.com/sklintyg/statistik.git -p GIT_CI_BRANCH=release/2020-2 -p BUILD_TEMPLATE=buildtemplate-webapp-java11-binary.yaml -p BUILD_TOOL=shgradle11 | oc apply  -f -
 ```
 ```
 SRS:
 oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=srs -p RELEASE_VERSION=2020-2 -p GIT_URL=https://github.com/sklintyg/srs.git -p GIT_CI_BRANCH=release/2020-2 -p BUILD_TEMPLATE=buildtemplate-srsapp-binary.yaml -p HEALTH_URI="'/services'" -p TEST_PORT=8080 | oc apply  -f -
-```
-```
-Intygstjanst Java 11 Temporary
-oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=intygstjanst -p RELEASE_VERSION=2020-2-spring5 -p GIT_URL=https://github.com/sklintyg/intygstjanst.git -p GIT_CI_BRANCH=feature/INTYGFV-12005 -p DEVOPS_GIT_CI_BRANCH=release/2020-2 -p BUILD_TEMPLATE=buildtemplate-webapp-java11-binary.yaml -p BUILD_TOOL=shgradle11 -p CONTEXT_PATH="inera-certificate" -p HEALTH_URI="'/inera-certificate/services'" | oc apply  -f -
 ```
 
 #### GitHub Webhooks
