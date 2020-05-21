@@ -11,13 +11,11 @@ parameters:
     required: true
   - name: STAGE
     required: true
-    value: "test"
   - name: SECRET
     required: true
     value: "nexus-registry"
   - name: TAG
     required: true
-    value: "latest"
   - name: NEXUS_URI
     required: true
     value: "docker.drift.inera.se/intyg"
