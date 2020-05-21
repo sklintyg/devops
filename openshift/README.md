@@ -193,7 +193,7 @@ A deployment config, service and route has to be configured, and the following e
 
 _Note: ALLOWEDPATHS shall be empty, and the SECRET value is from a secret with name git-webhook-secret and the key WebhookSecretKey_
 
-#### ACME-controller (Not cuurently in use)
+#### ACME-controller (Not currently in use)
 This one is used to provide LetsEncrypt Certificates to our routes.
 
 Follow the instructions at: https://github.com/tnozicka/openshift-acme/tree/master/deploy/letsencrypt-live/single-namespace
