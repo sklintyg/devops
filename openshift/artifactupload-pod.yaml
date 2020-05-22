@@ -46,7 +46,6 @@ objects:
         image: ${IMAGE}
         imagePullPolicy: Always
         name: ${BUILD_TAG}
-#        command: [ "curl -v -u ind-ocpt1:7cCqk55oKv --upload-file /tmp/src/tools/liquibase-runner/build/distributions/privatlakarportal-liquibase-runner-1.14.0.13.tar https://nexus.drift.inera.se/repository/maven-releases/se/inera/privatlakarportal/privatlakarportal-liquibase-runner/1.14.0.13/privatlakarportal-liquibase-runner-1.14.0.13.tar" ]
-        command: [ "curl", "-v", "https://sunet.se" ]
+        command: [ "curl", "-v", "-u", "ind-ocpt1:7cCqk55oKv", "--upload-file", "/tmp/src/tools/liquibase-runner/build/distributions/privatlakarportal-liquibase-runner-1.14.0.13.tar", "https://nexus.drift.inera.se/repository/maven-releases/se/inera/privatlakarportal/privatlakarportal-liquibase-runner/1.14.0.13/privatlakarportal-liquibase-runner-1.14.0.13.tar" ]
     restartPolicy: Never
 
