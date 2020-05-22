@@ -1,8 +1,10 @@
 apiVersion: v1
 kind: Template
 metadata:
-  name: testrunnertemplate-pod
+  name: artifactupload-pod
 parameters:
+- name: APP_NAME
+  required: true
 - name: SOURCE_PATH
   required: true
 - name: BUILD_VERSION

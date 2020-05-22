@@ -40,7 +40,11 @@ objects:
               // TODO: use generateName in Pod template, i.e. when it works
               def num = (new Random().nextInt() % 100000) + 1
               def suffix = (num < 0) ? "${num}" : "-${num}"
+
+              echo "Suffix ${suffix}"
+
               def pod = openshift.process("-f", "openshift/artifactupload-pod.yaml",
+              "-p", "APP_NAME=${appName}",
               "-p", "SOURCE_PATH=${sourcePath}",
               "-p", "IMAGE='${imageStream}:${buildVersion}'",
               "-p", "BUILD_VERSION=${buildVersion}",
@@ -85,8 +89,12 @@ objects:
                 stage('Upload Artifact') {
                   steps {
                     script {
-                      uploadArtifact("privatlakarportal","1.14.0.13","se/inera/privatlakarportal/privatlakarportal-liquibase-runner/")
-                      sh "ls -la ${pwd()}"
+                      openshift.withCluster() {
+                        openshift.withProject() {
+                          uploadArtifact("privatlakarportal","1.14.0.13","se/inera/privatlakarportal/privatlakarportal-liquibase-runner/")
+                          sh "ls -la ${pwd()}"
+                        }
+                      }
                     }
                   }
                 }
