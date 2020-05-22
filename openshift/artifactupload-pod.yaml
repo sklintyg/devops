@@ -5,9 +5,11 @@ metadata:
 parameters:
 - name: APP_NAME
   required: true
-- name: SOURCE_PATH
+- name: SOURCE
   required: true
-- name: BUILD_VERSION
+- name: DESTINATION
+  required: true
+- name: CREDENTIALS
   required: true
 - name: CALLBACK_URL
   required: true
@@ -28,8 +30,12 @@ objects:
   spec:
     containers:
       - env:
-        - name: SOURCE_PATH
-          value: ${SOURCE_PATH}
+        - name: SOURCE
+          value: ${SOURCE}
+        - name: DESTINATION
+          value: ${DESTINATION}
+        - name: CREDENTIALS
+          value: ${CREDENTIALS}
         - name: CALLBACK_URL
           value: ${CALLBACK_URL}
         - name: NO_PROXY
@@ -46,6 +52,7 @@ objects:
         image: ${IMAGE}
         imagePullPolicy: Always
         name: ${BUILD_TAG}
-        command: [ "curl", "-v", "-u", "ind-ocpt1:7cCqk55oKv", "--upload-file", "/tmp/src/tools/liquibase-runner/build/distributions/privatlakarportal-liquibase-runner-1.14.0.13.tar", "https://nexus.drift.inera.se/repository/maven-releases/se/inera/privatlakarportal/privatlakarportal-liquibase-runner/1.14.0.13/privatlakarportal-liquibase-runner-1.14.0.13.tar" ]
+        command: ["/bin/sh","-c"]
+        args: ["export RESULT=$(curl --write-out %{http_code} --silent --output /dev/null -u $CREDENTIALS --upload-file $SOURCE $DESTINATION); curl -X POST -k -d $RESULT $CALLBACK_URL"]
     restartPolicy: Never
 
