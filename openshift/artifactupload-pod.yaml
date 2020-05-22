@@ -53,6 +53,7 @@ objects:
         imagePullPolicy: Always
         name: ${BUILD_TAG}
         command: ["/bin/sh","-c"]
-        args: ["export RESULT=$(curl --write-out %{http_code} --silent --output /dev/null -u $CREDENTIALS --upload-file $SOURCE $DESTINATION); curl -X POST -k -d $RESULT $CALLBACK_URL"]
+        args: ["curl -v -u $CREDENTIALS --upload-file $SOURCE $DESTINATION"]
+        # args: ["export RESULT=$(curl --write-out %{http_code} --silent --output /dev/null -u $CREDENTIALS --upload-file $SOURCE $DESTINATION); curl -X POST -k -d $RESULT $CALLBACK_URL"]
     restartPolicy: Never
 
