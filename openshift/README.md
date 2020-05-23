@@ -33,6 +33,8 @@ oc create secret generic jenkins-integration \
 --from-literal=GITHUB_USERNAME=<replace_me> \
 --from-literal=NEXUS_PASSWORD=<replace_me> \
 --from-literal=NEXUS_USERNAME=<replace_me> \
+--from-literal=INERA_NEXUS_PASSWORD=<replace_me> \
+--from-literal=INERA_NEXUS_USERNAME=<replace_me> \
 --type=Opaque
 ```
 
