@@ -39,15 +39,15 @@ def getLiquibasePaths(appName, buildVersion, sourcePrefix, destPrefix) {
   switch(appName) {
     case "privatlakarportal":
       def tarName = "${appName}-liquibase-runner-${buildVersion}.tar"
-      paths = "${sourcePrefix}/${tarName}:${destPrefix}/${appName}/${appName}-liquibase-runner/${buildVersion}/${tarName}"
+      paths = "${sourcePrefix}/${tarName};${destPrefix}/${appName}/${appName}-liquibase-runner/${buildVersion}/${tarName}"
       break
     case "statistik":
       def tarName = "liquibase-runner-${buildVersion}.tar"
-      paths = "${sourcePrefix}/${tarName}:${destPrefix}/${appName}/liquibase-runner/${buildVersion}/${tarName}"
+      paths = "${sourcePrefix}/${tarName};${destPrefix}/${appName}/liquibase-runner/${buildVersion}/${tarName}"
       break
     case ["rehabstod", "intygstjanst", "webcert", "intygsadmin"]:
       def tarName = "${appName}-liquibase-runner-${buildVersion}.tar"
-      paths = "${sourcePrefix}/${tarName}:${destPrefix}/intyg/${appName}/${appName}-liquibase-runner/${buildVersion}/${tarName}"
+      paths = "${sourcePrefix}/${tarName};${destPrefix}/intyg/${appName}/${appName}-liquibase-runner/${buildVersion}/${tarName}"
       break
     default:
       paths = ""
@@ -91,11 +91,11 @@ def promoteImage(appName, appTag) {
 }
 
 def uploadLiquibase(appName, buildVersion, paths) {
-  def split = paths.split(":")
+  def split = paths.split(";")
   def source = split[0]
   def destination = split[1]
 
-  log "Upload liquibase for ${appName}:${buildVersion}"
+  log "Upload liquibase for ${appName};${buildVersion}"
 
   // Setup callback webhook
   def hook = registerWebhook()
