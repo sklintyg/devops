@@ -9,7 +9,7 @@ def apps = IMAGES.split(",")
 def releaseVersion = "${RELEASE_VERSION}.latest"
 def appsWithImageTag = []
 def sourcePrefix = "/tmp/src/tools/liquibase-runner/build/distributions"
-def destPrefix = "https://nexus.drift.inera.se/repository/maven-releases/se/inera/privatlakarportal/privatlakarportal-liquibase-runner/1.14.0.13/privatlakarportal-liquibase-runner-1.14.0.13.tar"
+def destPrefix = "https://nexus.drift.inera.se/repository/maven-releases/se/inera"
 
 def getVersion(appName, specificTag, releaseVersion) {
   def images = openshift.selector("is", "${appName}-verified").object().spec.tags
