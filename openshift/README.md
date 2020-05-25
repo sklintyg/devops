@@ -423,7 +423,13 @@ Can be used to trigger a pipeline if Jenkins trigger isn't a viable option.
 * Depends on the script (script content is logged).
 
 ### Promote images to Nexus
-Images created in previous builds are stored in imagestreams in the OpenShift project. These are only accessible from within the cluster. This poses a problem when builds are to be deployed in STAGE or PROD environment since they reside in a different OpenShift cluster. Because of this, images needs to be promoted/pushed to an "external" docker repo. This is achieved via `pipelinetemplate-promote-images.yaml`.
+Images created in previous builds are stored in imagestreams in the OpenShift project. These are only accessible from within the cluster. This poses a problem when builds are to be deployed in STAGE or PROD environment since they reside in a different OpenShift cluster. Because of this, images needs to be promoted/pushed to an "external" docker registry. This is achieved via `pipelinetemplate-promote-images.yaml`.
+
+The pipeline serves two purposes.
+1. Promote images to "external" Docker Registry. This is done with `buildtemplate-nexus.yaml`.
+2. Upload Liquibase-runners to "external" Maven Repository. This is done with `artifactupload-pod-yaml`.
+
+The pipeline is implemented in a separate Jenkinsfile named `PromoteImagesJenkinsfile`. 
 
 This pipeline is triggered manually when images are to be pushed to Nexus.
 
@@ -432,7 +438,7 @@ This pipeline is triggered manually when images are to be pushed to Nexus.
 | Parameter       | Required | Description |
 | --------------- | -------- | ----------- |
 | RELEASE_VERSION | Yes      | The release name, i.e. `2020-2` |
-| IMAGES          |          | The images (with or without version) to be deployed. Defaults to `webcert,rehabstod,minaintyg,intygsadmin,intygstjanst,logsender,privatlakarportal,statistik`  |        
+| IMAGES          |          | The images (with or without version) to be deployed. Defaults to `intygsadmin,intygstjanst,logsender,minaintyg,privatlakarportal,rehabstod,srs,statistik,webcert`  |        
 | GIT_URL         |          | DevopsRepo containing build-data. Defaults to `https://github.com/sklintyg/devops.git`|
 | GIT_CI_BRANCH   | Yes      | The branch from devopsrepo to build from, i.e. `release/2020-2`|
 
