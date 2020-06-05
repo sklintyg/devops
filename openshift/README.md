@@ -325,6 +325,10 @@ oc process -f pipelinetemplate-build-library.yaml -p LIBRARY_NAME=infra-2020-2 -
 ```
 oc process -f pipelinetemplate-build-library.yaml -p LIBRARY_NAME=common-2020-2 -p GIT_URL=https://github.com/sklintyg/common.git -p GIT_CI_BRANCH=release/2020-2 | oc apply -f -
 ```
+**refdata**
+```
+oc process -f pipelinetemplate-build-library.yaml -p LIBRARY_NAME=refdata -p GIT_URL=https://github.com/sklintyg/refdata.git -p GIT_CI_BRANCH=develop | oc apply -f -
+```
 
 #### Intygstjänster Web App Pipelines
 The Web-apps in Intygstjänster are built by pipelines created with `pipelinetemplate-build-webapp.yaml`. A release branch for each repository must first be created and updated to reflect the new release-version. (i.e. EnvConfig.js might be updated or properties used in secrets or configmaps).
