@@ -222,10 +222,10 @@ The template (housekeeping) must be applied in the OCP project of question:
 
 | Name | Value | Description |
 | ---- | ----- | ----- | 
-| RELEASE_VERSION | 2020-2 | Name of the release for this pipeline. Used to maintain separate pipelines between releases.
+| RELEASE_VERSION | 2020-3 | Name of the release for this pipeline. Used to maintain separate pipelines between releases.
 
 ```
-$ oc process -f pipelinetemplate-housekeeping.yaml -p RELEASE_VERSION=2020-2 | oc apply  -f -
+oc process -f pipelinetemplate-housekeeping.yaml -p RELEASE_VERSION=2020-3 | oc apply  -f -
 ```
 
 **Jenkins configuration**
@@ -311,19 +311,19 @@ When this is done the new pipeline can be created.
 
 | Parameter     | Required | Description |
 | ------------- | ---------| ----------- |
-| LIBRARY_NAME  | Yes      | i.e. `infra-2020-2` |
+| LIBRARY_NAME  | Yes      | i.e. `infra-2020-3` |
 | STAGE         |          | The stage label, default is `build` |        
 | GIT_URL       | Yes      | The GitURL for this repository |
-| GIT_CI_BRANCH | Yes      | Branch from repo i.e. `release/2020-2`   |
+| GIT_CI_BRANCH | Yes      | Branch from repo i.e. `release/2020-3`   |
 | CONTEXT_DIR   |          | defaults to `.`|
 
 **infra**
 ```
-oc process -f pipelinetemplate-build-library.yaml -p LIBRARY_NAME=infra-2020-2 -p GIT_URL=https://github.com/sklintyg/infra.git -p GIT_CI_BRANCH=release/2020-2 | oc apply -f -
+oc process -f pipelinetemplate-build-library.yaml -p LIBRARY_NAME=infra-2020-3 -p GIT_URL=https://github.com/sklintyg/infra.git -p GIT_CI_BRANCH=release/2020-3 | oc apply -f -
 ```
 **common**
 ```
-oc process -f pipelinetemplate-build-library.yaml -p LIBRARY_NAME=common-2020-2 -p GIT_URL=https://github.com/sklintyg/common.git -p GIT_CI_BRANCH=release/2020-2 | oc apply -f -
+oc process -f pipelinetemplate-build-library.yaml -p LIBRARY_NAME=common-2020-3 -p GIT_URL=https://github.com/sklintyg/common.git -p GIT_CI_BRANCH=release/2020-3 | oc apply -f -
 ```
 **refdata**
 ```
@@ -340,7 +340,7 @@ When this is done the new pipeline can be created.
 | Parameter | Required | Description |
 | --------- | -------- | ----------- |
 | APP_NAME                | Yes         | The Web App name, ex: `webcert` |
-| RELEASE_VERSION         | Yes         | The name of this release, ex: `2020-2` |
+| RELEASE_VERSION         | Yes         | The name of this release, ex: `2020-3` |
 | STAGE                   |             | The stage label, default is `test` |        
 | BUILD_TEMPLATE          |             | Name of the build template, default is: `buildtemplate-webapp.yaml` |
 | DEPLOY_TEMPLATE         |             | Name of the deploy template, default is: `deploytemplate-webapp.yaml` |
@@ -368,25 +368,25 @@ When this is done the new pipeline can be created.
 
 ```
 Intygstjanst:
-oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=intygstjanst -p RELEASE_VERSION=2020-2 -p GIT_URL=https://github.com/sklintyg/intygstjanst.git -p GIT_CI_BRANCH=release/2020-2 -p BUILD_TEMPLATE=buildtemplate-webapp-java11-binary.yaml -p BUILD_TOOL=shgradle11 -p CONTEXT_PATH="inera-certificate" -p HEALTH_URI="'/inera-certificate/services'" | oc apply  -f -
+oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=intygstjanst -p RELEASE_VERSION=2020-3 -p GIT_URL=https://github.com/sklintyg/intygstjanst.git -p GIT_CI_BRANCH=release/2020-3 -p BUILD_TEMPLATE=buildtemplate-webapp-java11-binary.yaml -p BUILD_TOOL=shgradle11 -p CONTEXT_PATH="inera-certificate" -p HEALTH_URI="'/inera-certificate/services'" | oc apply  -f -
 Intygsadmin:
-oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=intygsadmin -p RELEASE_VERSION=2020-2 -p GIT_URL=https://github.com/sklintyg/intygsadmin.git -p GIT_CI_BRANCH=release/2020-2 -p BUILD_TEMPLATE=buildtemplate-bootapp-binary.yaml -p BUILD_TOOL=shgradle11 -p HEALTH_URI="'/version.html'" -p TEST_PORT=8080 | oc apply  -f -
+oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=intygsadmin -p RELEASE_VERSION=2020-3 -p GIT_URL=https://github.com/sklintyg/intygsadmin.git -p GIT_CI_BRANCH=release/2020-3 -p BUILD_TEMPLATE=buildtemplate-bootapp-binary.yaml -p BUILD_TOOL=shgradle11 -p HEALTH_URI="'/version.html'" -p TEST_PORT=8080 | oc apply  -f -
 Logsender:
-oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=logsender -p RELEASE_VERSION=2020-2 -p GIT_URL=https://github.com/sklintyg/logsender.git -p GIT_CI_BRANCH=release/2020-2 -p BUILD_TEMPLATE=buildtemplate-webapp-java11-binary.yaml -p BUILD_TOOL=shgradle11 | oc apply  -f -
+oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=logsender -p RELEASE_VERSION=2020-3 -p GIT_URL=https://github.com/sklintyg/logsender.git -p GIT_CI_BRANCH=release/2020-3 -p BUILD_TEMPLATE=buildtemplate-webapp-java11-binary.yaml -p BUILD_TOOL=shgradle11 | oc apply  -f -
 Mina Intyg:
-oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=minaintyg -p RELEASE_VERSION=2020-2 -p GIT_URL=https://github.com/sklintyg/minaintyg.git -p GIT_CI_BRANCH=release/2020-2 -p BUILD_TEMPLATE=buildtemplate-webapp-java11-binary.yaml -p BUILD_TOOL=shgradle11 | oc apply  -f -
+oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=minaintyg -p RELEASE_VERSION=2020-3 -p GIT_URL=https://github.com/sklintyg/minaintyg.git -p GIT_CI_BRANCH=release/2020-3 -p BUILD_TEMPLATE=buildtemplate-webapp-java11-binary.yaml -p BUILD_TOOL=shgradle11 | oc apply  -f -
 Webcert:
-oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=webcert -p RELEASE_VERSION=2020-2 -p GIT_URL=https://github.com/sklintyg/webcert.git -p GIT_CI_BRANCH=release/2020-2 -p BUILD_TEMPLATE=buildtemplate-webapp-java11-binary.yaml -p BUILD_TOOL=shgradle11 | oc apply  -f -
+oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=webcert -p RELEASE_VERSION=2020-3 -p GIT_URL=https://github.com/sklintyg/webcert.git -p GIT_CI_BRANCH=release/2020-3 -p BUILD_TEMPLATE=buildtemplate-webapp-java11-binary.yaml -p BUILD_TOOL=shgradle11 | oc apply  -f -
 Rehabstöd:
-oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=rehabstod -p RELEASE_VERSION=2020-2 -p GIT_URL=https://github.com/sklintyg/rehabstod.git -p GIT_CI_BRANCH=release/2020-2 -p BUILD_TEMPLATE=buildtemplate-webapp-java11-binary.yaml -p BUILD_TOOL=shgradle11 | oc apply  -f -
+oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=rehabstod -p RELEASE_VERSION=2020-3 -p GIT_URL=https://github.com/sklintyg/rehabstod.git -p GIT_CI_BRANCH=release/2020-3 -p BUILD_TEMPLATE=buildtemplate-webapp-java11-binary.yaml -p BUILD_TOOL=shgradle11 | oc apply  -f -
 Privatläkarportal:
-oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=privatlakarportal -p RELEASE_VERSION=2020-2 -p GIT_URL=https://github.com/sklintyg/privatlakarportal.git -p GIT_CI_BRANCH=release/2020-2 -p BUILD_TEMPLATE=buildtemplate-webapp-java11-binary.yaml -p BUILD_TOOL=shgradle11 | oc apply  -f -
+oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=privatlakarportal -p RELEASE_VERSION=2020-3 -p GIT_URL=https://github.com/sklintyg/privatlakarportal.git -p GIT_CI_BRANCH=release/2020-3 -p BUILD_TEMPLATE=buildtemplate-webapp-java11-binary.yaml -p BUILD_TOOL=shgradle11 | oc apply  -f -
 Statistik:
-oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=statistik -p RELEASE_VERSION=2020-2 -p GIT_URL=https://github.com/sklintyg/statistik.git -p GIT_CI_BRANCH=release/2020-2 -p BUILD_TEMPLATE=buildtemplate-webapp-java11-binary.yaml -p BUILD_TOOL=shgradle11 | oc apply  -f -
+oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=statistik -p RELEASE_VERSION=2020-3 -p GIT_URL=https://github.com/sklintyg/statistik.git -p GIT_CI_BRANCH=release/2020-3 -p BUILD_TEMPLATE=buildtemplate-webapp-java11-binary.yaml -p BUILD_TOOL=shgradle11 | oc apply  -f -
 ```
 ```
 SRS:
-oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=srs -p RELEASE_VERSION=2020-2 -p GIT_URL=https://github.com/sklintyg/srs.git -p GIT_CI_BRANCH=release/2020-2 -p BUILD_TEMPLATE=buildtemplate-srsapp-binary.yaml -p HEALTH_URI="'/services'" -p TEST_PORT=8080 | oc apply  -f -
+oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=srs -p RELEASE_VERSION=2020-3 -p GIT_URL=https://github.com/sklintyg/srs.git -p GIT_CI_BRANCH=release/2020-3 -p BUILD_TEMPLATE=buildtemplate-srsapp-binary.yaml -p HEALTH_URI="'/services'" -p TEST_PORT=8080 | oc apply  -f -
 ```
 
 #### GitHub Webhooks
@@ -395,10 +395,10 @@ Each of these pipelines will have its own URL for webhook triggers. These can be
 Replace the hostname of the copied webhooktrigger with the route-name of the webhookproxy.
 ```
 Before:
-https://ind-ocpt1a-api.ocp.sth.basefarm.net/apis/build.openshift.io/v1/namespaces/dintyg/buildconfigs/common-2020-2-pipeline/webhooks/********/github
+https://ind-ocpt1a-api.ocp.sth.basefarm.net/apis/build.openshift.io/v1/namespaces/dintyg/buildconfigs/common-2020-3-pipeline/webhooks/********/github
 
 After:
-https://gitwebhookproxy-dintyg.ind-ocpt1a-app.ocp.sth.basefarm.net/apis/build.openshift.io/v1/namespaces/dintyg/buildconfigs/common-2020-2-pipeline/webhooks/********/github
+https://gitwebhookproxy-dintyg.ind-ocpt1a-app.ocp.sth.basefarm.net/apis/build.openshift.io/v1/namespaces/dintyg/buildconfigs/common-2020-3-pipeline/webhooks/********/github
 ```
 Use the new URL in GitHub repo, or where needed.
 
@@ -441,13 +441,13 @@ This pipeline is triggered manually when images are to be pushed to Nexus.
 
 | Parameter       | Required | Description |
 | --------------- | -------- | ----------- |
-| RELEASE_VERSION | Yes      | The release name, i.e. `2020-2` |
+| RELEASE_VERSION | Yes      | The release name, i.e. `2020-3` |
 | IMAGES          |          | The images (with or without version) to be deployed. Defaults to `intygsadmin,intygstjanst,logsender,minaintyg,privatlakarportal,rehabstod,srs,statistik,webcert`  |        
 | GIT_URL         |          | DevopsRepo containing build-data. Defaults to `https://github.com/sklintyg/devops.git`|
-| GIT_CI_BRANCH   | Yes      | The branch from devopsrepo to build from, i.e. `release/2020-2`|
+| GIT_CI_BRANCH   | Yes      | The branch from devopsrepo to build from, i.e. `release/2020-3`|
 
 ```
-oc process -f pipelinetemplate-promote-images.yaml -p RELEASE_VERSION=2020-2 -p GIT_CI_BRANCH=release/2020-2 | oc apply  -f -
+oc process -f pipelinetemplate-promote-images.yaml -p RELEASE_VERSION=2020-3 -p GIT_CI_BRANCH=release/2020-3 | oc apply  -f -
 ```
 
 ### Nightly Demo Deploy Pipeline
