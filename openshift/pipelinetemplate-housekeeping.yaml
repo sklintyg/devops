@@ -60,7 +60,7 @@ objects:
                 stage('Clean Pods') {
                   steps {
                     script {
-                      eshell("curl -s https://raw.githubusercontent.com/sklintyg/devops/release/2020-2/openshift/clean-pods.sh > /tmp/clean-pods.sh")
+                      eshell("curl -s https://raw.githubusercontent.com/sklintyg/devops/release/2020-3/openshift/clean-pods.sh > /tmp/clean-pods.sh")
                       shell("bash /tmp/clean-pods.sh")
                     }
                   }
@@ -68,7 +68,7 @@ objects:
                 stage('Clean Images') {
                   steps {
                     script {
-                      eshell("curl -s https://raw.githubusercontent.com/sklintyg/devops/release/2020-2/openshift/clean-istags.sh > /tmp/clean-istags.sh")
+                      eshell("curl -s https://raw.githubusercontent.com/sklintyg/devops/release/2020-3/openshift/clean-istags.sh > /tmp/clean-istags.sh")
                       images.each { k, v ->
                         suffix.each { s ->
                           shell("bash /tmp/clean-istags.sh ${k}${s} ${v}")
