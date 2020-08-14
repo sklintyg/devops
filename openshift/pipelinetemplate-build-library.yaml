@@ -14,6 +14,8 @@ parameters:
     required: true
   - name: CONTEXT_DIR
     value: "."
+  - name: CUSTOM_BUILD_NAME
+    value: ""
 objects:
   - apiVersion: v1
     kind: BuildConfig
@@ -32,7 +34,7 @@ objects:
       source:
         git:
           uri: "${GIT_URL}"
-          ref: "refs/heads/${GIT_CI_BRANCH}"
+          ref: "*/$GIT_BRANCH"
         contextDir: "${CONTEXT_DIR}"
       strategy:
         jenkinsPipelineStrategy:
@@ -42,3 +44,5 @@ objects:
               value: "${GIT_CI_BRANCH}"
             - name: "GIT_URL"
               value: "${GIT_URL}"
+            - name: "CUSTOM_BUILD_NAME"
+              value: "${CUSTOM_BUILD_NAME}"
