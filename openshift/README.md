@@ -325,9 +325,25 @@ oc process -f pipelinetemplate-build-library.yaml -p LIBRARY_NAME=infra-2020-3 -
 ```
 oc process -f pipelinetemplate-build-library.yaml -p LIBRARY_NAME=common-2020-3 -p GIT_URL=https://github.com/sklintyg/common.git -p GIT_CI_BRANCH=release/2020-3 | oc apply -f -
 ```
+
+#### Intygstjänster Refdata pipelines
+The Refdata library in Intygstjänster is built by a pipeline created with `pipelinetemplate-build-refdata.yaml`.
+
+When this is done the new pipeline can be created.
+
+**Parameters:** 
+
+| Parameter         | Required | Description |
+| -------------     | ---------| ----------- |
+| STAGE             |          | The stage label, default is `build` |        
+| GIT_URL           | Yes      | The GitURL for this repository |
+| GIT_CI_BRANCH     | Yes      | Branch from repo i.e. `develop`   |
+| CONTEXT_DIR       |          | defaults to `.`|
+| CUSTOM_BUILD_NAME | No       |  |
+
 **refdata**
 ```
-oc process -f pipelinetemplate-build-library.yaml -p LIBRARY_NAME=refdata -p GIT_URL=https://github.com/sklintyg/refdata.git -p GIT_CI_BRANCH=develop | oc apply -f -
+oc process -f pipelinetemplate-build-refdata.yaml -p GIT_URL=https://github.com/sklintyg/refdata.git -p GIT_CI_BRANCH=develop | oc apply -f -
 ```
 
 #### Intygstjänster Web App Pipelines
