@@ -29,6 +29,7 @@ objects:
               'logsender': '6.7.0',
               'minaintyg': '3.13.0',
               'webcert': '6.7.0',
+              'webcert': '6.7.1',
               'rehabstod': '1.13.0',
               'privatlakarportal': '1.14.0',
               'statistik': '7.6.0',
