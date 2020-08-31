@@ -13,7 +13,7 @@ objects:
       labels:
         release: ${RELEASE_VERSION}
         stage: test
-      name: housekeeping-${RELEASE_VERSION}
+      name: housekeeping-all-releases
     spec:
       triggers:
         - generic:
@@ -25,14 +25,23 @@ objects:
         jenkinsPipelineStrategy:
           jenkinsfile: |-
             def images = [
+              'intygstjanst': '3.12.0',
               'intygstjanst': '3.13.0',
+              'logsender': '6.7.0',
               'logsender': '6.8.0',
+              'minaintyg': '3.13.0',
               'minaintyg': '3.14.0',
+              'webcert': '6.7.0',
+              'webcert': '6.7.1',
               'webcert': '6.8.0',
+              'rehabstod': '1.13.0',
               'rehabstod': '1.14.0',
+              'privatlakarportal': '1.14.0',
               'privatlakarportal': '1.15.0',
+              'statistik': '7.6.0',
               'statistik': '7.7.0',
               'srs': '1.4.0',
+              'intygsadmin': '1.3.0',
               'intygsadmin': '1.4.0',
             ]
 
