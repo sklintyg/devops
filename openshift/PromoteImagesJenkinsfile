@@ -70,24 +70,8 @@ def promoteImage(appName, appTag) {
           "-p", "TAG='${appTag}'")
   openshift.apply(model)
 
-  def build = openshift.selector("bc", "${appName}-nexus").startBuild()
-  log "${build.name()} started"
-  def status = ""
-  timeout (20) {
-    build.untilEach(1) {
-      status = it.object().status.phase
-      echo "Build status: ${status}"
-      return !["Running", "Pending", "New"].contains(status)
-    }
-
-    echo "Logs for ${appName}-nexus build"
-    build.logs()
-    if (status != "Complete") {
-      error("Build terminated with status: ${status}")
-    }
-
-    log "${appName}:${appTag} promoted to Nexus"
-  }
+  def build = openshift.selector("bc", "${appName}-nexus").startBuild("--wait")
+  log "${appName}:${appTag} promoted to Nexus"
 }
 
 def uploadLiquibase(appName, buildVersion, paths) {
