@@ -236,7 +236,9 @@ To make this pipeline execute on a nightly basis, we need to make extra configur
 
 Base images for artifact builds, tomcat apps, spring boot and a special for srs exists. These are uploaded to BaseFarm nexus server `docker.drift.inera.se/intyg`.
 
-They are created with `make` and, which in turn uses `buildtemplate-image.yaml`. They are then uploaded to BaseFarm nexus with `buildtemplate-nexus.yaml`. The base images are:
+They are created with `make` and, which in turn uses `buildtemplate-image.yaml`. They are then uploaded to BaseFarm nexus with `buildtemplate-nexus.yaml`.
+This means that you need to be logged in to OCP and use the correct project before `make` is used. The project to use is `dintyg`.
+The base images are:
 
 * springboot-base
 * tomcat-base
@@ -257,33 +259,33 @@ oc tag tomcat-java11-base:latest tomcat-java11-base:9
 
 The upload to Nexus is done with:
 ```
-oc process -f buildtemplate-nexus.yaml -p APP_NAME=job-runner -p NEXUS_NAME=job-runner -p IMAGE=dintyg/jobrunner -p TAG=latest | oc apply -f -
-oc start-build job-runner-nexus
-oc process -f buildtemplate-nexus.yaml -p APP_NAME=job-runner -p NEXUS_NAME=job-runner -p IMAGE=dintyg/jobrunner -p TAG=latest | oc delete -f -
+oc process -f ../buildtemplate-nexus.yaml -p APP_NAME=job-runner -p NEXUS_NAME=job-runner -p IMAGE=dintyg/jobrunner -p TAG=latest -p STAGE=base | oc apply -f -
+oc start-build job-runner-nexus --follow
+oc process -f ../buildtemplate-nexus.yaml -p APP_NAME=job-runner -p NEXUS_NAME=job-runner -p IMAGE=dintyg/jobrunner -p TAG=latest -p STAGE=base | oc delete -f -
 
-oc process -f buildtemplate-nexus.yaml -p APP_NAME=s2i-war-builder -p NEXUS_NAME=s2i-war-builder -p IMAGE=dintyg/s2i-war-builder -p TAG=8 | oc apply -f -
-oc start-build s2i-war-builder-nexus
-oc process -f buildtemplate-nexus.yaml -p APP_NAME=s2i-war-builder -p NEXUS_NAME=s2i-war-builder -p IMAGE=dintyg/s2i-war-builder -p TAG=8 | oc delete -f -
+oc process -f ../buildtemplate-nexus.yaml -p APP_NAME=s2i-war-builder -p NEXUS_NAME=s2i-war-builder -p IMAGE=dintyg/s2i-war-builder -p TAG=8 -p STAGE=base | oc apply -f -
+oc start-build s2i-war-builder-nexus --follow
+oc process -f ../buildtemplate-nexus.yaml -p APP_NAME=s2i-war-builder -p NEXUS_NAME=s2i-war-builder -p IMAGE=dintyg/s2i-war-builder -p TAG=8 -p STAGE=base | oc delete -f -
 
-oc process -f buildtemplate-nexus.yaml -p APP_NAME=s2i-war-builder-java11 -p NEXUS_NAME=s2i-war-builder -p IMAGE=dintyg/s2i-war-builder-java11 -p TAG=11 | oc apply -f -
-oc start-build s2i-war-builder-java11-nexus
-oc process -f buildtemplate-nexus.yaml -p APP_NAME=s2i-war-builder-java11 -p NEXUS_NAME=s2i-war-builder -p IMAGE=dintyg/s2i-war-builder-java11 -p TAG=11 | oc delete -f -
+oc process -f ../buildtemplate-nexus.yaml -p APP_NAME=s2i-war-builder-java11 -p NEXUS_NAME=s2i-war-builder -p IMAGE=dintyg/s2i-war-builder-java11 -p TAG=11 -p STAGE=base | oc apply -f -
+oc start-build s2i-war-builder-java11-nexus --follow
+oc process -f ../buildtemplate-nexus.yaml -p APP_NAME=s2i-war-builder-java11 -p NEXUS_NAME=s2i-war-builder -p IMAGE=dintyg/s2i-war-builder-java11 -p TAG=11 -p STAGE=base | oc delete -f -
 
-oc process -f buildtemplate-nexus.yaml -p APP_NAME=springboot-base -p NEXUS_NAME=springboot-base -p IMAGE=dintyg/springboot-base -p TAG=11 | oc apply -f -
-oc start-build springboot-base-nexus
-oc process -f buildtemplate-nexus.yaml -p APP_NAME=springboot-base -p NEXUS_NAME=springboot-base -p IMAGE=dintyg/springboot-base -p TAG=11 | oc delete -f -
+oc process -f ../buildtemplate-nexus.yaml -p APP_NAME=springboot-base -p NEXUS_NAME=springboot-base -p IMAGE=dintyg/springboot-base -p TAG=11 -p STAGE=base | oc apply -f -
+oc start-build springboot-base-nexus --follow
+oc process -f ../buildtemplate-nexus.yaml -p APP_NAME=springboot-base -p NEXUS_NAME=springboot-base -p IMAGE=dintyg/springboot-base -p TAG=11 -p STAGE=base | oc delete -f -
 
-oc process -f buildtemplate-nexus.yaml -p APP_NAME=srs-base -p NEXUS_NAME=srs-base -p IMAGE=dintyg/srs-base -p TAG=8 | oc apply -f -
-oc start-build srs-base-nexus
-oc process -f buildtemplate-nexus.yaml -p APP_NAME=srs-base -p NEXUS_NAME=srs-base -p IMAGE=dintyg/srs-base -p TAG=8 | oc delete -f -
+oc process -f ../buildtemplate-nexus.yaml -p APP_NAME=srs-base -p NEXUS_NAME=srs-base -p IMAGE=dintyg/srs-base -p TAG=8 -p STAGE=base | oc apply -f -
+oc start-build srs-base-nexus --follow
+oc process -f ../buildtemplate-nexus.yaml -p APP_NAME=srs-base -p NEXUS_NAME=srs-base -p IMAGE=dintyg/srs-base -p TAG=8 -p STAGE=base | oc delete -f -
 
-oc process -f buildtemplate-nexus.yaml -p APP_NAME=tomcat-base -p NEXUS_NAME=tomcat-base -p IMAGE=dintyg/tomcat-base -p TAG=9 | oc apply -f -
-oc start-build tomcat-base-nexus
-oc process -f buildtemplate-nexus.yaml -p APP_NAME=tomcat-base -p NEXUS_NAME=tomcat-base -p IMAGE=dintyg/tomcat-base -p TAG=9 | oc delete -f -
+oc process -f ../buildtemplate-nexus.yaml -p APP_NAME=tomcat-base -p NEXUS_NAME=tomcat-base -p IMAGE=dintyg/tomcat-base -p TAG=9 -p STAGE=base | oc apply -f -
+oc start-build tomcat-base-nexus --follow
+oc process -f ../buildtemplate-nexus.yaml -p APP_NAME=tomcat-base -p NEXUS_NAME=tomcat-base -p IMAGE=dintyg/tomcat-base -p TAG=9 -p STAGE=base | oc delete -f -
 
-oc process -f buildtemplate-nexus.yaml -p APP_NAME=tomcat-java11-base -p NEXUS_NAME=tomcat-java11-base -p IMAGE=dintyg/tomcat-java11-base -p TAG=9 | oc apply -f -
-oc start-build tomcat-java11-base-nexus
-oc process -f buildtemplate-nexus.yaml -p APP_NAME=tomcat-java11-base -p NEXUS_NAME=tomcat-java11-base -p IMAGE=dintyg/tomcat-java11-base -p TAG=9 | oc delete -f -
+oc process -f ../buildtemplate-nexus.yaml -p APP_NAME=tomcat-java11-base -p NEXUS_NAME=tomcat-java11-base -p IMAGE=dintyg/tomcat-java11-base -p TAG=9 -p STAGE=base | oc apply -f -
+oc start-build tomcat-java11-base-nexus --follow
+oc process -f ../buildtemplate-nexus.yaml -p APP_NAME=tomcat-java11-base -p NEXUS_NAME=tomcat-java11-base -p IMAGE=dintyg/tomcat-java11-base -p TAG=9 -p STAGE=base | oc delete -f -
 ```
  
 ### Intygstjänster OCP Templates

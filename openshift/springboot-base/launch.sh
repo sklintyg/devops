@@ -13,20 +13,16 @@ if [ -f $CREDENTIALS ]; then
 fi
 
 # if no REFDATA_URL exists get latest dev snapshot, otherwise use REFDATA_URL
-# use xmllint to get latest version from maven-metadata
 if [ -z $REFDATA_URL ]; then
-    NEXUS_SNAPSHOT_URL="https://build-inera.nordicmedtest.se/nexus/repository/snapshots/se/inera/intyg/refdata/refdata/1.0-SNAPSHOT"
-    REFDATA_VERSION=$(curl -Ls -m 20 ${NEXUS_SNAPSHOT_URL}/maven-metadata.xml | xmllint --xpath '//snapshotVersion/extension[.="jar"]/../value/text()' -)
-    if [ $? != 0 ]; then
-        echo "Error: unable to fetch refdata metadata: ${NEXUS_SNAPSHOT_URL}/maven-metadata.xml"
-        exit 1
-    fi
-    REFDATA_URL="${NEXUS_SNAPSHOT_URL}/refdata-${REFDATA_VERSION}.jar"
+    REFDATA_VERSION="1.0-SNAPSHOT"
+    REFDATA_URL="https://nexus.drift.inera.se/service/rest/v1/search/assets/download?sort=version&direction=desc&repository=it-public&maven.groupId=se.inera.intyg.refdata&maven.artifactId=refdata&maven.baseVersion=${REFDATA_VERSION}&maven.extension=jar"
+    REFDATA_FILE="refdata-${REFDATA_VERSION}.jar"
+else
+    REFDATA_FILE=$(basename $REFDATA_URL)
 fi
 
-REFDATA_FILE=$(basename $REFDATA_URL)
 REFDATA_JAR=sklintyg-${REFDATA_FILE%.*}.jar
-curl -Ls -m 20 $REFDATA_URL > /tmp/$REFDATA_JAR
+curl -Ls -m 20 "${REFDATA_URL}" > /tmp/$REFDATA_JAR
 if [ $? != 0 ]; then
     echo "Error: unable to fetch refdata artifact: $REFDATA_URL"
     exit 1
