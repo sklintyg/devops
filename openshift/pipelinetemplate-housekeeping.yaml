@@ -39,6 +39,7 @@ objects:
               'webcert': '6.8.0',
               'webcert': '6.9.0',
               'rehabstod': '1.13.0',
+              'rehabstod': '1.13.1',
               'rehabstod': '1.14.0',
               'rehabstod': '1.15.0',
               'privatlakarportal': '1.14.0',
