@@ -28,13 +28,17 @@ The docker compose script in the directory includes the following infrastructure
 * NGINX (80, 443) 
 
 ## Usage
+This repository must be checked out with the correct branch (as of now `release/2021-1`).
+
+Use a console of your choice (PowerShell, Ubuntu in WSL2, Git Bash etc.) and go to the directory containing this README.me file.
+Then use the following commands to start and stop the containers:
+
 * `docker-compose up -d` (start as deamon)
 * `docker-compose up` (will lock console and use it to print container logs)
 * `docker-compose down`
-* `docker-compose restart`
 
 
-_**Note:** Windows sends a warning if the docker-compose_directory (i.e. this directory), is mounted on the windows filesystem
+_**Note:** Windows sends a warning if the docker-compose directory (i.e. this directory), is mounted on the windows filesystem
 but this can be ignored for now._
 
 ## ActiveMQ GUI
