@@ -33,5 +33,9 @@ The docker compose script in the directory includes the following infrastructure
 * `docker-compose down`
 * `docker-compose restart`
 
+
+_**Note:** Windows sends a warning if the docker-compose_directory (i.e. this directory), is mounted on the windows filesystem
+but this can be ignored for now._
+
 ## ActiveMQ GUI
 http://localhost:8861/admin (admin/admin)
