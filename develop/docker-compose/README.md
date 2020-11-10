@@ -42,4 +42,4 @@ _**Note:** Windows sends a warning if the docker-compose directory (i.e. this di
 but this can be ignored for now._
 
 ## ActiveMQ GUI
-http://localhost:8861/admin (admin/admin)
+https://amq.localtest.me/admin (admin/admin)
