@@ -304,6 +304,47 @@ Dev pipelines for Web Apps are realized with OCP Templates and the following tem
 * pipelinetemplate-promote-images.yaml - Pipeline that uses the buildtemplate-nexus.yaml to promote images to nexus
 * testrunnertemplate-pod.yaml - Pod Test Runner (gradle, java)
 
+#### Setting up Openshift pipelines for new release version of Intygstjanster
+Before creating deploy pipelines in OpenShift, new release branches for project modules should be set up in Github. The modules for which new Github branches have to be created are devops, common, infra, monitoring, intygstjanst, logsender, webcert, rehabstod, privatlakarportal, minaintyg, intygsadmin and statistik.  
+
+The new branches must be updated to use the correct app- and library versions. The version numbers that need to be updated are scattered at various locations in the project modules (see [Version updates required in new Openshift release pipelines](#version-updates-required-in-new-openshift-release-pipelines)).
+
+When app- and library versions have been updated and the new release branches have been pushed to Github, the Openshift pipelines can be created. (see [Intygstjänster Library pipelines](#intygstjnster-library-pipelines) and [Intygstjänster Web App Pipelines](#intygstjänster-web-app-pipelines)).
+
+Finally, webhooks for automatic triggering the deploy pipelines upon merge of new code to the Github repository can be created (see [GitHub Webhooks](#GitHub Webhooks)).
+
+#### Version updates required in new Openshift release pipelines
+
+To avoid having to create unnecessary feature branches, start in clean updated branches for the current release version and checkout new branches named according to the release branch naming convention (e.g. release/2021-1), and then proceed to perform the necessary version number updates as outlined below. 
+
+**Version updates in library modules** (common and infra) 
+* `build.gradle` (in root-folder) – bump SNAPSHOT version 
+* `Jenkinsfile` – bump `buildVersion`  
+* `NightlyJenkinsfile` – bump `buildVersion`  
+
+**Version updates in web app modules**
+(intygstjanst, intygsadmin, logsender, webcert, rehabstod, privatlakarportal, minaintyg and statistik)
+
+*All applications:*  
+* `build-info.json` – bump `appVersion`, set new `infraVersion` and `commonVersion` (if present)
+* `build.gradle` (in app-root) – set new `infraVersion` and `commonVersion` (if present)
+
+*In minaintyg, rehabstod and webcert:*  
+* `test/<app-name>TestTools/envConfig.json` – in “test-pipeline” update relevant URLs to use the new release version  
+
+*In mina intyg and webcert:*  
+* `build-info.json` – set `backingService` to use new version of intygstjanst
+
+*In rehabstod:*  
+* `openshift/test/configmap-envvar.properties` – set `WEBCERT_HOST_URL` to use the new release version
+
+*In statistik:*  
+* `test/protractor/envConfig.json` – set `ST_URL` to use the new release version
+
+##### Version updates in devops
+* `pipelinetemplate-housekeeping.yaml` - under `Jenkinsfile` -> `def images`, add new app versions to the list (see also [Housekeeping](#housekeeping)).
+* `devops/openshift/README.md` - preferably update all references to release version to the new version.
+
 #### Intygstjänster Library pipelines
 The librarys in Intygstjänster are built by pipelines created with `pipelinetemplate-build-library.yaml`. A release branch for each repository must first be created and updated to reflect the new release-version. (i.e. EnvConfig.js might be updated or properties used in secrets or configmaps).
 
