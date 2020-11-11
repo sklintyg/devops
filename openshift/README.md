@@ -345,7 +345,6 @@ To avoid having to create unnecessary feature branches, start in clean updated b
 * `pipelinetemplate-housekeeping.yaml` - under `Jenkinsfile` -> `def images`, add new app versions to the list (see also [Housekeeping](#housekeeping)).
 * `devops/openshift/README.md` - preferably update all references to release version to the new version.
 
-
 #### Intygstjänster Library pipelines
 The librarys in Intygstjänster are built by pipelines created with `pipelinetemplate-build-library.yaml`. A release branch for each repository must first be created and updated to reflect the new release-version. (i.e. EnvConfig.js might be updated or properties used in secrets or configmaps).
 
