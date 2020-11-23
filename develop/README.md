@@ -132,7 +132,17 @@ To run an application use
 gradlew appRun
 ```
 
-> Spring Boot applications, i.e. IntygsAdmin has an extra profile that should be used when you don't want, or need, to run the frontend proxy. `gradlew appRun -P client`
+> Spring Boot applications, i.e. IntygsAdmin has an extra profile that should be used when you don't want, or need, to run the frontend proxy.
+>
+>```
+>gradlew appRun -P client
+>```
+
+> AngularJS applications can be run with its client code in a minified state (as is done in production).
+>
+>```
+>gradlew appRun -P useMinifiedJavaScript
+>```
 
 ### Additional instance
 All applications have the ability to be started with two instances. Even more instances can be added, but requires extra configuration in the application itself. If you need this ability then study the code and figure it out.
@@ -223,19 +233,79 @@ npm start
 ```
 
 ## Running tests
-This section describes, in a generic way, how to run different kind of tests within Intygstjänster. Note that not all tests are applicable for all applications, but when a test of a certain type is present in an application, then this section can be used as guidance. 
+This section describes, in a generic way, how to run different kind of tests within Intygstjänster. Note that not all tests are applicable for all applications, but when a test of a certain type is present in an application, then this section can be used as guidance.
+
+The tests all run against the application standard and internal port. Not the via the frontend proxy. If that use-case is needed then this can easily be acheived via changes to the configuration file for the test. This will also create the need to start the frontend proxy before the test i run.
+
+See the illustration section for an overview of how the tests relates to, and uses, different ports.
+
+> All commands specified below are run from the project-root.
+
+> Applications marked with (*) requires that Intygstjänst is started as well.
  
 ### RestAssured
-TODO
+_Intygsadmin | Intygstjanst | Mina Intyg* | Privatläkarportal | Rehabstöd | Webcert*_
+```
+# All tests
+gradlew restAssured
+
+# All tests in a given packet
+gradlew restAssured --tests se.inera.intyg.webcert.web.integration.integrationtest.*
+
+# All tests in a given class
+gradlew restAssured --tests *ApiControllerIT
+
+# Specific test in a class
+gradlew restAssured --tests *ApiControllerIT.testArchive
+```
 
 ### Protractor
-TODO
+_Webcert* | Mina Intyg* | Rehabstöd | Statistik_
+```
+gradlew protractorTest
+```
+
+Protractor has the ability to run or skip individual tests. This is done by editing the test specification (*.spec.js). If you want to run a specific test edit the file and change `describe` to `fdescribe`.
+
+To skip a test change `describe` to `xdescribe`.
+
+Both of these changes can be made at individual steps in the test, or at the start definition. 
+
+> Be extra careful not to push any `fdescribe` to the repository since this will stop all other testcases to run in our pipelines. 
 
 ### Cypress
-TODO
+_Intygsadmin | Privatläkarportalen_
+```
+gradlew cypressTest
+```
+
+TODO: Add section describing how to start the cypress console
 
 ### Fitnesse
-TODO
+_Statistik_
+```
+gradlew fitnesseTest
+
+# alt.
+gradlew fitnesseWiki
+```
+In wiki mode, a webserver starts at http://localhost:9125/StatisticsTests
+
+### IntegrationTest
+_Statistik_
+
+This test does not require the application to be running
+```
+gradlew integrationTest
+```
+
+### CamelTest
+_Webcert_
+
+This test does not require the application to be running
+```
+gradlew camelTest
+```
 
 ## Illustration
 The following image illustrates how the applications and tests uses the different ports. Not all applications are represented in this image, but every type of service and tests are, so the principles shown applies to all applications.
