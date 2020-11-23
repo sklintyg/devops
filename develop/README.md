@@ -90,8 +90,8 @@ The applications in Intygstjänster uses the same convention for a lot of their 
 
 ## Ports
 Ports are assigned to each of the applications according to the following pattern where:
-* *X* - represents an application
-* *Y* - represents an instance of that application
+* **X** - represents an application
+* **Y** - represents an instance of that application
 
 | PORT | Usage |
 |---|---|
@@ -125,6 +125,7 @@ Some common options when building an application:
 | `gradlew build` | Builds the application an runs all unit tests |
 | `gradlew build -x test` | Builds the application but skips unit tests |
 | `gradlew build -P codeQuality` | Builds the application and checks code compliance (use with `-x test` to skip tests) |
+| `gradlew licenseFormat -P codeQuality` | Adds License header in .java, .kt, .groovy, .js files if they're missing | 
 
 ## Starting an application
 To run an application use
@@ -177,14 +178,14 @@ The preferred way is option 1, since this will allow you to use multiple applica
 
 Just start your application and access it with:
 
-| Application | URL |
-|---|---|
-| Webcert | https://wc.localtest.me |
-| Rehabstöd | https://rs.localtest.me |
-| Mina Intyg | https://mi.localtest.me |
-| Statistik | https://st.localtest.me |
-| Privatläkarportal | https://pp.localtest.me |
-| Intygsadmin | https://ia.localtest.me |
+| Application | URL | Fakelogin | 
+|---|---|---|
+| Webcert | https://wc.localtest.me | https://wc.localtest.me/welcome.html |
+| Rehabstöd | https://rs.localtest.me | https://rs.localtest.me/welcome.html |
+| Mina Intyg | https://mi.localtest.me | https://mi.localtest.me/welcome.html |
+| Statistik | https://st.localtest.me | https://st.localtest.me/#/fakelogin |
+| Privatläkarportal | https://pp.localtest.me | https://pp.localtest.me/welcome.html |
+| Intygsadmin | https://ia.localtest.me | https://ia.localtest.me/welcome.html |
 
 ### Option 2 
 This option will skip the NGINX and address the application directly through it's standard port. This is how the tests accesses the applications when run. This option can used in two ways. Either by using localhost, or by using the applications localhost alias. Webcert example below, but see the ports section for all the other application ports.
@@ -235,11 +236,11 @@ npm start
 ## Running tests
 This section describes, in a generic way, how to run different kind of tests within Intygstjänster. Note that not all tests are applicable for all applications, but when a test of a certain type is present in an application, then this section can be used as guidance.
 
-The tests all run against the application standard and internal port. Not the via the frontend proxy. If that use-case is needed then this can easily be acheived via changes to the configuration file for the test. This will also create the need to start the frontend proxy before the test i run.
+The tests all run against the application standard and internal port. Not the via the frontend proxy. If that use-case is needed then this can easily be acheived via changes to the configuration file for the test. This will also create the need to start the frontend proxy before the test is run.
 
 See the illustration section for an overview of how the tests relates to, and uses, different ports.
 
-> All commands specified below are run from the project-root.
+> All commands specified below are run from the project-root, and require the application to be started as the primary instance.
 
 > Applications marked with (*) requires that Intygstjänst is started as well.
  
@@ -248,6 +249,9 @@ _Intygsadmin | Intygstjanst | Mina Intyg* | Privatläkarportal | Rehabstöd | We
 ```
 # All tests
 gradlew restAssured
+
+# Log to standard out
+gradlew restAssured -info
 
 # All tests in a given packet
 gradlew restAssured --tests se.inera.intyg.webcert.web.integration.integrationtest.*
@@ -279,7 +283,22 @@ _Intygsadmin | Privatläkarportalen_
 gradlew cypressTest
 ```
 
-TODO: Add section describing how to start the cypress console
+An alternative is to start the tests (or Cypress console) via `npm`.
+
+With Cypress console:
+```
+cd test
+npm start
+```
+
+Headless (equal to the `gradlew` option):
+```
+cd test
+npm test
+```
+
+
+
 
 ### Fitnesse
 _Statistik_
