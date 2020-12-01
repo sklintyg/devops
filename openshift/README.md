@@ -126,6 +126,8 @@ CREATE USER 'intygsbestallning'@'%' IDENTIFIED BY 'intygsbestallning';
 GRANT ALL PRIVILEGES ON * . * TO 'intygsbestallning'@'%' WITH GRANT OPTION;
 CREATE USER 'privatlakarportal'@'%' IDENTIFIED BY 'privatlakarportal';
 GRANT ALL PRIVILEGES ON * . * TO 'privatlakarportal'@'%' WITH GRANT OPTION;
+CREATE USER 'rehabstod'@'%' IDENTIFIED BY 'rehabstod';
+GRANT ALL PRIVILEGES ON * . * TO 'rehabstod'@'%' WITH GRANT OPTION;
 CREATE USER 'webcert'@'%' IDENTIFIED BY 'webcert';
 GRANT ALL PRIVILEGES ON * . * TO 'webcert'@'%' WITH GRANT OPTION;
 CREATE USER 'srs'@'%' IDENTIFIED BY 'srs';
