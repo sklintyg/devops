@@ -1,7 +1,7 @@
-version: '3.7'
+version: "3.8"
 
 services:
-  
+
   mysql:
     image: mysql:5.7
     container_name: mysql
@@ -20,7 +20,7 @@ services:
     command: redis-server --requirepass redis
     ports:
       - "6379:6379"
-  
+
   activemq:
     image: webcenter/activemq:latest
     container_name: amq
