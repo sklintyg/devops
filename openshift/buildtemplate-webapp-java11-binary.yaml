@@ -72,7 +72,6 @@ objects:
           COPY . /tmp/src/
           RUN chown -R ${E_UID} /tmp/src
           USER ${E_UID}
-          RUN cd /tmp/src && git init && ./gradlew --stacktrace testClasses
       strategy:
         type: Docker
         dockerStrategy:
