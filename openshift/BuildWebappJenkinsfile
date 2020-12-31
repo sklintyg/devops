@@ -20,7 +20,6 @@ def backingServiceDbName = ""
 def propagateTo = []
 def artifactFolder = "target"
 def nodeModuleFolder = "web/node_modules"
-def webSrcFolder = "web/src"
 def applicationZip = "${artifactFolder}/${appReleaseName}-${BUILD_NUMBER}.tar.gz"
 def versionFlags = ""
 def testList = []
@@ -248,7 +247,7 @@ pipeline {
                     reportName           : 'JUnitTests',
             ])
           }
-          eshell("tar --exclude ${artifactFolder} --exclude ${tmpDir} --exclude ${gitDevopsDir} --exclude ${nodeModuleFolder}  --exclude ${webSrcFolder} --exclude .git -chzf ${applicationZip} ${applicationDir}")
+          eshell("tar --exclude ${artifactFolder} --exclude ${tmpDir} --exclude ${gitDevopsDir} --exclude ${nodeModuleFolder} --exclude .git -chzf ${applicationZip} ${applicationDir}")
           archiveArtifacts artifacts: "${applicationZip}", excludes: null, onlyIfSuccessful: true
         }
       }
