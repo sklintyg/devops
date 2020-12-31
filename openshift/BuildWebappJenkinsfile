@@ -235,6 +235,10 @@ pipeline {
             eshell("mkdir -p ${artifactFolder}")
           }
 
+          log("Starting gradle clean")
+          "${BUILD_TOOL}" "clean"
+          log("Finished gradle clean")
+
           log("Starting copy git repo")
           eshell("rm -rf ../artifacts")
           eshell("mkdir ../artifacts")
