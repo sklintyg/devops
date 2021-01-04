@@ -517,7 +517,7 @@ pipeline {
   post {
     success {
       script {
-        echo "Pipeline Success :)"
+        util.notifySuccess()
       }
     }
 
@@ -568,6 +568,7 @@ pipeline {
     failure {
       script {
         echo "Pipeline Failed :("
+        util.notifyFailed()
       }
     }
 
