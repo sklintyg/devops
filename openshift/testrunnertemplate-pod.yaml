@@ -54,7 +54,7 @@ objects:
           value: ${NO_PROXY}
         resources:
           limits:
-            cpu: 500m
+            cpu: 1
             memory: 2304Mi
           requests:
             cpu: 100m
