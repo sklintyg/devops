@@ -245,6 +245,7 @@ pipeline {
         script {
           openshift.withCluster() {
             openshift.withProject() {
+              log "Starting Setup Image Builds"
               def models = openshift.process("-f", "${gitDevopsDir}/openshift/${BUILD_TEMPLATE}",
                       "-p", "IS_APP_NAME=${APP_NAME}",
                       "-p", "APP_NAME=${appReleaseName}",
@@ -256,7 +257,9 @@ pipeline {
                       "-p", "ARTIFACT_IMAGE_SUFFIX=${ARTIFACT_IMAGE_SUFFIX}",
                       "-p", "GIT_URL=${gitUrl}",
                       "-p", "GIT_REF=${GIT_BRANCH}")
-              openshift.apply(models)
+              log "openshift.process(${gitDevopsDir}/openshift/${BUILD_TEMPLATE}) - models: ${models}"
+              def result = openshift.apply(models)
+              log "openshift.apply(models) - result: ${result}"
             }
           }
         }
