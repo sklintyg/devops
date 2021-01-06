@@ -254,6 +254,8 @@ pipeline {
                       "-p", "COMMON_VERSION=${commonVersion}",
                       "-p", "CONTEXT_PATH=${CONTEXT_PATH}",
                       "-p", "ARTIFACT_IMAGE_SUFFIX=${ARTIFACT_IMAGE_SUFFIX}",
+                      "-p", "GIT_URL=${gitUrl}",
+                      "-p", "GIT_REF=${GIT_BRANCH}",
                       "-p", "BUILD_ARGS=${buildArgs}")
               openshift.apply(models)
             }
