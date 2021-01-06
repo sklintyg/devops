@@ -40,7 +40,7 @@ parameters:
     value: "--no-daemon build -PuseMinifiedJavaScript -Pclient"
   - name: BUILDER_IMAGE
     required: true
-    value: "s2i-war-builder:11"
+    value: "docker.drift.inera.se/intyg/s2i-war-builder:11"
 objects:
   - apiVersion: v1
     kind: BuildConfig
@@ -93,7 +93,7 @@ objects:
             - name: BUILD_ARGS
               value: ${BUILD_ARGS}
           from:
-            kind: "ImageStreamTag"
+            kind: "DockerImage"
             name: ${BUILDER_IMAGE}
           pullSecret:
             name: "nexus-registry"
