@@ -38,6 +38,9 @@ parameters:
   - name: BUILD_ARGS
     required: true
     value: "--no-daemon build -PuseMinifiedJavaScript -Pclient"
+  - name: BUILDER_IMAGE
+    required: true
+    value: "s2i-war-builder:11"
 objects:
   - apiVersion: v1
     kind: BuildConfig
