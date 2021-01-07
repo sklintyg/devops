@@ -10,10 +10,6 @@ parameters:
   - name: ARTIFACT_IMAGE_SUFFIX
     required: true
     value: "artifact"
-  - name: GIT_URL
-    required: true
-  - name: GIT_REF
-    required: true
   - name: STAGE
     required: true
     value: "test"
@@ -66,11 +62,8 @@ objects:
           cpu: 200m
           memory: 2Gi
       source:
-        git:
-          ref: ${GIT_REF}
-          uri: ${GIT_URL}
         contextDir: /
-        type: Git
+        type: Binary
       strategy:
         sourceStrategy:
           env:

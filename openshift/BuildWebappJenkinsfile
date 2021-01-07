@@ -272,7 +272,7 @@ pipeline {
           openshift.withCluster() {
             openshift.withProject() {
               log "Build artifact image ${APP_NAME}-${ARTIFACT_IMAGE_SUFFIX}"
-              def build = openshift.selector("bc", "${appReleaseName}-${ARTIFACT_IMAGE_SUFFIX}").startBuild()
+              def build = openshift.selector("bc", "${appReleaseName}-${ARTIFACT_IMAGE_SUFFIX}").startBuild("--from-archive=${applicationZip}")
               sleep(time: 1, unit: 'SECONDS')
               echo "${build.name()} started"
               timeout(30) {
