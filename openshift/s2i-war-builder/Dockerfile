@@ -3,11 +3,20 @@ FROM openshift/base-centos7
 
 LABEL maintainer="inera.se"
 
+ENV GRADLE_VERSION=5.6.2
+
 # Install Java and Chrome etc.
 ADD google-chrome.repo /etc/yum.repos.d/
 RUN yum -y update
 RUN yum -y install java-1.8.0-openjdk-devel google-chrome-stable xorg-x11-server-Xvfb gtk2 GConf2 libnotify
 RUN ln -s /etc/alternatives/google-chrome /usr/bin/chrome
+
+# Install Gradle
+RUN wget https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip && \
+    mkdir /opt/gradle && \
+    unzip -d /opt/gradle gradle-${GRADLE_VERSION}-bin.zip && \
+    rm gradle-${GRADLE_VERSION}-bin.zip && \
+    ln -s /opt/gradle/gradle-${GRADLE_VERSION}/bin/gradle /usr/local/bin/gradle
 
 # Env (localtime)
 ADD environment /etc/environment
