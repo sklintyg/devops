@@ -86,7 +86,7 @@ if [ -f "$S2I_SOURCE_DIR/build.gradle"  -o -f "$S2I_SOURCE_DIR/build.gradle.kts"
 
     echo "---> Remove unnecessary files"
     rm -f $S2I_SOURCE_DIR/tools/liquibase-runner/build/distributions/*.zip
-    rm -f $S2I_SOURCE_DIR/web/src/main/webapp/bower_components
+    rm -rf $S2I_SOURCE_DIR/web/src/main/webapp/bower_components
 
     # add write access
     make_writeable $GRADLE_USER_HOME $S2I_SOURCE_DIR /opt/app-root/src/.npm /opt/app-root/src/.local

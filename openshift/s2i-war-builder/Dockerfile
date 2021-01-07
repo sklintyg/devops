@@ -4,6 +4,7 @@ FROM openshift/base-centos7
 LABEL maintainer="inera.se"
 
 ENV GRADLE_VERSION=5.6.2
+ENV GRADLE_USER_HOME=/usr/local/bin/gradle
 
 # Install Java and Chrome etc.
 ADD google-chrome.repo /etc/yum.repos.d/
