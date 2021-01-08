@@ -33,10 +33,10 @@ parameters:
     value: ROOT
   - name: BUILD_ARGS
     required: true
-    value: "--no-daemon build -PuseMinifiedJavaScript -Pclient"
+    value: "--no-daemon build -x Test testClasses -PuseMinifiedJavaScript -Pclient"
   - name: BUILDER_IMAGE
     required: true
-    value: "docker.drift.inera.se/intyg/s2i-war-builder:11"
+    value: "docker.drift.inera.se/intyg/s2i-war-builder:11.1"
 objects:
   - apiVersion: v1
     kind: BuildConfig
@@ -82,7 +82,7 @@ objects:
             - name: BUILDER_IMAGE
               value: ${BUILDER_IMAGE}
             - name: JAVA_TOOL_OPTIONS
-              value: '-Xms512m -Xmx1536m'
+              value: '-Xms512m -Xmx2048m'
             - name: BUILD_ARGS
               value: ${BUILD_ARGS}
           from:
