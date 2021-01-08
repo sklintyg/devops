@@ -88,7 +88,6 @@ objects:
           from:
             kind: "DockerImage"
             name: ${BUILDER_IMAGE}
-          forcePull: true
           pullSecret:
             name: "nexus-registry"
   - apiVersion: v1
