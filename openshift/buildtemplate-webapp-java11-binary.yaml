@@ -88,7 +88,6 @@ objects:
           from:
             kind: "ImageStreamTag"
             name: ${BUILDER_IMAGE}
-          incremental: true
   - apiVersion: v1
     kind: BuildConfig
     metadata:
