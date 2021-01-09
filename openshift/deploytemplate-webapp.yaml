@@ -74,7 +74,7 @@ objects:
                 path: ${HEALTH_URI}
                 port: 8080
                 scheme: HTTP
-              initialDelaySeconds: 60
+              initialDelaySeconds: 30
               periodSeconds: 10
               successThreshold: 1
               timeoutSeconds: 2
