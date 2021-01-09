@@ -88,6 +88,7 @@ objects:
           from:
             kind: "DockerImage"
             name: ${BUILDER_IMAGE}
+          incremental: true
           pullSecret:
             name: "nexus-registry"
   - apiVersion: v1
