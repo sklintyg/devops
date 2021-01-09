@@ -36,7 +36,7 @@ parameters:
     value: "--no-daemon build -x Test testClasses -PuseMinifiedJavaScript -Pclient"
   - name: BUILDER_IMAGE
     required: true
-    value: "docker.drift.inera.se/intyg/s2i-war-builder:11.1"
+    value: "s2i-war-builder-java11:11.1"
 objects:
   - apiVersion: v1
     kind: BuildConfig
@@ -86,11 +86,9 @@ objects:
             - name: BUILD_ARGS
               value: ${BUILD_ARGS}
           from:
-            kind: "DockerImage"
+            kind: "ImageStreamTag"
             name: ${BUILDER_IMAGE}
           incremental: true
-          pullSecret:
-            name: "nexus-registry"
   - apiVersion: v1
     kind: BuildConfig
     metadata:
