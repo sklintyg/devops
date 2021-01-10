@@ -103,6 +103,13 @@ objects:
         to:
           kind: ImageStreamTag
           name: ${IS_APP_NAME}:${BUILD_VERSION}
+      resources:
+        limits:
+          cpu: 2
+          memory: 4Gi
+        requests:
+          cpu: 200m
+          memory: 2Gi
       source:
         dockerfile: |-
           FROM docker.drift.inera.se/intyg/tomcat-java11-base:9
