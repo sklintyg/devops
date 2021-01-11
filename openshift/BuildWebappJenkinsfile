@@ -514,6 +514,7 @@ pipeline {
     success {
       script {
         log "Pipeline success :)"
+        util.notifySuccess()
       }
     }
 
@@ -564,6 +565,7 @@ pipeline {
     failure {
       script {
         log "Pipeline Failed :("
+        util.notifyFailed()
       }
     }
 
