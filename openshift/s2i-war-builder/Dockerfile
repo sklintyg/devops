@@ -6,8 +6,11 @@ LABEL maintainer="inera.se"
 # Install Java and Chrome etc.
 ADD google-chrome.repo /etc/yum.repos.d/
 RUN yum -y update
-RUN yum -y install java-1.8.0-openjdk-devel google-chrome-stable xorg-x11-server-Xvfb gtk2 GConf2 libnotify
+RUN yum -y install java-1.8.0-openjdk-devel google-chrome-stable xorg-x11-server-Xvfb gtk2 GConf2 libnotify libXScrnSaver
 RUN ln -s /etc/alternatives/google-chrome /usr/bin/chrome
+
+# Clean yum cache to remove unnecessary files
+RUN yum clean all
 
 # Env (localtime)
 ADD environment /etc/environment
