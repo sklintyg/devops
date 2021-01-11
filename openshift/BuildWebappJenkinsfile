@@ -52,7 +52,7 @@ def eshell(cmd) {
 
 //
 def log(msg) {
-  echo "${new Date()} -- ${msg}"
+  echo "${new Date().format('yyyy-MM-dd HH:mm:ss.SSS')} : ${msg}"
 }
 
 // function to extract openshift stage configuration only from repo. dir must not exist
@@ -66,6 +66,7 @@ def extractConfig(dir, url, ref, stage, latestTag) {
   eshell(wd + "git config core.sparsecheckout true")
   eshell(wd + "echo 'devops/openshift/${stage}/*' >> .git/info/sparse-checkout")
   if (ref.startsWith("v")) {
+    log "Extract config - Get tag for ${ref}"
     if (ref.endsWith('.+')) {
       ref = ref.replace('+', '')
     }
@@ -73,17 +74,21 @@ def extractConfig(dir, url, ref, stage, latestTag) {
             script: wd + "git tag -l | grep ${ref} | sort -V | tail -1",
             returnStdout: true
     ).trim()
+    log "Extract config - Start checkout for ${ref}"
     eshell(wd + "git checkout tags/${tag}")
+    log "Extract config - Finish checkout for ${ref}"
     return tag.substring(1)
   } else {
+    log "Extract config - Start checkout for ${ref}"
     eshell(wd + "git checkout ${ref}")
+    log "Extract config - Finish checkout for ${ref}"
     return "${latestTag}"
   }
 }
 
 // function to perform a named test
 def performTest(testName, buildVersion, appReleaseName, gitDevopsDir) {
-  echo "Do ${testName}"
+  log "Do ${testName}"
 
   // Setup callback webhook
   def hook = registerWebhook()
@@ -93,7 +98,7 @@ def performTest(testName, buildVersion, appReleaseName, gitDevopsDir) {
   def actuatorUrl = "http://${appReleaseName}:8081"
 
   def imageStream = openshift.selector("is", "${APP_NAME}").object().status.dockerImageRepository
-  echo "Use ImageStream: ${imageStream}"
+  log "Use ImageStream: ${imageStream}"
 
   // to make the pod name somewhat unique
   // TODO: use generateName in Pod template, i.e. when it works
@@ -114,10 +119,10 @@ def performTest(testName, buildVersion, appReleaseName, gitDevopsDir) {
 
   def data = ""
   timeout(45) {
-    echo "Waiting (max 45 min) for POST to ${hook.getURL()}"
+    log "Waiting (max 45 min) for POST to ${hook.getURL()}"
     data = waitForWebhook(hook).trim()
 
-    echo "Publishing ${testName} reports for ${JOB_NAME}/${buildVersion}"
+    log "Publishing ${testName} reports for ${JOB_NAME}/${buildVersion}"
     publishHTML([
             allowMissing         : true,
             alwaysLinkToLastBuild: true,
@@ -128,11 +133,11 @@ def performTest(testName, buildVersion, appReleaseName, gitDevopsDir) {
     ])
   }
 
-  echo "Logs for ${appReleaseName}${suffix}"
+  log "Logs for ${appReleaseName}${suffix}"
   openshift.selector("pod", "${appReleaseName}${suffix}").logs()
 
   if ("SUCCESS".equals(data)) {
-    echo "Test SUCCESS"
+    log "Test SUCCESS"
   } else {
     error("${testName} FAILED, see HTML report for details")
   }
@@ -184,14 +189,14 @@ pipeline {
         script {
           currentBuild.displayName = "${appReleaseName} ${buildVersion}"
 
-          echo "Prepare configuration and check pre-conditions"
+          log "Prepare configuration and check pre-conditions"
           openshift.withCluster() {
             openshift.withProject() {
               log "Pipeline started with:"
-              echo "gitUrl: ${gitUrl}, gitBranch: ${GIT_BRANCH}"
-              echo "buildVersion: ${buildVersion}, infraVersion: ${infraVersion}, commonVersion: ${commonVersion}"
-              echo "backingService: ${backingService}"
-              echo "gitDevopsDir: ${gitDevopsDir}"
+              log "gitUrl: ${gitUrl}, gitBranch: ${GIT_BRANCH}"
+              log "buildVersion: ${buildVersion}, infraVersion: ${infraVersion}, commonVersion: ${commonVersion}"
+              log "backingService: ${backingService}"
+              log "gitDevopsDir: ${gitDevopsDir}"
 
               // check envrionment
               [GIT_DEVOPS_DIR, APP_NAME, RELEASE_VERSION, STAGE, BUILD_TEMPLATE, DEPLOY_TEMPLATE, TESTRUNNER_TEMPLATE, ARTIFACT_IMAGE_SUFFIX, GIT_URL, GIT_CI_BRANCH, TEST_PORT, BUILD_TOOL, CONTEXT_PATH, HEALTH_URI, GIT_BRANCH, buildVersion].each {
@@ -200,7 +205,7 @@ pipeline {
                 }
               }
 
-              echo "All environment variables in place!"
+              log "All environment variables in place!"
               sh "ls -la ${pwd()}"
 
               // Make sure required template files exists in devops repo
@@ -227,27 +232,14 @@ pipeline {
       }
     }
 
-    stage('Build Binaries') {
+    stage('Create Archive Artifact') {
       steps {
         script {
           def applicationDir = "."
           if (!fileExists("${artifactFolder}")) {
             eshell("mkdir -p ${artifactFolder}")
           }
-          try {
-            log("Starting gradle build")
-            "${BUILD_TOOL}" "${buildArgs} ${versionFlags}"
-          } finally {
-            publishHTML([
-                    allowMissing         : true,
-                    alwaysLinkToLastBuild: true,
-                    keepAll              : true,
-                    reportDir            : 'build/reports/allTests',
-                    reportFiles          : 'index.html',
-                    reportName           : 'JUnitTests',
-            ])
-          }
-          eshell("tar --exclude ${artifactFolder} --exclude ${tmpDir} --exclude ${gitDevopsDir} --exclude ${nodeModuleFolder} --exclude .git -chzf ${applicationZip} ${applicationDir}")
+          eshell("tar --exclude ${artifactFolder} --exclude ${tmpDir} --exclude ${gitDevopsDir} --exclude ${nodeModuleFolder} --exclude .git --exclude .gradle -chzf ${applicationZip} ${applicationDir}")
           archiveArtifacts artifacts: "${applicationZip}", excludes: null, onlyIfSuccessful: true
         }
       }
@@ -282,20 +274,20 @@ pipeline {
               log "Build artifact image ${APP_NAME}-${ARTIFACT_IMAGE_SUFFIX}"
               def build = openshift.selector("bc", "${appReleaseName}-${ARTIFACT_IMAGE_SUFFIX}").startBuild("--from-archive=${applicationZip}")
               sleep(time: 1, unit: 'SECONDS')
-              echo "${build.name()} started"
+              log "${build.name()} started"
               timeout(30) {
                 def status = ""
                 build.untilEach(1) {
                   status = it.object().status.phase
-                  echo "Build status: ${status}"
+                  log "Build status: ${status}"
                   return !["Running", "Pending", "New"].contains(status)
                 }
-                echo "Logs for artifact build"
+                log "Logs for artifact build"
                 build.logs()
                 if (status != "Complete") {
                   error("Build terminated with status: ${status}")
                 }
-                echo "Build Completed"
+                log "Build Completed"
               }
             }
           }
@@ -311,15 +303,15 @@ pipeline {
               log "Build runtime image ${APP_NAME}"
               def build = openshift.selector("bc", "${appReleaseName}").startBuild()
               sleep(time: 1, unit: 'SECONDS')
-              echo "${build.name()} started"
+              log "${build.name()} started"
               timeout(45) {
                 def status = ""
                 build.untilEach(1) {
                   status = it.object().status.phase
-                  echo "Build status: ${status}"
+                  log "Build status: ${status}"
                   return !["Running", "Pending", "New"].contains(status)
                 }
-                echo "Logs for docker runtime build"
+                log "Logs for docker runtime build"
                 build.logs()
                 if (status != "Complete") {
                   error("Build terminated with status: ${status}")
@@ -376,6 +368,8 @@ pipeline {
               } else {
                 error("For the time being, intygstjanst only is allowed as a backing service")
               }
+
+              log "Create database"
               backingServiceDbName = "${backingServiceName.replace('-', '')}${dbName}"
               def status = dbScript("create database ${backingServiceDbName} character set utf8mb4;")
               if (status != 0) {
@@ -388,10 +382,11 @@ pipeline {
               def svcGitRef = backingServiceVersion.equals("${latestTag}") ? "${GIT_BRANCH}" : "v${backingServiceVersion}"
 
               // Replace configured backingServiceVersion with the version extracted from git tag
-              echo "Extract config for intygstjanst ${svcGitRef}"
+              log "Extract config for intygstjanst ${svcGitRef}"
               backingServiceAppVersion = extractConfig(tmpDir, "https://github.com/sklintyg/intygstjanst.git", svcGitRef, "${STAGE}", latestTag)
 
               // Delete any old resources
+              log "Delete old resources"
               shell("oc delete configmap ${backingServiceAppName}-config")
               shell("oc delete configmap ${backingServiceAppName}-configmap-envvar")
               shell("oc delete secret ${backingServiceAppName}-env")
@@ -399,6 +394,7 @@ pipeline {
               shell("oc delete secret ${backingServiceAppName}-secret-envvar")
 
               // Create new resources
+              log "Create new resources"
               def wd = "cd ${tmpDir}/devops/openshift; "
               eshell(wd + "oc create configmap ${backingServiceAppName}-configmap-envvar --from-env-file=${STAGE}/configmap-envvar.properties")
               eshell(wd + "oc create configmap ${backingServiceAppName}-config --from-file=${STAGE}/config/")
@@ -407,7 +403,7 @@ pipeline {
               eshell(wd + "oc create secret generic ${backingServiceAppName}-certifikat --from-file=${STAGE}/certifikat/ --type=Opaque")
 
               def imageStream = openshift.selector("is", "${backingServiceName}-verified").object().status.dockerImageRepository
-              echo "Use ImageStream ${imageStream}:${backingServiceAppVersion}"
+              log "Use ImageStream ${imageStream}:${backingServiceAppVersion}"
 
               def deployModel = openshift.process("-f", "${gitDevopsDir}/openshift/${DEPLOY_TEMPLATE}",
                       "-p", "APP_NAME=${backingServiceAppName}",
@@ -418,7 +414,7 @@ pipeline {
               log "Wait for rollout (limited to 5 minutes)"
               timeout(5) {
                 def rm = openshift.apply(deployModel).narrow("dc").rollout()
-                echo "Waiting for deployment to complete"
+                log "Waiting for deployment to complete"
                 rm.status()
                 log "Deployment done."
               }
@@ -434,7 +430,7 @@ pipeline {
           openshift.withCluster() {
             openshift.withProject() {
               def imageStream = openshift.selector("is", "${APP_NAME}").object().status.dockerImageRepository
-              echo "Use ImageStream: ${imageStream}"
+              log "Use ImageStream: ${imageStream}"
               def deployModel = openshift.process("-f", "${gitDevopsDir}/openshift/${DEPLOY_TEMPLATE}",
                       "-p", "APP_NAME=${appReleaseName}",
                       "-p", "IMAGE='$imageStream:${buildVersion}'",
@@ -480,7 +476,7 @@ pipeline {
             openshift.withProject() {
               def source = "${APP_NAME}"
               def target = "${APP_NAME}-verified"
-              echo "Promote image ${source} to imagestream ${target}"
+              log "Promote image ${source} to imagestream ${target}"
               openshift.tag("${source}:${buildVersion}", "${target}:${buildVersion}", "${target}:${latestTag}")
             }
           }
@@ -504,7 +500,7 @@ pipeline {
                 try {
                   build job: "dintyg-${t}-${RELEASE_VERSION}-pipeline", parameters: [string(name: 'GIT_BRANCH', value: GIT_BRANCH)]
                 } catch (e) {
-                  echo "Trigger build error (ignored): ${e.message}"
+                  log "Trigger build error (ignored): ${e.message}"
                 }
               }
             }
@@ -517,6 +513,7 @@ pipeline {
   post {
     success {
       script {
+        log "Pipeline success :)"
         util.notifySuccess()
       }
     }
@@ -529,7 +526,7 @@ pipeline {
             dbScript("drop database ${dbName};")
             shell("rm -f ${applicationZip}")
 
-            echo "Logs for ${appReleaseName}"
+            log "Logs for ${appReleaseName}"
             openshift.selector("dc", "${appReleaseName}").logs()
 
             def image = openshift.selector("is", "${APP_NAME}").object()
@@ -567,7 +564,7 @@ pipeline {
 
     failure {
       script {
-        echo "Pipeline Failed :("
+        log "Pipeline Failed :("
         util.notifyFailed()
       }
     }

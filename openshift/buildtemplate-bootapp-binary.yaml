@@ -31,6 +31,12 @@ parameters:
   - name: CONTEXT_PATH
     required: true
     value: ROOT
+  - name: BUILD_ARGS
+    required: true
+    value: "build -x Test testClasses -PuseMinifiedJavaScript -Pclient"
+  - name: BUILDER_IMAGE
+    required: true
+    value: "s2i-war-builder-java11:11.1"
 objects:
   - apiVersion: v1
     kind: BuildConfig
@@ -56,28 +62,32 @@ objects:
           cpu: 200m
           memory: 2Gi
       source:
+        contextDir: /
         type: Binary
-        dockerfile: |-
-          FROM docker.drift.inera.se/intyg/s2i-war-builder:11
-          USER root
-          ENV APP_NAME=${APP_NAME} \
-              BUILD_VERSION=${BUILD_VERSION} \
-              INFRA_VERSION=${INFRA_VERSION} \
-              COMMON_VERSION=${COMMON_VERSION} \
-              REF_DATA_VERSION=${REF_DATA_VERSION} \
-              GRADLE_USER_HOME=${GRADLE_USER_HOME} \
-              HOME=/tmp/nohome \
-              JAVA_TOOL_OPTIONS="-DbuildVersion=${BUILD_VERSION} -DinfraVersion=${INFRA_VERSION} -DcommonVersion=${COMMON_VERSION} -DrefDataVersion=${REF_DATA_VERSION} -Dfile.encoding=UTF-8"
-          ADD web/build/libs/*-${BUILD_VERSION}.jar /tmp/artifacts/ROOT.war
-          COPY . /tmp/src/
-          RUN chown -R ${E_UID} /tmp/src
-          USER ${E_UID}
-          RUN cd /tmp/src && git init && ./gradlew --no-daemon --stacktrace testClasses
       strategy:
-        type: Docker
-        dockerStrategy:
-          pullSecret:
-            name: "nexus-registry"
+        sourceStrategy:
+          env:
+            - name: APP_NAME
+              value: ${APP_NAME}
+            - name: STAGE
+              value: ${STAGE}
+            - name: COMMON_VERSION
+              value: ${COMMON_VERSION}
+            - name: INFRA_VERSION
+              value: ${INFRA_VERSION}
+            - name: REF_DATA_VERSION
+              value: ${REF_DATA_VERSION}
+            - name: BUILD_VERSION
+              value: ${BUILD_VERSION}
+            - name: BUILDER_IMAGE
+              value: ${BUILDER_IMAGE}
+            - name: JAVA_TOOL_OPTIONS
+              value: '-Xms512m -Xmx2048m'
+            - name: BUILD_ARGS
+              value: ${BUILD_ARGS}
+          from:
+            kind: "ImageStreamTag"
+            name: ${BUILDER_IMAGE}
   - apiVersion: v1
     kind: BuildConfig
     metadata:
@@ -93,6 +103,13 @@ objects:
         to:
           kind: ImageStreamTag
           name: ${IS_APP_NAME}:${BUILD_VERSION}
+      resources:
+        limits:
+          cpu: 2
+          memory: 4Gi
+        requests:
+          cpu: 200m
+          memory: 2Gi
       source:
         dockerfile: |-
           FROM docker.drift.inera.se/intyg/springboot-base:11
