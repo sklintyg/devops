@@ -1,0 +1,56 @@
+version: "3.8"
+
+services:
+
+  mysql:
+    image: mysql:5.7
+    container_name: mysql
+    volumes:
+      - ./init-db:/docker-entrypoint-initdb.d
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 2lkopp
+    ports:
+      - "3306:3306"
+
+  redis:
+    image: redis:6.0.9-alpine
+    container_name: redis
+    restart: always
+    command: redis-server --requirepass redis
+    ports:
+      - "6379:6379"
+
+  activemq:
+    image: webcenter/activemq:latest
+    container_name: amq
+    restart: always
+    ports:
+      # mqtt
+      - "1883:1883"
+      # amqp
+      - "5672:5672"
+      # ui
+      - "8861:8161"
+      # stomp
+      - "61613:61613"
+      # ws
+      - "61614:61614"
+      # jms
+      - "61616:61616"
+    environment:
+      - "ACTIVEMQ_ADMIN_LOGIN=admin"
+      - "ACTIVEMQ_ADMIN_PASSWORD=admin"
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: always
+    tty: true
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf/default.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/ssl:/ssl
+      - ./nginx/www:/var/www

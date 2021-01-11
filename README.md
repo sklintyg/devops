@@ -1,2 +1,2 @@
 # DevOps
-Instruktioner och kod för CI/CD av Intygstjänster.
+This repository contains CI/CD pipelines to build and test Intygstjänster.

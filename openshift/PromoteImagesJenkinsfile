@@ -1,0 +1,179 @@
+#!groovy
+
+// Variable required in buildconfig
+//
+// - name: RELEASE_VERSION
+// - name: IMAGES
+
+def apps = IMAGES.split(",")
+def releaseVersion = "${RELEASE_VERSION}.latest"
+def appsWithImageTag = []
+def sourcePrefix = "/tmp/src/tools/liquibase-runner/build/distributions"
+def destPrefix = "https://nexus.drift.inera.se/repository/maven-releases/se/inera"
+
+def getVersion(appName, specificTag, releaseVersion) {
+  def images = openshift.selector("is", "${appName}-verified").object().spec.tags
+
+  if (!specificTag.isEmpty()) {
+    def specificImage = images.find { it.name == "${specificTag}" }
+    if (specificImage == null) {
+      error("${specificTag} for ${appName} not found in imagestream ${appName}-verified")
+    } else {
+      return "${specificTag}"
+    }
+  } else {
+    def latestimage = images.find { it.name == "${releaseVersion}" }
+    log "latestimage is ${latestimage}"
+    def latestimageref = "${latestimage.from.name}"
+
+    def promoteVersion = images.find { it.from.name == "${latestimageref}" && it.name != "${releaseVersion}" }.name
+    log "promoteVersion is ${promoteVersion}"
+    return "${promoteVersion}"
+  }
+
+}
+
+// It works, but could be done in many different ways
+def getLiquibasePaths(appName, buildVersion, sourcePrefix, destPrefix) {
+  def paths
+  switch(appName) {
+    case "privatlakarportal":
+      def tarName = "${appName}-liquibase-runner-${buildVersion}.tar"
+      paths = "${sourcePrefix}/${tarName};${destPrefix}/${appName}/${appName}-liquibase-runner/${buildVersion}/${tarName}"
+      break
+    case "statistik":
+      def tarName = "liquibase-runner-${buildVersion}.tar"
+      paths = "${sourcePrefix}/${tarName};${destPrefix}/${appName}/liquibase-runner/${buildVersion}/${tarName}"
+      break
+    case ["rehabstod", "intygstjanst", "webcert", "intygsadmin"]:
+      def tarName = "${appName}-liquibase-runner-${buildVersion}.tar"
+      paths = "${sourcePrefix}/${tarName};${destPrefix}/intyg/${appName}/${appName}-liquibase-runner/${buildVersion}/${tarName}"
+      break
+    default:
+      paths = ""
+      break
+  }
+  return paths
+
+
+}
+
+def promoteImage(appName, appTag) {
+  def imageStream = openshift.selector("is", "${appName}-verified").object().status.dockerImageRepository
+  log "Use ImageStream: ${imageStream}"
+
+  def model = openshift.process("-f", "openshift/buildtemplate-nexus.yaml",
+          "-p", "APP_NAME=${appName}",
+          "-p", "NEXUS_NAME=${appName}",
+          "-p", "IMAGE='${imageStream}'",
+          "-p", "STAGE=test",
+          "-p", "TAG='${appTag}'")
+  openshift.apply(model)
+
+  def build = openshift.selector("bc", "${appName}-nexus").startBuild("--wait")
+  log "${appName}:${appTag} promoted to Nexus"
+}
+
+def uploadLiquibase(appName, buildVersion, paths) {
+  def split = paths.split(";")
+  def source = split[0]
+  def destination = split[1]
+
+  log "Upload liquibase for ${appName};${buildVersion}"
+
+  // Setup callback webhook
+  def hook = registerWebhook()
+
+  def imageStream = openshift.selector("is", "${appName}-artifact").object().status.dockerImageRepository
+  log "Use ImageStream: ${imageStream}"
+
+  // to make the pod name somewhat unique
+  def num = (new Random().nextInt() % 100000) + 1
+  def suffix = (num < 0) ? "${num}" : "-${num}"
+
+  // Username and password is taken from Jenkins env variables
+  def pod = openshift.process("-f", "openshift/artifactupload-pod.yaml",
+          "-p", "APP_NAME=${appName}",
+          "-p", "SOURCE=${source}",
+          "-p", "DESTINATION=${destination}",
+          "-p", "CREDENTIALS=${INERA_NEXUS_USERNAME}:${INERA_NEXUS_PASSWORD}",
+          "-p", "IMAGE='${imageStream}:${buildVersion}'",
+          "-p", "CALLBACK_URL='${hook.getURL()}'",
+          "-p", "BUILD_TAG=${appName}${suffix}")
+  openshift.apply(pod)
+
+  def data = ""
+  timeout(2) {
+    log "Waiting (max 2 min) for POST to ${hook.getURL()}"
+    data = waitForWebhook(hook).trim()
+  }
+
+  log "Logs for ${appName}${suffix}"
+  openshift.selector("pod", "${appName}${suffix}").logs()
+
+  if ("201" == data) {
+    log "Upload SUCCESS"
+  } else {
+    error("${appName} FAILED artifact upload with result ${data}")
+  }
+}
+
+def log(msg) {
+  echo "${new Date()} -- ${msg}"
+}
+
+pipeline {
+  agent any
+
+  environment {
+    JAVA_TOOL_OPTIONS = '-Dfile.encoding=UTF-8'
+  }
+
+  stages {
+    stage('Prepare imagetags') {
+      steps {
+        script {
+          openshift.withCluster() {
+            openshift.withProject() {
+              apps.each { t ->
+                def appName = (t.contains(":") ? t.split(":")[0] : t)
+                def specificTag = (t.contains(":") ? t.split(":")[1] : "")
+                def imagetag = getVersion(appName, specificTag, releaseVersion)
+                appsWithImageTag.add(appName + ":" + imagetag)
+              }
+            }
+          }
+        }
+      }
+    }
+
+    stage('Promote to Nexus') {
+      steps {
+        script {
+          openshift.withCluster() {
+            openshift.withProject() {
+              appsWithImageTag.each { t ->
+                stage(t.capitalize()) {
+                  def split = t.split(":")
+                  def appName = split[0]
+                  def appTag = split[1]
+
+                  log "Promoting image for ${t}"
+                  promoteImage(appName, appTag)
+
+                  def paths = getLiquibasePaths(appName, appTag, sourcePrefix, destPrefix)
+                  if (paths?.trim()) {
+                    stage("${appName} Liquibase"){
+                      log "Uploading Liquibase-runner for ${t}"
+                      uploadLiquibase(appName, appTag, paths)
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

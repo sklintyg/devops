@@ -14,6 +14,9 @@ parameters:
   - name: HEALTH_URI
     required: true
     value: /
+  - name: JAVA_OPTS
+    required: true
+    value: "-Xmx512M"
 objects:
   - apiVersion: v1
     kind: DeploymentConfig
@@ -27,12 +30,12 @@ objects:
       replicas: 1
       selector:
         app: ${APP_NAME}
-        deploymentconfig:  ${APP_NAME}
+        deploymentconfig: ${APP_NAME}
       template:
         metadata:
           labels:
             app: ${APP_NAME}
-            deploymentconfig:  ${APP_NAME}
+            deploymentconfig: ${APP_NAME}
             stage: ${STAGE}
         spec:
           containers:
@@ -42,7 +45,7 @@ objects:
             - name: STAGE
               value: ${STAGE}
             - name: JAVA_OPTS
-              value: "-Xmx512M"
+              value: ${JAVA_OPTS}
             - name: DATABASE_NAME
               value: ${DATABASE_NAME}
             envFrom:
@@ -55,10 +58,10 @@ objects:
             name: ${APP_NAME}
             resources:
               limits:
-                cpu: 500m
+                cpu: 2
                 memory: 2Gi
               requests:
-                cpu: 100m
+                cpu: 200m
                 memory: 1Gi
             ports:
               - containerPort: 8080
@@ -71,7 +74,7 @@ objects:
                 path: ${HEALTH_URI}
                 port: 8080
                 scheme: HTTP
-              initialDelaySeconds: 60
+              initialDelaySeconds: 30
               periodSeconds: 10
               successThreshold: 1
               timeoutSeconds: 2
@@ -135,5 +138,5 @@ objects:
         deploymentconfig: ${APP_NAME}
       sessionAffinity: None
       type: ClusterIP
- 
+
 

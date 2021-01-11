@@ -53,10 +53,10 @@ export GRADLE_USER_HOME=$S2I_SOURCE_DIR/.gradle
 if [ -f "$S2I_SOURCE_DIR/build.gradle"  -o -f "$S2I_SOURCE_DIR/build.gradle.kts" ]; then
     echo "---> User $(id) home is $HOME"
 
-    GRADLE_ARGS=${GRADLE_ARGS:-"--no-daemon build -PuseMinifiedJavaScript -Pclient"}
+    GRADLE_ARGS=${GRADLE_ARGS:-${BUILD_ARGS}}
 
     echo "---> Building application from source with gradle wrapper GRADLE_ARGS=$GRADLE_ARGS"
-    (cd $S2I_SOURCE_DIR; ./gradlew $GRADLE_ARGS)
+    (cd $S2I_SOURCE_DIR; git init; gradle --no-daemon $GRADLE_ARGS)
     ERR=$?
     if [ $ERR -ne 0 ]; then
         echo "Aborting due to error code $ERR from gradle build"
@@ -83,6 +83,11 @@ if [ -f "$S2I_SOURCE_DIR/build.gradle"  -o -f "$S2I_SOURCE_DIR/build.gradle.kts"
 
     echo "---> Create build info"
     create_build_info
+
+    echo "---> Remove unnecessary files"
+    rm -rf $S2I_SOURCE_DIR/tools/liquibase-runner/build/distributions/*.zip
+    rm -rf $S2I_SOURCE_DIR/web/src/main/webapp/bower_components
+    rm -rf $S2I_SOURCE_DIR/web/node_modules
 
     # add write access
     make_writeable $GRADLE_USER_HOME $S2I_SOURCE_DIR /opt/app-root/src/.npm /opt/app-root/src/.local

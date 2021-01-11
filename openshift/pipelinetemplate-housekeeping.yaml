@@ -1,0 +1,106 @@
+kind: Template
+apiVersion: v1
+metadata:
+  name: pipelinetemplate-housekeeping
+parameters:
+  - name: RELEASE_VERSION
+    required: true
+objects:
+  - apiVersion: v1
+    kind: BuildConfig
+    metadata:
+      generation: 1
+      labels:
+        release: ${RELEASE_VERSION}
+        stage: test
+      name: housekeeping-all-releases
+    spec:
+      triggers:
+        - generic:
+            allowEnv: true
+            secret: nosecret
+          type: Generic
+      strategy:
+        type: JenkinsPipeline
+        jenkinsPipelineStrategy:
+          jenkinsfile: |-
+            def images = [
+              'intygstjanst': '3.12.0,3.13.0,3.14.0',
+              'logsender': '6.7.0,6.8.0,6.9.0',
+              'minaintyg': '3.13.0,3.14.0,3.15.0',
+              'webcert': '6.7.0,6.7.1,6.8.0,6.9.0',
+              'rehabstod': '1.13.0,1.13.1,1.14.0,1.15.0',
+              'privatlakarportal': '1.14.0,1.15.0,1.16.0',
+              'statistik': '7.6.0,7.7.0,7.8.0',
+              'srs': '1.4.0',
+              'intygsadmin': '1.3.0,1.4.0,1.5.0'
+            ]
+
+            def suffix = [ "", "-artifact", "-verified" ]
+
+            // run shell command, return status code
+            def shell(cmd) {
+              sh (
+                script: cmd,
+                returnStatus: true
+              )
+            }
+
+            // run shell command and signal an error on failure
+            def eshell(cmd) {
+              def rc = shell(cmd)
+              if (rc != 0) {
+                error("Error: shell command exited with error code ${rc}")
+              }
+            }
+
+            pipeline {
+              agent any
+              stages {
+                stage('Clean Pods') {
+                  steps {
+                    script {
+                      eshell("curl -s https://raw.githubusercontent.com/sklintyg/devops/release/${RELEASE_VERSION}/openshift/clean-pods.sh > /tmp/clean-pods.sh")
+                      shell("bash /tmp/clean-pods.sh")
+                    }
+                  }
+                }
+                stage('Clean Images') {
+                  steps {
+                    script {
+                      eshell("curl -s https://raw.githubusercontent.com/sklintyg/devops/release/${RELEASE_VERSION}/openshift/clean-istags.sh > /tmp/clean-istags.sh")
+                      images.each { k, v ->
+                        suffix.each { s ->
+                          v.split(',').each { t ->
+                            //echo "${k}${s}:${t}"
+                            shell("bash /tmp/clean-istags.sh ${k}${s} ${t}")
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                stage('Clean Reports') {
+                  steps {
+                    script {
+                      shell("find /var/lib/jenkins/reports/dintyg/*-pipeline/ -maxdepth 1 -type d -mtime +20 | xargs -r rm -rf")
+                    }
+                  }
+                }
+                stage('Purge Redis & AMQ') {
+                  steps {
+                    script {
+                      // cleanup app specific redis keys
+                      sh (
+                        script: "oc rsh \$(oc get pods | grep redis- | grep Running | awk \'{ print \$1 }\')  /opt/rh/rh-redis32/root/usr/bin/redis-cli -a redis flushall",
+                        returnStatus: true
+                      )
+                      sh (
+                        script: "oc rsh \$(oc get pods | grep broker-amq- | grep Running | awk \'{ print \$1 }\')  /opt/amq/bin/activemq purge",
+                        returnStatus: true
+                      )
+                    }
+                  }
+                }
+              }
+            }

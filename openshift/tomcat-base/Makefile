@@ -1,8 +1,8 @@
 # Creates build docker images (base java8 and java11)
 
 NAME=$(shell basename `pwd`)
-TEMPLATE=buildtemplate-image
-PROCESS=oc process $(TEMPLATE) -p NAME=$(NAME) -p SOURCE="`cat Dockerfile`"
+TEMPLATE=../buildtemplate-image.yaml
+PROCESS=oc process -f $(TEMPLATE) -p NAME=$(NAME) -p SOURCE="`cat Dockerfile`"
 
 all: build
 

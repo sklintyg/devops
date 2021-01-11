@@ -5,6 +5,8 @@ metadata:
 parameters:
   - name: APP_NAME
     required: true
+  - name: IS_APP_NAME
+    required: true
   - name: ARTIFACT_IMAGE_SUFFIX
     required: true
     value: "artifact"
@@ -24,7 +26,7 @@ parameters:
     value: "/tmp/src/.gradle"
     required: true
   - name: E_UID
-    value: "1000130000"
+    value: "1000310000"
     required: true
   - name: CONTEXT_PATH
     required: true
@@ -45,14 +47,14 @@ objects:
       output:
         to:
           kind: ImageStreamTag
-          name: ${APP_NAME}-${ARTIFACT_IMAGE_SUFFIX}:${BUILD_VERSION}
+          name: ${IS_APP_NAME}-${ARTIFACT_IMAGE_SUFFIX}:${BUILD_VERSION}
       resources:
         limits:
           cpu: 2
           memory: 4Gi
         requests:
           cpu: 200m
-          memory: 2Gi     
+          memory: 2Gi
       source:
         type: Binary
         dockerfile: |-
@@ -75,7 +77,7 @@ objects:
         type: Docker
         dockerStrategy:
           pullSecret:
-            name: "nexus-registry"              
+            name: "nexus-registry"
   - apiVersion: v1
     kind: BuildConfig
     metadata:
@@ -90,7 +92,7 @@ objects:
       output:
         to:
           kind: ImageStreamTag
-          name: ${APP_NAME}:${BUILD_VERSION}
+          name: ${IS_APP_NAME}:${BUILD_VERSION}
       source:
         dockerfile: |-
           FROM docker.drift.inera.se/intyg/tomcat-base:9
@@ -99,7 +101,7 @@ objects:
         images:
           - from:
               kind: ImageStreamTag
-              name: ${APP_NAME}-${ARTIFACT_IMAGE_SUFFIX}:${BUILD_VERSION}
+              name: ${IS_APP_NAME}-${ARTIFACT_IMAGE_SUFFIX}:${BUILD_VERSION}
             paths:
               - sourcePath: /tmp/artifacts/.
                 destinationDir: "."
@@ -107,13 +109,13 @@ objects:
         type: Docker
         dockerStrategy:
           pullSecret:
-            name: "nexus-registry"       
+            name: "nexus-registry"
   - apiVersion: v1
     kind: ImageStream
     metadata:
-      name: ${APP_NAME}-${ARTIFACT_IMAGE_SUFFIX}
+      name: ${IS_APP_NAME}-${ARTIFACT_IMAGE_SUFFIX}
       labels:
-        app: ${APP_NAME}
+        app: ${IS_APP_NAME}
         stage: ${STAGE}
     spec:
       lookupPolicy:
@@ -121,9 +123,9 @@ objects:
   - apiVersion: v1
     kind: ImageStream
     metadata:
-      name: ${APP_NAME}
+      name: ${IS_APP_NAME}
       labels:
-        app: ${APP_NAME}
+        app: ${IS_APP_NAME}
         stage: ${STAGE}
     spec:
       lookupPolicy:
@@ -131,9 +133,9 @@ objects:
   - apiVersion: v1
     kind: ImageStream
     metadata:
-      name: ${APP_NAME}-verified
+      name: ${IS_APP_NAME}-verified
       labels:
-        app: ${APP_NAME}
+        app: ${IS_APP_NAME}
         stage: ${STAGE}
     spec:
       lookupPolicy:

@@ -15,7 +15,7 @@ parameters:
 - name: JOB_NAME
   required: true
 - name: BUILD_VERSION
-  required: true  
+  required: true
 - name: CALLBACK_URL
   required: true
 - name: BUILD_TAG
@@ -24,6 +24,9 @@ parameters:
   required: true
 - name: TESTS
   required: true
+- name: NO_PROXY
+  required: true
+  value: "*"
 objects:
 - apiVersion: v1
   kind: Pod
@@ -45,9 +48,13 @@ objects:
           value: /mnt/reports/${JOB_NAME}/${BUILD_VERSION}
         - name: JAVA_OPTS
           value: "-Xmx512M"
+        - name: NO_PROXY
+          value: ${NO_PROXY}
+        - name: no_proxy
+          value: ${NO_PROXY}
         resources:
           limits:
-            cpu: 500m
+            cpu: 1
             memory: 2304Mi
           requests:
             cpu: 100m
