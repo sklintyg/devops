@@ -455,19 +455,21 @@ oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=srs -p RELEASE_VERS
 ```
 
 #### GitHub Webhooks
-Each of these pipelines will have its own URL for webhook triggers. These can be copied from within the OpenShift console (in each respective DC configuration). But due to network issues, the previously mentioned webhookproxy must be used from outside of the cluster.
+Each of these pipelines will have its own URL for webhook triggers. These can be found in the pipeline configuration in OpenShift. But due to network issues, the previously mentioned webhookproxy must be used from outside of the cluster.
 
-Replace the hostname of the copied webhooktrigger with the route-name of the webhookproxy.
+An example of the webhook url displayed in the pipeline configuration in OpenShift:
 ```
-Before:
 https://ind-ocpt1a-api.ocp.sth.basefarm.net/apis/build.openshift.io/v1/namespaces/dintyg/buildconfigs/common-2021-2-pipeline/webhooks/********/github
-
-After:
+```
+To use this webhook from GitHub a proxy must be used. Corresponding modified url for the example above:
+```
 https://gitwebhookproxy-dintyg.ind-ocpt1a-app.ocp.sth.basefarm.net/apis/build.openshift.io/v1/namespaces/dintyg/buildconfigs/common-2021-2-pipeline/webhooks/********/github
 ```
-Use the new URL in GitHub repo, or where needed.
 
-_NOTE: This must be done for each repository/pipeline._
+**Create a new webhook for each application build pipeline**
+* In GitHub go the Settings -> Webhooks.
+* Copy Payload URL from an existing webhook.
+* Create a new webhook with the same settings as an existing webhook. Use the copied Payload URL but replace release version with 2021-2.
 
 #### Template Scheduled Jobs 
 
