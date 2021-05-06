@@ -377,6 +377,8 @@ oc process -f pipelinetemplate-build-library.yaml -p LIBRARY_NAME=infra-2021-2 -
 oc process -f pipelinetemplate-build-library.yaml -p LIBRARY_NAME=common-2021-2 -p GIT_URL=https://github.com/sklintyg/common.git -p GIT_CI_BRANCH=release/2021-2 | oc apply -f -
 ```
 
+Start the pipeline for each of the pipelines created above and make sure the build is successful.
+
 #### Intygstjänster Refdata pipelines
 The Refdata library in Intygstjänster is built by a pipeline created with `pipelinetemplate-build-refdata.yaml`.
 
@@ -456,6 +458,8 @@ SRS:
 oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=srs -p RELEASE_VERSION=2021-2 -p GIT_URL=https://github.com/sklintyg/srs.git -p GIT_CI_BRANCH=release/2021-2 -p BUILD_TEMPLATE=buildtemplate-srsapp-binary.yaml -p HEALTH_URI="'/services'" -p TEST_PORT=8080 | oc apply  -f -
 ```
 
+Start the pipeline for intygstjanst and make sure the build is successful. Then start the rest of the pipelines created above.
+
 #### GitHub Webhooks
 Each of these pipelines will have its own URL for webhook triggers. These can be found in the pipeline configuration in OpenShift. But due to network issues, the previously mentioned webhookproxy must be used from outside of the cluster.
 
@@ -519,9 +523,17 @@ This pipeline is triggered manually when images are to be pushed to Nexus.
 oc process -f pipelinetemplate-promote-images.yaml -p RELEASE_VERSION=2021-2 -p GIT_CI_BRANCH=release/2021-2 | oc apply  -f -
 ```
 
+### Nightly builds
+
+Update release version in nightly builds for all applications in Jenkins (dintyg). Configure -> Parameter -> Default Value -> `release/2021-2`
+
 ### Nightly Demo Deploy Pipeline
 
-TODO Will be handled by pipeline that triggers the predefined pipelines
+* Create a new branch in Bitbucket from the previous branch named `release/2021-2`.
+* Update release version in `parameters.txt` for all application in the demo-folder.
+* Follow the instructions in test-templates/README.md in Bitbucket to create a deploy pipline for each application in demo (demointyg).
+* Follow the instructions in test-templates/README.md in Bitbucket to create a deploy pipline for all application in demo (demointyg).
+* Start pipeline deploy-demo-2021-2 that will deploy all application in demo.
 
 # Access BF OpenShift Cluster
 
