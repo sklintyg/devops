@@ -331,6 +331,8 @@ To avoid having to create unnecessary feature branches, start in clean updated b
 *All applications:*  
 * `build-info.json` – bump `appVersion`, set new `infraVersion` and `commonVersion` (if present)
 * `build.gradle` (in app-root) – set new `infraVersion` and `commonVersion` (if present)
+* `.github/workflows/gradle.yml` – set the new release version and bump `infraVersion` and `commonVersion` (if present)
+  * Om du får ett fel när du försöker pusha workflows från IntelliJ kan följa den här instruktionen: https://stackoverflow.com/questions/64059610/how-to-resolve-refusing-to-allow-an-oauth-app-to-create-or-update-workflow-on
 
 *In minaintyg, rehabstod and webcert:*  
 * `test/<app-name>TestTools/envConfig.json` – in “test-pipeline” update relevant URLs to use the new release version  
