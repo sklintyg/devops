@@ -534,6 +534,15 @@ Update release version in nightly builds for all applications in Jenkins (dintyg
 * Follow the instructions in test-templates/README.md in Bitbucket to create a deploy pipline for each application in demo (demointyg).
 * Follow the instructions in test-templates/README.md in Bitbucket to create a deploy pipline for all application in demo (demointyg).
 * Start pipeline deploy-demo-2021-2 that will deploy all application in demo.
+* Deactivate the old deploy pipeline
+    * Enter configuration for the old deploy pipeline in Jenkins
+    * Uncheck "Build periodically"
+    * Save the changes
+* Activate the deploy pipeline for 2021-2
+    * Enter configuration for the deploy pipeline for 2021-2 in Jenkins
+    * Check "Build periodically"
+    * Enter "H 3 * * *" in "Schema"
+    * Save the changes
 
 # Access BF OpenShift Cluster
 
