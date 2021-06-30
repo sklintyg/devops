@@ -217,7 +217,7 @@ pipeline {
 
               // cleanup app specific redis keys
               sh(
-                      script: "oc rsh \$(oc get pods | grep redis- | grep Running | awk \'{ print \$1 }\')  /opt/rh/rh-redis32/root/usr/bin/redis-cli -a redis  EVAL \"return redis.call(\'del\', unpack(redis.call(\'keys\', ARGV[1])))\" 0 *:${appReleaseName}:*",
+                      script: "oc rsh \$(oc get pods | grep redis- | grep Running | awk \'{ print \$1 }\')  /usr/bin/redis-cli -a redis  EVAL \"return redis.call(\'del\', unpack(redis.call(\'keys\', ARGV[1])))\" 0 *:${appReleaseName}:*",
                       returnStatus: true
               )
             }
