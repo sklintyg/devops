@@ -38,6 +38,7 @@ oc create secret generic jenkins-integration \
 --from-literal=INERA_SONAR_LOGIN=<replace_me> \
 --type=Opaque
 ```
+**Note:** _Since Aug 13 2021 Github no longer accepts `username + password` for accessing api-operations. Instead a combination of `username + personal access token` shall be used. Thus, the password under GITHUB_PASSWORD is simply replaced by the access token. Access tokens can be generated when logged in to the user in Github, and can be set with or without an expiration date. An expired personal access token will result in Github access problems from pipelines in which case the token can be easily updated from the OpenShift web console._
 
 #### Persistant Volume Claims (PVC)
 Some services and pipelines require PVC's to function. These are normally created by OpenShift when the service is added from the catalog, but the following PVC's needs to be added manually to the project:
