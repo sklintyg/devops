@@ -452,6 +452,8 @@ Privatläkarportal:
 oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=privatlakarportal -p RELEASE_VERSION=2021-2 -p GIT_URL=https://github.com/sklintyg/privatlakarportal.git -p GIT_CI_BRANCH=release/2021-2 -p BUILD_TEMPLATE=buildtemplate-webapp-java11-binary.yaml -p BUILD_TOOL=shgradle11 | oc apply  -f -
 Statistik:
 oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=statistik -p RELEASE_VERSION=2021-2 -p GIT_URL=https://github.com/sklintyg/statistik.git -p GIT_CI_BRANCH=release/2021-2 -p BUILD_TEMPLATE=buildtemplate-webapp-java11-binary.yaml -p BUILD_TOOL=shgradle11 | oc apply  -f -
+Sjut:
+oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=sjut -p RELEASE_VERSION=master -p GIT_URL=https://github.com/sklintyg/sjut.git -p GIT_CI_BRANCH=master -p BUILD_TEMPLATE=buildtemplate-bootapp-binary.yaml -p BUILD_TOOL=shgradle11 -p DEVOPS_GIT_CI_BRANCH=release/2021-2 | oc apply  -f -
 ```
 ```
 SRS:
