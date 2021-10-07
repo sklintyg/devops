@@ -86,8 +86,10 @@ objects:
                 git url: "${gitDevopsUrl}", branch: "${gitDevopsBranch}"
               }
 
+              def gitUrlWithCredentials = gitUrl.substring(0, gitUrl.lastIndexOf("//")+2) + "${GITHUB_USERNAME}:${GITHUB_PASSWORD}@" + gitUrl.substring(gitUrl.lastIndexOf("//")+2)
+
               // Must pass all parameters as environment variables
-              withEnv(["GIT_URL=${GIT_URL}",
+              withEnv(["GIT_URL=${gitUrlWithCredentials}",
                         "APP_NAME=${APP_NAME}",
                         "RELEASE_VERSION=${RELEASE_VERSION}",
                         "STAGE=${STAGE}",
@@ -95,7 +97,6 @@ objects:
                         "DEPLOY_TEMPLATE=${DEPLOY_TEMPLATE}",
                         "TESTRUNNER_TEMPLATE=${TESTRUNNER_TEMPLATE}",
                         "ARTIFACT_IMAGE_SUFFIX=${ARTIFACT_IMAGE_SUFFIX}",
-                        "GIT_URL=${GIT_URL}",
                         "GIT_CI_BRANCH=${GIT_CI_BRANCH}",
                         "TEST_PORT=${TEST_PORT}",
                         "BUILD_TOOL=${BUILD_TOOL}",
