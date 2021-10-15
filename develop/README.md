@@ -112,6 +112,7 @@ This translates to the following concrete ports for each of the applications (po
 | Privatläkarportal | 8060 <br> _(8061)_ | 8160 <br> _(8161)_ | 8860 <br> _(8861)_ | 8960 |
 | Intygsadmin | 8070 <br> _(8071)_ | 8170 <br> _(8171)_ | 8870 <br> _(8871)_ | 8970 |
 | Intygstjänst | 8080 <br> _(8081)_ | 8180 <br> _(8181)_ | 8880 <br> _(8881)_ | N/A |
+| Sjut | 8090 <br> _(8091)_ | 8190 <br> _(8191)_ | 8890 <br> _(8891)_ | N/A |
 
 ## Building an application
 All applications are built using the gradle-wrapper included in the repository. To build an application simple use
@@ -186,6 +187,7 @@ Just start your application and access it with:
 | Statistik | https://st.localtest.me | https://st.localtest.me/#/fakelogin |
 | Privatläkarportal | https://pp.localtest.me | https://pp.localtest.me/welcome.html |
 | Intygsadmin | https://ia.localtest.me | https://ia.localtest.me/welcome.html |
+| Sjut | https://sjut.localtest.me | https://sjut.localtest.me/welcome.html |
 
 ### Option 2 
 This option will skip the NGINX and address the application directly through it's standard port. This is how the tests accesses the applications when run. This option can used in two ways. Either by using localhost, or by using the applications localhost alias. Webcert example below, but see the ports section for all the other application ports.
