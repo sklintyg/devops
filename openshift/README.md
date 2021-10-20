@@ -132,6 +132,8 @@ CREATE USER 'webcert'@'%' IDENTIFIED BY 'webcert';
 GRANT ALL PRIVILEGES ON * . * TO 'webcert'@'%' WITH GRANT OPTION;
 CREATE USER 'srs'@'%' IDENTIFIED BY 'srs';
 GRANT ALL PRIVILEGES ON * . * TO 'srs'@'%' WITH GRANT OPTION;
+CREATE USER 'sjut'@'%' IDENTIFIED BY 'sjut';
+GRANT ALL PRIVILEGES ON * . * TO 'sjut'@'%' WITH GRANT OPTION;
 ```
 
 #### Jenkins (Persistent)
