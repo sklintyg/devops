@@ -1,0 +1,44 @@
+kind: Template
+apiVersion: v1
+metadata:
+  name: pipelinetemplate-promoto-images
+objects:
+  - kind: BuildConfig
+    apiVersion: v1
+    metadata:
+      name: promote-nginx-sjut-pipeline
+      labels:
+        release: ${TAG}
+    spec:
+      nodeSelector: {}
+      output: {}
+      postCommit: {}
+      resources: {}
+      runPolicy: Serial
+      source:
+        git:
+          uri: ${GIT_URL}
+          ref: "refs/heads/${GIT_CI_BRANCH}"
+        type: Git
+      strategy:
+        type: JenkinsPipeline
+        jenkinsPipelineStrategy:
+          jenkinsfilePath: openshift/PromoteNginxSjutJenkinsfile
+          env:
+          - name: TAG
+            value: ${TAG}
+          - name: IMAGE
+            value: ${IMAGE}
+parameters:
+  - name: TAG
+    description: Name of the tag in Image Stream on dintyg, 1-112
+    required: true
+  - name: IMAGE
+    description: A application image name, ie "nginx-116"
+    required: true
+  - name: GIT_URL
+    required: true
+    value: "https://github.com/sklintyg/devops.git"
+  - name: GIT_CI_BRANCH
+    description: Deploy branch to be used for this build, ie release/2020-2
+    required: true

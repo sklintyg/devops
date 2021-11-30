@@ -1,0 +1,86 @@
+#!groovy
+
+// Variable required in buildconfig
+//
+// - name: TAG
+// - name: IMAGE
+
+def app = "${IMAGE}"
+def specificTag = "${TAG}"
+def appsWithImageTag = []
+
+def getVersion(appName, specificTag) {
+  def images = openshift.selector("is", "${appName}").object().spec.tags
+
+  def specificImage = images.find { it.name == "${specificTag}" }
+  if (specificImage == null) {
+    error("${specificTag} for ${appName} not found in imagestream ${appName}")
+  } else {
+    return "${specificTag}"
+  }
+
+}
+
+def promoteImage(appName, appTag) {
+  def imageStream = openshift.selector("is", "${appName}").object().status.dockerImageRepository
+  log "Use ImageStream: ${imageStream}"
+
+  def model = openshift.process("-f", "openshift/buildtemplate-nexus.yaml",
+          "-p", "APP_NAME=${appName}",
+          "-p", "NEXUS_NAME=${appName}",
+          "-p", "IMAGE='${imageStream}'",
+          "-p", "STAGE=test",
+          "-p", "TAG='${appTag}'")
+  openshift.apply(model)
+
+  def build = openshift.selector("bc", "${appName}-nexus").startBuild("--wait")
+  log "${appName}:${appTag} promoted to Nexus"
+}
+
+def log(msg) {
+  echo "${new Date()} -- ${msg}"
+}
+
+pipeline {
+  agent any
+
+  environment {
+    JAVA_TOOL_OPTIONS = '-Dfile.encoding=UTF-8'
+  }
+
+  stages {
+    stage('Prepare imagetags') {
+      steps {
+        script {
+          openshift.withCluster() {
+            openshift.withProject() {
+              def imagetag = getVersion(app, specificTag)
+              appsWithImageTag.add(app + ":" + imagetag)
+            }
+          }
+        }
+      }
+    }
+
+    stage('Promote to Nexus') {
+      steps {
+        script {
+          openshift.withCluster() {
+            openshift.withProject() {
+              appsWithImageTag.each { t ->
+                stage(t.capitalize()) {
+                  def split = t.split(":")
+                  def appName = split[0]
+                  def appTag = split[1]
+
+                  log "Promoting image for ${t}"
+                  promoteImage(appName, appTag)
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
