@@ -10,7 +10,7 @@ def specificTag = "${TAG}"
 def appsWithImageTag = []
 
 def getVersion(appName, specificTag) {
-  def images = openshift.selector("is", "${appName}").object().spec.tags
+  def images = openshift.selector("is", "${appName}").object().status.tags
 
   def specificImage = images.find { it.name == "${specificTag}" }
   if (specificImage == null) {
