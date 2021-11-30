@@ -7,8 +7,6 @@ objects:
     apiVersion: v1
     metadata:
       name: promote-nginx-sjut-pipeline
-      labels:
-        release: ${TAG}
     spec:
       nodeSelector: {}
       output: {}
@@ -32,10 +30,8 @@ objects:
 parameters:
   - name: TAG
     description: Name of the tag in Image Stream on dintyg, 1-112
-    required: true
   - name: IMAGE
     description: A application image name, ie "nginx-116"
-    required: true
   - name: GIT_URL
     required: true
     value: "https://github.com/sklintyg/devops.git"
