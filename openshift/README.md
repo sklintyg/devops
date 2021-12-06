@@ -307,6 +307,7 @@ Dev pipelines for Web Apps are realized with OCP Templates and the following tem
 * pipelinetemplate-build-webapp.yaml - Web App Build Pipeline. Depends the templates above
 * pipelinetemplate-housekeeping.yaml - OpenShift resource cleanup
 * pipelinetemplate-promote-images.yaml - Pipeline that uses the buildtemplate-nexus.yaml to promote images to nexus
+* pipelinetemplate-promote-nginx-sjut.yaml - Pipeline that uses the buildtemplate-nexus.yaml to promote sjut nginx to nexus
 * testrunnertemplate-pod.yaml - Pod Test Runner (gradle, java)
 
 #### Setting up Openshift pipelines for new release version of Intygstjanster
@@ -526,6 +527,29 @@ This pipeline is triggered manually when images are to be pushed to Nexus.
 ```
 oc process -f pipelinetemplate-promote-images.yaml -p RELEASE_VERSION=2021-2 -p GIT_CI_BRANCH=release/2021-2 | oc apply  -f -
 ```
+
+### Promote sjut nginx to Nexus
+This is achieved via `pipelinetemplate-promote-nginx-sjut.yaml`.
+
+The pipeline is used to promote images to "external" Docker Registry. This is done with `buildtemplate-nexus.yaml`.
+
+The pipeline is implemented in a separate Jenkinsfile named `PromoteNginxSjutJenkinsfile`.
+
+This pipeline is triggered manually when images are to be pushed to Nexus.
+
+**Parameters:**
+
+| Parameter       | Required | Description |
+| --------------- | -------- | ----------- |
+| TAG             |          | The release name, i.e. `1-112` |
+| IMAGE           |          | The image to be deployed, i.e. `nginx-116`  |        
+| GIT_URL         |          | DevopsRepo containing build-data. Defaults to `https://github.com/sklintyg/devops.git`|
+| GIT_CI_BRANCH   | Yes      | The branch from devopsrepo to build from, i.e. `release/2021-2`|
+
+```
+oc process -f pipelinetemplate-promote-nginx-sjut.yaml -p GIT_CI_BRANCH=release/2021-2 | oc apply  -f -
+```
+
 
 ### Nightly builds
 
