@@ -35,5 +35,5 @@ CREATE USER 'sjut'@'%' IDENTIFIED BY 'sjut';
 GRANT ALL PRIVILEGES ON * . * TO 'sjut'@'%' WITH GRANT OPTION;
 
 CREATE DATABASE customer_terminate;
-CREATE USER 'cts_devtest'@'%' IDENTIFIED BY 'cts_devtest';
-GRANT ALL PRIVILEGES ON * . * TO 'cts_devtest'@'%' WITH GRANT OPTION;
+CREATE USER 'cts'@'%' IDENTIFIED BY 'cts';
+GRANT ALL PRIVILEGES ON * . * TO 'cts'@'%' WITH GRANT OPTION;
