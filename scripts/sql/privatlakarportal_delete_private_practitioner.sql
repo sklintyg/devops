@@ -24,7 +24,7 @@ BEGIN
         SELECT CONCAT('Private practitioner ', privatePractionerPersonId, ' could not be found in PP database.');
 
     ELSE
-		START TRANSACTION;
+        START TRANSACTION;
             DELETE FROM BEFATTNING WHERE PRIVATLAKARE_ID = privatePractionerId;
             DELETE FROM LEGITIMERAD_YRKESGRUPP WHERE PRIVATLAKARE_ID = privatePractionerId;
             DELETE FROM MEDGIVANDE WHERE PRIVATLAKARE_ID = privatePractionerId;
@@ -34,10 +34,10 @@ BEGIN
             DELETE FROM PRIVATLAKARE WHERE PRIVATLAKARE_ID = privatePractionerId;
 
             IF errorCode = '00000' THEN
-				COMMIT;
+                COMMIT;
                 SELECT CONCAT('Private practitioner ', privatePractionerId, ' was deleted from PP.');
             ELSE
-				ROLLBACK;
+                ROLLBACK;
                 SELECT 'Transaction rolled back due to sql exception. No private practitioner was deleted.';
                 SELECT CONCAT('Stored procedure failed, error = ', errorCode, ', message = ', errorMessage);
             END IF;
