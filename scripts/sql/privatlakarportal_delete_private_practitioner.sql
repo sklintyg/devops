@@ -17,11 +17,11 @@ BEGIN
             errorCode = RETURNED_SQLSTATE, errorMessage = MESSAGE_TEXT;
     END;
 
-    SET privatePractionerPersonId = '197309069289';
+    SET privatePractionerPersonId = 'YYYYMMDDNNNN';
     SELECT PRIVATLAKARE_ID FROM PRIVATLAKARE WHERE PERSONID = privatePractionerPersonId INTO privatePractionerId;
 
     IF (privatePractionerId IS NULL OR privatePractionerId = '') THEN
-        SELECT CONCAT('Private practioner ', privatePractionerPersonId, ' could not be found in PP database.');
+        SELECT CONCAT('Private practitioner ', privatePractionerPersonId, ' could not be found in PP database.');
 
     ELSE
 		START TRANSACTION;
@@ -35,7 +35,7 @@ BEGIN
 
             IF errorCode = '00000' THEN
 				COMMIT;
-                SELECT CONCAT('Private practioner ', privatePractionerId, ' was deleted from PP.');
+                SELECT CONCAT('Private practitioner ', privatePractionerId, ' was deleted from PP.');
             ELSE
 				ROLLBACK;
                 SELECT 'Transaction rolled back due to sql exception. No private practitioner was deleted.';
