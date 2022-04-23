@@ -6,8 +6,8 @@ DELIMITER $$
 CREATE PROCEDURE deletePrivatePractitioner()
 BEGIN
 
-	DECLARE privatePractionerId varchar(255) ;
-	DECLARE privatePractionerPersonId varchar(255) ;
+    DECLARE privatePractionerId varchar(255);
+    DECLARE privatePractionerPersonId varchar(255);
 
     DECLARE errorCode CHAR(5) DEFAULT '00000';
     DECLARE errorMessage TEXT;
