@@ -16,8 +16,3 @@ ENV ACTIVEMQ_HOME="/opt/apache-activemq-$version"
 
 # Run activemq with jetty.host set to 0.0.0.0 to make web UI accessible from host system
 ENTRYPOINT $ACTIVEMQ_HOME/bin/activemq -Djetty.host=0.0.0.0 start
-
-
-
-
-
