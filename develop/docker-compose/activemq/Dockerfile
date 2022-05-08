@@ -1,16 +1,20 @@
 # JDK 11 - alpine
 FROM eclipse-temurin:11-alpine
 
-# Use version arg from docker-compose
 ARG version
+ARG checksum
+ARG activemqPackage="apache-activemq-$version-bin.tar.gz"
 
 # Download activemq 'version' to directory /opt
-ADD "https://archive.apache.org/dist/activemq/$version/apache-activemq-$version-bin.tar.gz" /opt
+ADD "https://archive.apache.org/dist/activemq/$version/$activemqPackage" /opt
 
 WORKDIR /opt
 
+# Check integrity of downloaded activemq package.
+RUN if [ $(sha512sum $activemqPackage | awk '{print $1}') != $checksum ]; then echo Checksum validation failure; exit -1; fi;
+
 # Decompress downloaded apachemq and remove compressed file
-RUN tar -xzf "apache-activemq-$version-bin.tar.gz" && rm "apache-activemq-$version-bin.tar.gz"
+RUN tar -xzf $activemqPackage && rm $activemqPackage
 
 ENV ACTIVEMQ_HOME="/opt/apache-activemq-$version"
 

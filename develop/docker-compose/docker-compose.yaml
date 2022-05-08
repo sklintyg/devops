@@ -25,7 +25,8 @@ services:
     build:
       context: activemq
       args:
-        version: 5.17.0
+        version: $ACTIVEMQ_VERSION
+        checksum: $ACTIVEMQ_CHECKSUM
     container_name: amq
     restart: always
     ports:
