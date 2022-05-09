@@ -22,7 +22,11 @@ services:
       - "6379:6379"
 
   activemq:
-    image: webcenter/activemq:latest
+    build:
+      context: activemq
+      args:
+        version: $ACTIVEMQ_VERSION
+        checksum: $ACTIVEMQ_CHECKSUM
     container_name: amq
     restart: always
     ports:
