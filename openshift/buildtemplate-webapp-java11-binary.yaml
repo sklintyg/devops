@@ -82,7 +82,7 @@ objects:
             - name: BUILDER_IMAGE
               value: ${BUILDER_IMAGE}
             - name: JAVA_TOOL_OPTIONS
-              value: '-Xms512m -Xmx2048m'
+              value: '-Xms512m -Xmx3072m'
             - name: BUILD_ARGS
               value: ${BUILD_ARGS}
           from:
