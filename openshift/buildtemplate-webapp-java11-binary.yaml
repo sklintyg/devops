@@ -33,7 +33,7 @@ parameters:
     value: ROOT
   - name: BUILD_ARGS
     required: true
-    value: "build testClasses -PcodeQuality -PuseMinifiedJavaScript"
+    value: "build -x test testClasses -PuseMinifiedJavaScript"
   - name: BUILDER_IMAGE
     required: true
     value: "s2i-war-builder-java11:11.1"
