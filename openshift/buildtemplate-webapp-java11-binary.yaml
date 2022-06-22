@@ -57,7 +57,7 @@ objects:
       resources:
         limits:
           cpu: 2
-          memory: 4Gi
+          memory: 6Gi
         requests:
           cpu: 200m
           memory: 2Gi
@@ -82,7 +82,7 @@ objects:
             - name: BUILDER_IMAGE
               value: ${BUILDER_IMAGE}
             - name: JAVA_TOOL_OPTIONS
-              value: '-Xms512m -Xmx3072m'
+              value: '-Xms512m -Xmx4096m'
             - name: BUILD_ARGS
               value: ${BUILD_ARGS}
           from:
