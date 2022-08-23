@@ -13,15 +13,15 @@ BEGIN
     DECLARE certificateIssuer VARCHAR(255);
     DECLARE existingCertificate VARCHAR(255);
     DECLARE existingMetadata VARCHAR(255) ;
-	DECLARE existingRedelivery VARCHAR(255);
+    DECLARE existingRedelivery VARCHAR(255);
 
-	-- Create temporary table holding certificate ids for which redelivery of all events should be performed.
+    -- Create temporary table holding certificate ids for which redelivery of all events should be performed.
     -- When appropriate, the below section with hardcoded certificate id's can be replaced with an sql-query for
     -- collection of id's for redelivery. (Based on, for example, care unit or a certain period in time.
-	DROP TEMPORARY TABLE IF EXISTS CERTIFICATE_IDS;
-	CREATE TEMPORARY TABLE CERTIFICATE_IDS AS (SELECT DISTINCT(INTYGS_ID) AS certificate_id, 0 AS processed FROM HANDELSE WHERE INTYGS_ID IN (
-	    'certificate-id-1',
-	    'certificate-id-2'
+    DROP TEMPORARY TABLE IF EXISTS CERTIFICATE_IDS;
+    CREATE TEMPORARY TABLE CERTIFICATE_IDS AS (SELECT DISTINCT(INTYGS_ID) AS certificate_id, 0 AS processed FROM HANDELSE WHERE INTYGS_ID IN (
+        'certificate-id-1',
+        'certificate-id-2'
     ));
 
     -- Add index certificate_id to table CERTIFICATE_IDS, (or updates to the temp table will not be permitted).
@@ -38,7 +38,7 @@ BEGIN
     -- Create temporary table for holding events of the looped certificate id's.
     -- Add index to event_id to table EVENT_IDS, (or updates to the temp table will not be permitted).
     DROP TEMPORARY TABLE IF EXISTS EVENT_IDS;
-	CREATE TEMPORARY TABLE EVENT_IDS(event_id BIGINT(20), processed INT);
+    CREATE TEMPORARY TABLE EVENT_IDS(event_id BIGINT(20), processed INT);
     ALTER TABLE EVENT_IDS ADD INDEX (event_id);
 
     -- Loop through certificate ids (table CERTIFICATE_IDS)
@@ -46,9 +46,9 @@ BEGIN
     DO
         SET existingCertificate = null;
         SET certificateTypeInternal = null;
-		SET certificateTypeExternal = null;
-		SET certificateVersion = null;
-		SET certificateIssuer = null;
+        SET certificateTypeExternal = null;
+        SET certificateVersion = null;
+        SET certificateIssuer = null;
 
         -- Set the current certificate id in variable currentCertificateId
         SELECT certificate_id FROM CERTIFICATE_IDS WHERE processed = 0 LIMIT 1 INTO currentCertificateId;
@@ -70,11 +70,11 @@ BEGIN
 
         -- Loop events of current certificate id.
         WHILE (SELECT COUNT(*) FROM EVENT_IDS WHERE processed = 0) > 0
-		DO
+        DO
             SET existingRedelivery = null;
             SET existingMetadata = null;
 
-			-- Set currently processed event id in variable currentEventId
+            -- Set currently processed event id in variable currentEventId
             SELECT event_id FROM EVENT_IDS WHERE processed = 0 LIMIT 1 INTO currentEventId;
 
             -- Fetch redelivery for current event if exists
@@ -90,19 +90,19 @@ BEGIN
                 -- This will exclude all events for deleted certificates that were created before release 2021-1.
                 IF ((existingCertificate IS NOT NULL AND existingCertificate != '') OR (existingMetadata IS NOT NULL AND existingMetadata != '')) THEN
 
-					-- If there is no metadata record for current event, create one based on the existing certificate.
-					IF (existingMetadata IS NULL OR existingMetadata = '') THEN
-						INSERT INTO HANDELSE_METADATA(HANDELSE_ID, DELIVERY_STATUS, CERTIFICATE_TYPE, CERTIFICATE_VERSION, CERTIFICATE_ISSUER)
-						VALUES (currentEventId, 'RESEND', certificateTypeExternal, certificateVersion, certificateIssuer);
+                    -- If there is no metadata record for current event, create one based on the existing certificate.
+                    IF (existingMetadata IS NULL OR existingMetadata = '') THEN
+                        INSERT INTO HANDELSE_METADATA(HANDELSE_ID, DELIVERY_STATUS, CERTIFICATE_TYPE, CERTIFICATE_VERSION, CERTIFICATE_ISSUER)
+                        VALUES (currentEventId, 'RESEND', certificateTypeExternal, certificateVersion, certificateIssuer);
                     END IF;
 
-					-- Create a record in redelivery table for the event being processed.
+                    -- Create a record in redelivery table for the event being processed.
                     INSERT INTO NOTIFICATION_REDELIVERY (HANDELSE_ID, REDELIVERY_STRATEGY, REDELIVERY_TIME)
                     VALUES(currentEventId, 'STANDARD', now());
                 END IF;
             END IF;
 
-			-- Flag current event id as processed.
+            -- Flag current event id as processed.
             UPDATE EVENT_IDS SET processed = 1 WHERE event_id = currentEventId;
         END WHILE;
 
