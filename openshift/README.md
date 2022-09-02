@@ -42,9 +42,9 @@ oc create secret generic jenkins-integration \
 #### Persistant Volume Claims (PVC)
 Some services and pipelines require PVC's to function. These are normally created by OpenShift when the service is added from the catalog, but the following PVC's needs to be added manually to the project:
 
-| Name | Requested Capacity | Access Modes | Used by
-| --- | --- | --- | --- |
-| jenkins-reports | 10GiB | RWO | testrunnertemplate-pod.yaml |
+| Name            | Requested Capacity | Access Modes | Used by                     |
+|-----------------|--------------------|--------------|-----------------------------|
+| jenkins-reports | 10GiB              | RWO          | testrunnertemplate-pod.yaml |
 
 #### Infrastructure Services
 The following services must exist in order for the build-pipelines to function:
@@ -227,7 +227,7 @@ The template (housekeeping) must be applied in the OCP project of question:
 
 | Name | Value | Description |
 | ---- | ----- | ----- | 
-| RELEASE_VERSION | 2021-2 | Name of the release for this pipeline. Used to maintain separate pipelines between releases.
+| RELEASE_VERSION | 2021-2 | Name of the release for this pipeline. Used to maintain separate pipelines between releases.|
 
 ```
 oc process -f pipelinetemplate-housekeeping.yaml -p RELEASE_VERSION=2021-2 | oc apply  -f -
@@ -257,7 +257,7 @@ The tags indicates main version and currently are 8 and 11 used to indicate java
 oc tag s2i-war-builder:latest s2i-war-builder:8
 oc tag s2i-war-builder-java11:latest s2i-war-builder-java11:11
 oc tag springboot-base:latest springboot-base:11
-oc tag srs-base:latest srs-base:8
+oc tag srs-base:latest srs-base:11
 oc tag tomcat-base:latest tomcat-base:9
 oc tag tomcat-java11-base:latest tomcat-java11-base:9
 ```
@@ -280,9 +280,9 @@ oc process -f ../buildtemplate-nexus.yaml -p APP_NAME=springboot-base -p NEXUS_N
 oc start-build springboot-base-nexus --follow
 oc process -f ../buildtemplate-nexus.yaml -p APP_NAME=springboot-base -p NEXUS_NAME=springboot-base -p IMAGE=dintyg/springboot-base -p TAG=11 -p STAGE=base | oc delete -f -
 
-oc process -f ../buildtemplate-nexus.yaml -p APP_NAME=srs-base -p NEXUS_NAME=srs-base -p IMAGE=dintyg/srs-base -p TAG=8 -p STAGE=base | oc apply -f -
+oc process -f ../buildtemplate-nexus.yaml -p APP_NAME=srs-base -p NEXUS_NAME=srs-base -p IMAGE=dintyg/srs-base -p TAG=11 -p STAGE=base | oc apply -f -
 oc start-build srs-base-nexus --follow
-oc process -f ../buildtemplate-nexus.yaml -p APP_NAME=srs-base -p NEXUS_NAME=srs-base -p IMAGE=dintyg/srs-base -p TAG=8 -p STAGE=base | oc delete -f -
+oc process -f ../buildtemplate-nexus.yaml -p APP_NAME=srs-base -p NEXUS_NAME=srs-base -p IMAGE=dintyg/srs-base -p TAG=11 -p STAGE=base | oc delete -f -
 
 oc process -f ../buildtemplate-nexus.yaml -p APP_NAME=tomcat-base -p NEXUS_NAME=tomcat-base -p IMAGE=dintyg/tomcat-base -p TAG=9 -p STAGE=base | oc apply -f -
 oc start-build tomcat-base-nexus --follow
