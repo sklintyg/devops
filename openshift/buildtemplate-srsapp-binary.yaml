@@ -105,7 +105,7 @@ objects:
           name: ${IS_APP_NAME}:${BUILD_VERSION}
       source:
         dockerfile: |-
-          FROM docker-registry.default.svc:5000/dintyg/srs-base:latest
+          FROM registry/srs-base:latest
           ENV APP_NAME=${APP_NAME}
           ADD ROOT.war /deployments/
         images:
