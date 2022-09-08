@@ -8,5 +8,7 @@ RUN yum -y install epel-release
 RUN yum -y install R
 RUN R -e 'install.packages("rJava",,"http://www.rforge.net/")'
 RUN R -e 'install.packages("pch",,"https://cloud.r-project.org/")'
-
+RUN rm /opt/app/bin/launch.sh
+ADD launch.sh /opt/app/bin/
+RUN chmod 755 /opt/app/bin/launch.sh
 USER nobody
