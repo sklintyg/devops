@@ -56,8 +56,8 @@ objects:
           name: ${IS_APP_NAME}-${ARTIFACT_IMAGE_SUFFIX}:${BUILD_VERSION}
       resources:
         limits:
-          cpu: 2
-          memory: 6Gi
+          cpu: 4
+          memory: 10Gi
         requests:
           cpu: 200m
           memory: 2Gi
