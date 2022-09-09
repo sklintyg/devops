@@ -15,6 +15,7 @@ services:
 
   redis:
     image: redis:6.0.9-alpine
+    platform: linux/arm64
     container_name: redis
     restart: always
     command: redis-server --requirepass redis
@@ -48,6 +49,7 @@ services:
 
   nginx:
     image: nginx:latest
+    platform: linux/arm64
     container_name: nginx
     restart: always
     tty: true
