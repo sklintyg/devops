@@ -1,7 +1,8 @@
 FROM docker-registry.default.svc:5000/dintyg/springboot-base:latest
 
 USER root
-ENV R_HOME=/opt/R/4.1.3/bin/R
+ENV JAVA_HOME="/usr/lib/jvm/java-11-openjdk/"
+ENV R_HOME=/opt/R/4.1.3/lib/R
 ENV JVM_OPTS="-Djava.library.path=$R_HOME/library/rJava/jri"
 
 RUN yum -y install epel-release
@@ -14,6 +15,8 @@ RUN ln -s /opt/R/4.1.3/bin/Rscript /usr/local/bin/Rscript
 
 RUN yum -y install libjpeg-turbo-devel
 RUN yum -y install libpng-devel
+
+RUN R CMD javareconf
 
 RUN R -e 'install.packages("rJava",,"http://www.rforge.net/")'
 RUN R -e 'install.packages("jpeg",,"https://cran.r-project.org")'
