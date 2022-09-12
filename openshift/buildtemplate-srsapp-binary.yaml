@@ -105,7 +105,7 @@ objects:
           name: ${IS_APP_NAME}:${BUILD_VERSION}
       source:
         dockerfile: |-
-          FROM docker.drift.inera.se/intyg/srs-base:11.6
+          FROM docker.drift.inera.se/intyg/srs-base:11.7
           ENV APP_NAME=${APP_NAME}
           ADD ROOT.war /deployments/
         images:
