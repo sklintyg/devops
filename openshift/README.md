@@ -460,7 +460,7 @@ oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=sjut -p RELEASE_VER
 ```
 ```
 SRS (Uses 2021-2 as devops branch, but 2022-2 as release branch):
-oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=srs -p RELEASE_VERSION=2022-2 -p GIT_URL=https://github.com/sklintyg/srs.git -p DEVOPS_GIT_CI_BRANCH=release/2021-2 -p GIT_CI_BRANCH=release/2022-2 -p BUILD_TEMPLATE=buildtemplate-srsapp-binary.yaml -p HEALTH_URI="'/services'" -p TEST_PORT=8080 | oc apply  -f -
+oc process -f pipelinetemplate-build-webapp.yaml -p APP_NAME=srs -p RELEASE_VERSION=2022-2 -p GIT_URL=https://github.com/sklintyg/srs.git -p DEVOPS_GIT_CI_BRANCH=release/2021-2 -p GIT_CI_BRANCH=release/2022-2 -p BUILD_TOOL=shgradle11 -p BUILD_TEMPLATE=buildtemplate-srsapp-binary.yaml -p HEALTH_URI="'/services'" -p TEST_PORT=8080 | oc apply  -f -
 ```
 
 Start the pipeline for intygstjanst and make sure the build is successful. Then start the rest of the pipelines created above.
