@@ -47,7 +47,7 @@ The docker compose script in the `docker-compose` directory includes the followi
 | NGINX | 80, 443 | 
 
 # Usage
-This repository (devops) must be checked out with the correct branch (as of now `release/2021-1`).
+This repository (devops) must be checked out with the correct branch (as of now `release/2021-2`).
 
 Use a console of your choice (Bash, PowerShell, Ubuntu in WSL2, Git Bash etc.) and go to the directory `docker-compose`. Then use the following commands to start the containers (this will take a few minutes the first time, since the images needs to download to your computer):
 
