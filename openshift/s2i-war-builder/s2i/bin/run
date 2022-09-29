@@ -30,7 +30,7 @@ function testrun() {
     [ "$ARGS" = "fitnesseTest" ] && ARGS="$ARGS -PfileOutput -PoutputFormat=html"
     [ "$ARGS" = "restAssuredTest" ] && ARGS="$ARGS -x processResources"
     echo "---> Testing application with GRADLE_ARGS=$ARGS"
-    (cd $S2I_SOURCE_DIR; gradle --no-daemon $ARGS)
+    (cd $S2I_SOURCE_DIR; ./gradlew --no-daemon $ARGS)
     ERR=$?
     return $ERR
 }
