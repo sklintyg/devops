@@ -23,6 +23,7 @@ pipeline {
 
     environment {
         GIT_BRANCH = 'poc/INTYGFV-15255'
+        GIT_CREDENTIALS = 'intyg-github'
     }
 
     stages {
