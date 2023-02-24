@@ -3,7 +3,7 @@ version: "3.8"
 services:
 
   mysql:
-    image: mysql:5.7
+    image: mysql:8.0
     container_name: mysql
     volumes:
       - ./init-db:/docker-entrypoint-initdb.d
@@ -45,6 +45,8 @@ services:
     environment:
       - "ACTIVEMQ_ADMIN_LOGIN=admin"
       - "ACTIVEMQ_ADMIN_PASSWORD=admin"
+    volumes:
+      - ./activemq/activemq.xml:/opt/apache-activemq-$ACTIVEMQ_VERSION/conf/activemq.xml
 
   nginx:
     image: nginx:latest
