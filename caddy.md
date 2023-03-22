@@ -1,4 +1,4 @@
-# Use caddy instead of nginx
+# Use Caddy instead of nginx
 
 Alternative to nginx for windows users is to use caddy
 
@@ -37,9 +37,9 @@ $ curl.exe https://webi.ms/caddy | powershell
 Make sure the path to `caddy.exe` is avilable in your environment `PATH`
 
 ```
-$ caddy --config Caddyfile
+$ caddy run --config Caddyfile
 ```
 
 ## Run caddy as a service
 
-Documentation for running Caddy as a service can be found on the [official website](https://caddyserver.com/docs/running#windows-service)
+Documentation for running Caddy as a service can be found on the [official website](https://caddyserver.com/docs/running#windows-service).
