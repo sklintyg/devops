@@ -1,0 +1,51 @@
+{
+    local_certs
+}
+
+wc2.wc.localtest.me {
+    reverse_proxy :3000
+}
+
+wc.localtest.me {
+    reverse_proxy :8020
+}
+
+sjut.localtest.me {
+    reverse_proxy :8090
+}
+
+it.localtest.me {
+    reverse_proxy :8080
+}
+
+rs.localtest.me {
+    reverse_proxy :8030
+}
+
+mi.localtest.me {
+    reverse_proxy :8040
+}
+
+st.localtest.me {
+    reverse_proxy :8050
+}
+
+pp.localtest.me {
+    reverse_proxy :8060
+}
+
+ia.localtest.me {
+    reverse_proxy :8070
+}
+
+ls.localtest.me {
+    reverse_proxy :8010
+}
+
+cts.localtest.me {
+    reverse_proxy :18010
+}
+
+amq.localtest.me {
+    reverse_proxy :8861
+}
