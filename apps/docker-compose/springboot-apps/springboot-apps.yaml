@@ -1,0 +1,105 @@
+version: "3.8"
+
+x-config: &base-config
+  pull_policy: always
+  restart: always
+  extra_hosts:
+    - host.docker.internal:$WSL_HOST_IP
+    - host.docker.external:host-gateway
+
+
+services:
+  customer-terminate-service:
+    image: docker.drift.inera.se/intyg/customer-terminate-service:1.2.2.4
+    container_name: customer-terminate-service
+    profiles: [ "cts" ]
+    ports:
+      - "18010:8080"
+      - "18810:18810"
+    <<: *base-config
+    env_file: customer-terminate-service/.cts-env
+    environment:
+      - SPRING_PROFILES_ACTIVE=testability
+    volumes:
+      - ./customer-terminate-service/certificate:$APPLICATION_DIR/certificate
+      - ./customer-terminate-service/exports:$APPLICATION_DIR/exports
+
+
+  intyg-proxy-service:
+    image: localhost:5000/intyg/intyg-proxy-service:latest
+    container_name: intyg-proxy-service
+    profiles: [ "ips" ]
+    ports:
+      - "18020:18020"
+      - "18021:18021"
+    <<: *base-config
+    env_file: intyg-proxy-service/.ips-env
+    environment:
+      - SPRING_PROFILES_ACTIVE=testability,dev,fakepu
+    volumes:
+      - ./intyg-proxy-service/certificate:$APPLICATION_DIR/certificate
+
+
+  intygsadmin:
+    image: docker.drift.inera.se/intyg/intygsadmin:1.9.2.1
+    container_name: intygsadmin
+    profiles: [ 'ia' ]
+    ports:
+      - "8070:8080"
+      - "8170:8081"
+      - "8870:8870"
+    <<: *base-config
+    env_file: intygsadmin/.ia-env
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev,fake,caching-enabled,it-stub,wc-stub,pp-stub
+    volumes:
+      - ./intygsadmin/config:$APPLICATION_DIR/config
+
+
+  minaintyg2:
+    image: docker.drift.inera.se/intyg/minaintyg:4.0.0.25
+    container_name: minaintyg2
+    profiles: [ "mi2" ]
+    ports:
+      - "8041:8041"
+      - "8141:8141"
+      - "8841:8841"
+    <<: *base-config
+    env_file: minaintyg2/.mi2-env
+    environment:
+      - SPRING_PROFILES_ACTIVE=testability,dev
+    volumes:
+      - ./minaintyg2/certificates:$APPLICATION_DIR/certificates
+      - ./minaintyg2/config:$APPLICATION_DIR/config
+
+
+  sjut:
+    image: docker.drift.inera.se/intyg/sjut:1.1.2.1
+    container_name: sjut
+    profiles: [ 'sjut' ]
+    ports:
+      - "8090:8090"
+      - "8890:8890"
+    <<: *base-config
+    env_file: sjut/.sjut-env
+    environment:
+      - SPRING_PROFILES_ACTIVE=fake,dev
+    volumes:
+      - ./sjut/config:$APPLICATION_DIR/config
+      - ./sjut/certifikat:$APPLICATION_DIR/certifikat
+      - ./sjut/filestore:$APPLICATION_DIR/filestore
+
+
+  srs:
+    image: docker.drift.inera.se/intyg/srs:1.2.2.2
+    container_name: srs
+    profiles: [ 'srs' ]
+    ports:
+      - "18080:8080"
+      - "18880:18880"
+    <<: *base-config
+    env_file: srs/.srs-env
+    environment:
+      - SPRING_PROFILES_ACTIVE=runtime,it,bootstrap
+    volumes:
+      - ./srs/refdata:$APPLICATION_DIR/refdata

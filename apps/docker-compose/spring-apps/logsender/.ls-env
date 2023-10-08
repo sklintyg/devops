@@ -1,0 +1,2 @@
+# .it-env
+JAVA_OPTS=$JAVA_DEBUG_STRING:8810

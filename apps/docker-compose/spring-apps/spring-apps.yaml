@@ -1,0 +1,141 @@
+version: "3.8"
+
+x-config: &base-config
+  pull_policy: always
+  restart: always
+  extra_hosts:
+    - host.docker.internal:$WSL_HOST_IP
+    - host.docker.external:host-gateway
+
+
+services:
+  intygstjanst:
+    image: localhost:5000/intyg/intygstjanst:latest
+    container_name: intygstjanst
+    profiles: [ 'it' ]
+    ports:
+      - "8080:8080"
+      - "8180:8081"
+      - "8880:8880"
+    <<: *base-config
+    env_file:
+      - .spring-app-env
+      - intygstjanst/.it-env
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev,bootstrap,testability-api,caching-enabled,it-fk-stub,wc-hsa-stub
+    volumes:
+      - ./intygstjanst/config:$APPLICATION_DIR/config
+
+
+  logsender:
+    image: localhost:5000/intyg/logsender:latest
+    container_name: logsender
+    profiles: [ 'ls' ]
+    ports:
+      - "8010:8080"
+      - "8110:8081"
+      - "8810:8810"
+    <<: *base-config
+    env_file:
+      - .spring-app-env
+      - logsender/.ls-env
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev,wc-loggtjanst-stub,testability-api,caching-enabled
+    volumes:
+      - ./logsender/certifikat:$APPLICATION_DIR/certifikat
+      - ./logsender/config:$APPLICATION_DIR/config
+
+
+  minaintyg:
+    image: docker.drift.inera.se/intyg/minaintyg:3.19.2.5
+    container_name: minaintyg
+    profiles: [ 'mi' ]
+    ports:
+      - "8040:8080"
+      - "8140:8081"
+      - "8840:8840"
+    <<: *base-config
+    env_file:
+      - .spring-app-env
+      - minaintyg/.mi-env
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev,caching-enabled,ia-stub,mi-security-test
+    volumes:
+      - ./minaintyg/certifikat:$APPLICATION_DIR/certifikat
+      - ./minaintyg/config:$APPLICATION_DIR//config
+
+
+  privatlakarportal:
+    image: docker.drift.inera.se/intyg/privatlakarportal:1.20.2.4
+    container_name: privatlakarportal
+    profiles: [ 'pp' ]
+    ports:
+      - "8060:8080"
+      - "8160:8081"
+      - "8860:8860"
+    <<: *base-config
+    env_file:
+      - .spring-app-env
+      - privatlakarportal/.pp-env
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev,caching-enabled
+    volumes:
+      - ./privatlakarportal/certifikat:$APPLICATION_DIR/certifikat
+      - ./privatlakarportal/config:$APPLICATION_DIR/config
+
+
+  rehabstod:
+    image: docker.drift.inera.se/intyg/rehabstod:2.0.0.9
+    container_name: rehabstod
+    profiles: [ 'rs' ]
+    ports:
+      - "8030:8080"
+      - "8130:8081"
+      - "8830:8830"
+    <<: *base-config
+    env_file:
+      - .spring-app-env
+      - rehabstod/.rs-env
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev,rhs-samtyckestjanst-stub,rhs-sparrtjanst-stub,rhs-srs-stub,caching-enabled,rhs-security-test,ia-stub
+    volumes:
+      - ./rehabstod/certifikat:$APPLICATION_DIR/certifikat
+      - ./rehabstod/config:$APPLICATION_DIR/config
+
+
+  statistik:
+    image: docker.drift.inera.se/intyg/statistik:7.12.2.5
+    container_name: statistik
+    profiles: [ 'st' ]
+    ports:
+      - "8050:8080"
+      - "8150:8081"
+      - "8850:8850"
+    <<: *base-config
+    env_file:
+     - .spring-app-env
+     - statistik/.st-env
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev,caching-enabled,hsa-caching-disabled,testapi,hsa-stub,wc-hsa-stub,security-both,noprocessing,ia-stub,request-caching-enabled
+    volumes:
+      - ./statistik/certifikat:$APPLICATION_DIR/certifikat
+      - ./statistik/config:$APPLICATION_DIR/config
+
+
+  webcert:
+    image: localhost:5000/intyg/webcert:latest
+    container_name: webcert
+    profiles: [ 'wc' ]
+    ports:
+      - "8020:8080"
+      - "8120:8081"
+      - "8820:8820"
+    <<: *base-config
+    env_file:
+      - .spring-app-env
+      - webcert/.wc-env
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev,caching-enabled,wc-security-test,ia-stub
+    volumes:
+      - ./webcert/certifikat:/opt/app/certifikat
+      - ./webcert/config:/opt/app/config

@@ -1,0 +1,9 @@
+# .spring-app-env
+ACTIVEMQ_BROKER_URL=tcp://host.docker.external:61616?jms.nonBlockingRedelivery=true&jms.redeliveryPolicy.maximumRedeliveries=3&jms.redeliveryPolicy.maximumRedeliveryDelay=6000&jms.redeliveryPolicy.initialRedeliveryDelay=4000&jms.redeliveryPolicy.useExponentialBackOff=true&jms.redeliveryPolicy.backOffMultiplier=2
+APPLICATION_DIR=$APPLICATION_DIR
+DATABASE_SERVER=host.docker.external
+DB_SERVER=host.docker.external
+DEV_CONFIG_FILE=$APPLICATION_DIR/config/application-dev.properties
+DEV_HTTP_PORT=8080
+DEV_HTTP_PORT_INTERNAL=8081
+REDIS_HOST=host.docker.external

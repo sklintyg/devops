@@ -55,6 +55,7 @@ services:
     tty: true
     extra_hosts:
       - host.docker.internal:$WSL_HOST_IP
+      - host.docker.external:host-gateway
     ports:
       - "80:80"
       - "443:443"

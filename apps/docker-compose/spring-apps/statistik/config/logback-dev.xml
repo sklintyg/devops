@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ Copyright (C) 2021 Inera AB (http://www.inera.se)
+  ~
+  ~ This file is part of sklintyg (https://github.com/sklintyg).
+  ~
+  ~ sklintyg is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ sklintyg is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<configuration>
+
+  <property name="APP_NAME" value="${APP_NAME:-statistik}"/>
+
+  <include resource="logback-dev-base.xml"/>
+
+  <logger name="org.apache.camel" level="warn"/>
+  <logger name="org.apache.activemq" level="warn"/>
+  <logger name="org.apache.cxf" level="warn"/>
+
+  <logger name="org.springframework" level="warn"/>
+  <logger name="org.springframework.security" level="warn"/>
+  <logger name="org.springframework.core.env.PropertySourcesPropertyResolver" level="warn"/>
+  <logger name="org.springframework.web" level="warn"/>
+  <logger name="org.springframework.http" level="warn"/>
+
+  <logger name="se.inera.certificate.web" level="warn"/>
+
+  <logger name="org.springframework.security.saml.log" level="info" />
+  <logger name="org.opensaml" level="info" />
+
+  <logger name="se.inera.statistics" level="info" />
+  <logger name="se.inera.statistics.web.service.monitoring" level="info" />
+
+
+  <!-- Enable logging of frontend activities -->
+  <logger name="se.inera.statistics.web.api.LoggingService" level="info">
+    <appender-ref ref="FRONTEND" />
+  </logger>
+
+  <!-- Enable logging of processing status -->
+  <logger name="se.inera.statistics.service.processlog.LogConsumerImpl" level="info" additivity="false">
+    <appender-ref ref="PROCESS" />
+  </logger>
+  <logger name="se.inera.statistics.service.processlog.message.MessageLogConsumerImpl" level="info" additivity="false">
+    <appender-ref ref="PROCESS" />
+  </logger>
+  <logger name="se.inera.statistics.service.hsa.HSAServiceImpl" level="info" additivity="false">
+    <appender-ref ref="PROCESS"/>
+  </logger>
+  <logger name="se.inera.statistics.service.helper.certificate.JsonDocumentHelper" level="info" additivity="false">
+    <appender-ref ref="PROCESS"/>
+  </logger>
+  <logger name="se.inera.statistics.scheduler.active.LogJob" level="info"  additivity="false">
+    <appender-ref ref="PROCESS"/>
+  </logger>
+  <logger name="se.inera.statistics.web.api.ChartDataService" level="info"  additivity="false">
+    <appender-ref ref="PROCESS"/>
+  </logger>
+
+  <!-- Enable logging of access status -->
+  <logger name="se.inera.statistics.web.api.ProtectedChartDataService" level="info" additivity="false">
+    <appender-ref ref="ACCESS" />
+  </logger>
+  <logger name="se.inera.statistics.web.api.ProtectedRegionService" level="info" additivity="false">
+    <appender-ref ref="ACCESS" />
+  </logger>
+
+  <root level="info">
+    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="MONITORING" />
+    <appender-ref ref="VALIDATION" />
+  </root>
+
+</configuration>
