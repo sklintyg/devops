@@ -8,7 +8,7 @@ x-base-config: &base-config
 x-base-config-net: &base-config-net
   <<: *base-config
   networks:
-    jenkins:
+    jenkins-env-test:
 
 
 services:
@@ -41,10 +41,10 @@ services:
       - ./jenkins/data:/var/jenkins_home
       - jenkins-docker-certs:/certs/client
       - type: bind
-        source: ./registry/auth/host.docker.internal.crt
+        source: ./registry/auth/host-docker-internal.crt
         target: /etc/docker/certs.d/host.docker.internal:5000/ca.crt
     networks:
-      jenkins:
+      jenkins-env-test:
         aliases:
           - docker
 
@@ -88,8 +88,8 @@ volumes:
   jenkins-docker-certs:
 
 networks:
-  jenkins:
+  jenkins-env-test:
     ipam:
       config:
-        - subnet: 172.21.0.0/16
-          gateway: 172.21.0.1
+        - subnet: 172.27.0.0/16
+          gateway: 172.27.0.1

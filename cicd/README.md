@@ -1,16 +1,78 @@
-
-
-## Clone the devops repo from Intygstjanster
-Clone repo to a suitable location (for example /repos/intyg) in WSL Ubuntu distro.
-For easy editing of code, setup a project in Intellij in Windows and point to the repo in Linux
-\\wsl$\Ubuntu-22.04\repos\intyg
-
-The devops repo was cloned into a suitable location wsl ubuntu environment but setup as an Intellij project in Windows.
-
+RESET THE CONTAINER AND NETWORK NAMES WHEN DONE
 
 ## Downloading and running Jenkins in Docker
+The setup of Jenkins and Docker in a local container envionment is largely based on
 https://www.jenkins.io/doc/book/installing/docker/ \
 https://yetkintimocin.medium.com/creating-a-local-jenkins-server-using-docker-2e4dfe7b5880
+
+## Clone the devops repo from Intygstjanster
+Clone the Intygstjanster devops repo into a suitable location (for example /repos/intyg) in WSL
+Ubuntu distro. For easy editing of code, setup a project in Intellij in Windows and point to the
+repo in WSL (example path: \\wsl$\Ubuntu-22.04\repos\intyg).
+
+cd into the nexus directory and run\
+chmod 777 -R data\
+chmod 777 -R work
+
+There are number of mounted folders for the different applications. Reason for this is in part to 
+be able to access data easily in the Intellij project but also to keep the size of the containers
+at reasonable levels. Especially the docker registry is likely to consume a lot of memory
+since it holds all images pushed from Jenkins piplines.
+
+
+## Freeing up memory in docker, the docker registry and the WSL distro
+
+### Cleaning up in docker
+To remove all unused containers, networks, images (both dangling and unreferenced), and optionally,
+volumes, system prune can be run.
+
+```docker system prune (use option --volumes to also prune volumes)```
+
+There are also specific prune commands for cleaning images, containers etc separately.
+docker prune container/image/network/volumes
+
+https://docs.docker.com/engine/reference/commandline/system_prune/
+
+
+### Cleaning in WSL
+Apparently Windows does not automatically reclaim memory even when a large amount of data
+has been deleted in WSL. To reclaim freed memory for Windows, perform manual compaction
+of the virtual hard drive.
+
+In PowerShell with admin rights:
+1. cd into ~\AppData\Local\Packages\CanonicalGroupLimited.Ubuntu22.04LTS_79rhkp1fndgsc\LocalState
+(or something with a similar name containing the wsl distro).
+
+2. Run ```wsl --shutdown```
+
+3. Run ```optimize-vhd -Path .\ext4.vhdx -Mode full```
+
+https://ryanharrison.co.uk/2021/05/13/wsl2-better-managing-system-resources.html
+
+
+### Cleaning the registry
+
+
+With time the docker registry might consume quite a lot of memory.
+
+Run ```docker ps``` to find the id of the registry container\
+Run ```docker exec -it <container-id> sh``` (prefer bash instead of shell if it exists)\
+Run ```registry garbage-collect -m /etc/docker/registry/config.yml```
+
+Note: the -m option is probably same as ----delete-untagged
+
+https://docs.docker.com/registry/garbage-collection/
+
+
+
+## Setting the size memory size in WSL
+In Windows in the User folder, create a file name .wslconfig add the below content:\
+
+    [wsl2]\
+    memory=16GB\
+    processors=8\
+
+
 
 
 ## Create a self-signed certificate for use in docker test-environment
