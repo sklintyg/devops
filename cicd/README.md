@@ -20,6 +20,23 @@ at reasonable levels. Especially the docker registry is likely to consume a lot 
 since it holds all images pushed from Jenkins piplines.
 
 
+## Clone the Jenkins library used in Nationella Jenkins
+To simulate work in Nationella Jenkins the code library there used should also be avialable in
+the local Jenkins environment. To achieve this clone the Jenkins library to a suitable
+location and add the whole repo as mounted volume in the local Jenkins.
+
+Example in Ubuntu WSL\
+```cd /repos/jenkins-library```\
+```git clone https://bitbucket.drift.inera.se/scm/jenkins/jenkins-library.git```
+
+In docker-compose.yaml, add the following row in the volumes section of the Jenkins service to
+be able to access it at location /jenkins-library in the Jenkins container. (The :ro at the end
+means read-only).
+
+```- /repos/jenkins-library:/jenkins-library:ro```
+
+
+
 ## Freeing up memory in docker, the docker registry and the WSL distro
 
 ### Cleaning up in docker
