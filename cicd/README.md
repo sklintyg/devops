@@ -9,7 +9,7 @@ The devops repo was cloned into a suitable location wsl ubuntu environment but s
 
 
 ## Downloading and running Jenkins in Docker
-https://www.jenkins.io/doc/book/installing/docker/
+https://www.jenkins.io/doc/book/installing/docker/ \
 https://yetkintimocin.medium.com/creating-a-local-jenkins-server-using-docker-2e4dfe7b5880
 
 
@@ -42,3 +42,25 @@ it.property("sonar.host.url", System.getProperty("sonarUrl") ?: "http://172.21.0
 jenkins: localhost:49000\
 nexus: localhost:37373\
 sonarqbe: localhost:9000
+
+
+```
+docker-compose
+├── docker-compose.yaml
+├── jenkins
+│   ├── data
+│   └── docker
+│       └── Dockerfile
+├── nexus
+│   ├── data
+│   └── work
+├── registry
+│   ├── auth
+│   │   ├── host-docker-internal.crt
+│   │   └── host-docker-internal.key
+│   └── data
+└── sonarqube
+    ├── data
+    ├── extensions
+    └── logs
+```

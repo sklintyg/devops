@@ -1,16 +1,25 @@
 # cicd docker environment
 
+x-base-config: &base-config
+  restart: on-failure
+  extra_hosts:
+    - host.docker.internal:172.21.0.1
+
+x-base-config-net: &base-config-net
+  <<: *base-config
+  networks:
+    jenkins:
+
+
 services:
   jenkins:
     build:
       context: jenkins/docker
-    container_name: jenkins
-    restart: on-failure
+    container_name: jenkins-env-test
+    <<: *base-config-net
     ports:
       - "49000:8080"
       - "50000:50000"
-    extra_hosts:
-      - host.docker.internal:172.21.0.1
     environment:
       - DOCKER_HOST=tcp://docker:2376
       - DOCKER_CERT_PATH=/certs/client
@@ -18,18 +27,14 @@ services:
     volumes:
       - ./jenkins/data:/var/jenkins_home
       - jenkins-docker-certs:/certs/client:ro
-    networks:
-      jenkins:
 
   docker:
     image: docker:dind
-    container_name: docker
+    container_name: docker-env-test
     privileged: true
-    restart: on-failure
+    <<: *base-config
     ports:
       - "2376:2376"
-    extra_hosts:
-      - host.docker.internal:172.21.0.1
     environment:
       - DOCKER_TLS_CERTDIR=/certs
     volumes:
@@ -45,8 +50,8 @@ services:
 
   registry:
     image: registry:2
-    container_name: registry
-    restart: on-failure
+    container_name: registry-env-test
+    <<: *base-config-net
     ports:
       - "5000:5000"
     env_file:
@@ -54,37 +59,30 @@ services:
     volumes:
       - ./registry/auth:/auth
       - ./registry/data:/var/lib/registry
-    networks:
-      jenkins:
 
   sonarqube:
     image: sonarqube:lts-community
-    container_name: sonarqube
-    restart: on-failure
+    container_name: sonarqube-env-test
+    <<: *base-config-net
     ports:
       - "9000:9000"
-    extra_hosts:
-      - host.docker.internal:172.21.0.1
     environment:
       - SONAR_EMBEDDEDDATABASE_PORT=9092
     volumes:
       - ./sonarqube/data:/opt/sonarqube/data
       - ./sonarqube/logs:/opt/sonarqube/logs
       - ./sonarqube/extensions:/opt/sonarqube/extensions
-    networks:
-      jenkins:
 
   nexus:
     image: sonatype/nexus3
-    container_name: nexus
-    restart: on-failure
+    container_name: nexus-env-test
+    <<: *base-config-net
     ports:
       - "37373:8081"
     volumes:
       - ./nexus/data:/nexus-data
       - ./nexus/work:/sonatype-work
-    networks:
-      jenkins:
+
 
 volumes:
   jenkins-docker-certs:
