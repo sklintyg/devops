@@ -1,0 +1,6 @@
+*.iml
+**/data/*
+**/extensions/*
+**/logs/*
+**/work/*
+!**/.gitkeep
