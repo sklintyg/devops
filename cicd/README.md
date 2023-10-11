@@ -7,17 +7,39 @@ https://yetkintimocin.medium.com/creating-a-local-jenkins-server-using-docker-2e
 
 ## Clone the devops repo from Intygstjanster
 Clone the Intygstjanster devops repo into a suitable location (for example /repos/intyg) in WSL
-Ubuntu distro. For easy editing of code, setup a project in Intellij in Windows and point to the
+Ubuntu distro. For easy editing of code, set up a project in Intellij in Windows and point to the
 repo in WSL (example path: \\wsl$\Ubuntu-22.04\repos\intyg).
 
 cd into the nexus directory and run\
 chmod 777 -R data\
 chmod 777 -R work
 
-There are number of mounted folders for the different applications. Reason for this is in part to 
+## Project structure
+There are number of mounted folders for the different applications. Reason for this is in part to
 be able to access data easily in the Intellij project but also to keep the size of the containers
 at reasonable levels. Especially the docker registry is likely to consume a lot of memory
 since it holds all images pushed from Jenkins piplines.
+
+```
+docker-compose
+├── docker-compose.yaml
+├── jenkins
+│   ├── data
+│   └── docker
+│       └── Dockerfile
+├── nexus
+│   ├── data
+│   └── work
+├── registry
+│   ├── auth
+│   │   ├── host-docker-internal.crt
+│   │   └── host-docker-internal.key
+│   └── data
+└── sonarqube
+    ├── data
+    ├── extensions
+    └── logs
+```
 
 
 ## Clone the Jenkins library used in Nationella Jenkins
@@ -35,6 +57,29 @@ means read-only).
 
 ```- /repos/jenkins-library:/jenkins-library:ro```
 
+
+## Setup Jenkins application
+In a Windows browser, go to localhost:49000 to find the Jenkins GUI and follow on-screen
+instructions. To unlock Jenkins, find administrator password in folder /var/jenkins_home/secrets/initialAdminPassword
+either by ```docker exec it <container-id> bash``` into the container or in the Intellij project
+under cicd/docker-compose/jenkins/data/secrets/initialAdminPassword.
+
+Add the jenkins-library intrduced into the container via the mount from WSL. In Jenkins,
+go to \
+```Manage Jenkins -> Configure System -> Global Pipeline Libraries``` and choose to add a library.
+
+    Name: essLib
+    Default version: master
+    Keep checkboxes default
+    Retrieval method: Modern SCM
+    Source code management: Git
+    Project-repository: /jenkins-library (if using the mount from previous section)
+
+Add plugin ```config-file-provider``` to be able to use the JenkinsProperties file used by
+the jenkins-library for holding various config.
+
+Add plugin ```pipeline-utility-steps``` which contributes further functionality used by the
+jenkins-library.
 
 
 ## Freeing up memory in docker, the docker registry and the WSL distro
@@ -58,7 +103,7 @@ of the virtual hard drive.
 
 In PowerShell with admin rights:
 1. cd into ~\AppData\Local\Packages\CanonicalGroupLimited.Ubuntu22.04LTS_79rhkp1fndgsc\LocalState
-(or something with a similar name containing the wsl distro).
+   (or something with a similar name containing the wsl distro).
 
 2. Run ```wsl --shutdown```
 
@@ -123,23 +168,4 @@ nexus: localhost:37373\
 sonarqbe: localhost:9000
 
 
-```
-docker-compose
-├── docker-compose.yaml
-├── jenkins
-│   ├── data
-│   └── docker
-│       └── Dockerfile
-├── nexus
-│   ├── data
-│   └── work
-├── registry
-│   ├── auth
-│   │   ├── host-docker-internal.crt
-│   │   └── host-docker-internal.key
-│   └── data
-└── sonarqube
-    ├── data
-    ├── extensions
-    └── logs
-```
+
