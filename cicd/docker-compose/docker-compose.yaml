@@ -3,25 +3,21 @@
 x-base-config: &base-config
   restart: on-failure
   extra_hosts:
-    - host.docker.internal:172.21.0.1
-
-x-base-config-net: &base-config-net
-  <<: *base-config
+    - host.docker.internal:$CICD_GATEWAY_IP
   networks:
-    jenkins-env-test:
-
+    cicd_network:
 
 services:
   jenkins:
     build:
       context: jenkins/docker
-    container_name: jenkins-env-test
-    <<: *base-config-net
+    container_name: jenkins
+    <<: *base-config
     ports:
       - "49000:8080"
       - "50000:50000"
     environment:
-      - DOCKER_HOST=tcp://docker:2376
+      - DOCKER_HOST=tcp://cicd_network:2376
       - DOCKER_CERT_PATH=/certs/client
       - DOCKER_TLS_VERIFY=1
     volumes:
@@ -30,7 +26,7 @@ services:
 
   docker:
     image: docker:dind
-    container_name: docker-env-test
+    container_name: docker
     privileged: true
     <<: *base-config
     ports:
@@ -43,15 +39,11 @@ services:
       - type: bind
         source: ./registry/auth/host-docker-internal.crt
         target: /etc/docker/certs.d/host.docker.internal:5000/ca.crt
-    networks:
-      jenkins-env-test:
-        aliases:
-          - docker
 
   registry:
-    image: registry:2
-    container_name: registry-env-test
-    <<: *base-config-net
+    image: registry:latest
+    container_name: registry
+    <<: *base-config
     ports:
       - "5000:5000"
     env_file:
@@ -62,8 +54,8 @@ services:
 
   sonarqube:
     image: sonarqube:lts-community
-    container_name: sonarqube-env-test
-    <<: *base-config-net
+    container_name: sonarqube
+    <<: *base-config
     ports:
       - "9000:9000"
     environment:
@@ -74,22 +66,21 @@ services:
       - ./sonarqube/extensions:/opt/sonarqube/extensions
 
   nexus:
-    image: sonatype/nexus3
-    container_name: nexus-env-test
-    <<: *base-config-net
+    image: sonatype/nexus3:latest
+    container_name: nexus
+    <<: *base-config
     ports:
       - "37373:8081"
     volumes:
       - ./nexus/data:/nexus-data
       - ./nexus/work:/sonatype-work
 
-
 volumes:
   jenkins-docker-certs:
 
 networks:
-  jenkins-env-test:
+  cicd_network:
     ipam:
       config:
-        - subnet: 172.27.0.0/16
-          gateway: 172.27.0.1
+        - subnet: $CICD_SUBNET_IP
+          gateway: $CICD_GATEWAY_IP

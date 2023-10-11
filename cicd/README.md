@@ -1,4 +1,3 @@
-RESET THE CONTAINER AND NETWORK NAMES WHEN DONE
 
 ## Downloading and running Jenkins in Docker
 The setup of Jenkins and Docker in a local container envionment is largely based on
