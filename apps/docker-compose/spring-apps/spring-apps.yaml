@@ -2,7 +2,7 @@ version: "3.8"
 
 x-config: &base-config
   pull_policy: always
-  restart: always
+  restart: on-failure
   extra_hosts:
     - host.docker.internal:$WSL_HOST_IP
     - host.docker.external:host-gateway
