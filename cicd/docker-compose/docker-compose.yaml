@@ -73,7 +73,6 @@ services:
       - "37373:8081"
     volumes:
       - ./nexus/data:/nexus-data
-      - ./nexus/work:/sonatype-work
 
 volumes:
   jenkins-docker-certs:
