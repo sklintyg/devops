@@ -165,6 +165,3 @@ it.property("sonar.host.url", System.getProperty("sonarUrl") ?: "http://172.21.0
 jenkins: localhost:49000\
 nexus: localhost:37373\
 sonarqbe: localhost:9000
-
-
-
