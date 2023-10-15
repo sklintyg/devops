@@ -10,7 +10,7 @@ x-config: &base-config
 
 services:
   intygstjanst:
-    image: localhost:5000/intyg/intygstjanst:latest
+    image: docker.drift.inera.se/intyg/intygstjanst:latest
     container_name: intygstjanst
     profiles: [ 'it' ]
     ports:
@@ -28,7 +28,7 @@ services:
 
 
   logsender:
-    image: localhost:5000/intyg/logsender:latest
+    image: docker.drift.inera.se/intyg/logsender:latest
     container_name: logsender
     profiles: [ 'ls' ]
     ports:
@@ -47,7 +47,7 @@ services:
 
 
   minaintyg:
-    image: docker.drift.inera.se/intyg/minaintyg:3.19.2.5
+    image: docker.drift.inera.se/intyg/minaintyg:latest
     container_name: minaintyg
     profiles: [ 'mi' ]
     ports:
@@ -66,7 +66,7 @@ services:
 
 
   privatlakarportal:
-    image: docker.drift.inera.se/intyg/privatlakarportal:1.20.2.4
+    image: docker.drift.inera.se/intyg/privatlakarportal:latest
     container_name: privatlakarportal
     profiles: [ 'pp' ]
     ports:
@@ -85,7 +85,7 @@ services:
 
 
   rehabstod:
-    image: docker.drift.inera.se/intyg/rehabstod:2.0.0.9
+    image: docker.drift.inera.se/intyg/rehabstod:latest
     container_name: rehabstod
     profiles: [ 'rs' ]
     ports:
@@ -104,7 +104,7 @@ services:
 
 
   statistik:
-    image: docker.drift.inera.se/intyg/statistik:7.12.2.5
+    image: docker.drift.inera.se/intyg/statistik:latest
     container_name: statistik
     profiles: [ 'st' ]
     ports:
@@ -123,7 +123,7 @@ services:
 
 
   webcert:
-    image: localhost:5000/intyg/webcert:latest
+    image: docker.drift.inera.se/intyg/webcert:latest
     container_name: webcert
     profiles: [ 'wc' ]
     ports:

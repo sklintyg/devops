@@ -10,7 +10,7 @@ x-config: &base-config
 
 services:
   customer-terminate-service:
-    image: docker.drift.inera.se/intyg/customer-terminate-service:1.2.2.4
+    image: docker.drift.inera.se/intyg/customer-terminate-service:latest
     container_name: customer-terminate-service
     profiles: [ "cts" ]
     ports:
@@ -26,7 +26,7 @@ services:
 
 
   intyg-proxy-service:
-    image: localhost:5000/intyg/intyg-proxy-service:latest
+    image: docker.drift.inera.se/intyg/intyg-proxy-service:latest
     container_name: intyg-proxy-service
     profiles: [ "ips" ]
     ports:
@@ -41,7 +41,7 @@ services:
 
 
   intygsadmin:
-    image: docker.drift.inera.se/intyg/intygsadmin:1.9.2.1
+    image: docker.drift.inera.se/intyg/intygsadmin:latest
     container_name: intygsadmin
     profiles: [ 'ia' ]
     ports:
@@ -57,7 +57,7 @@ services:
 
 
   minaintyg2:
-    image: docker.drift.inera.se/intyg/minaintyg:4.0.0.25
+    image: docker.drift.inera.se/intyg/minaintyg:latest
     container_name: minaintyg2
     profiles: [ "mi2" ]
     ports:
@@ -74,7 +74,7 @@ services:
 
 
   sjut:
-    image: docker.drift.inera.se/intyg/sjut:1.1.2.1
+    image: docker.drift.inera.se/intyg/sjut:latest
     container_name: sjut
     profiles: [ 'sjut' ]
     ports:
@@ -91,7 +91,7 @@ services:
 
 
   srs:
-    image: docker.drift.inera.se/intyg/srs:1.2.2.2
+    image: docker.drift.inera.se/intyg/srs:latest
     container_name: srs
     profiles: [ 'srs' ]
     ports:

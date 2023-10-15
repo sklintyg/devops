@@ -10,7 +10,7 @@ x-config: &base-config
 
 services:
   minaintyg-frontend:
-    image: docker.drift.inera.se/intyg/minaintyg-frontend:0.1.0.20
+    image: docker.drift.inera.se/intyg/minaintyg-frontend:latest
     container_name: minaintyg-frontend
     profiles: [ 'mi-frontend' ]
     ports:
@@ -21,7 +21,7 @@ services:
 
 
   rehabstod-frontend:
-    image: docker.drift.inera.se/intyg/rehabstod-frontend:1.0.0.18
+    image: docker.drift.inera.se/intyg/rehabstod-frontend:latest
     container_name: rehabstod-frontend
     profiles: [ 'rs-frontend' ]
     ports:
@@ -32,7 +32,7 @@ services:
 
 
   webcert-frontend:
-    image: localhost:5000/intyg/webcert-frontend:latest
+    image: docker.drift.inera.se/intyg/webcert-frontend:latest
     container_name: webcert-frontend
     profiles: [ "wc-frontend" ]
     ports:
