@@ -1,0 +1,3 @@
+# .it-env
+RECIPIENT_CONFIG_FILE=$APPLICATION_DIR/config/recipients-dev.json
+JAVA_OPTS=$JAVA_DEBUG_STRING:8880

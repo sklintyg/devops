@@ -1,0 +1,6 @@
+version: "3.8"
+
+include:
+  - frontend-apps/frontend-apps.yaml
+  - spring-apps/spring-apps.yaml
+  - springboot-apps/springboot-apps.yaml
