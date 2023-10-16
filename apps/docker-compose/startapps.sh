@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # APPS is a space separated list of apps to run in docker containers locally
-# start containers with command ./startintygenv
+# start containers with command ./startapps.sh
 APPS=("mi-frontend" "ips" "it" "wc" "mi2")
 
 # OPTIONS:
