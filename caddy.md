@@ -6,7 +6,7 @@ Alternative to nginx for windows users is to use caddy
 
 Navigate to folder containing docker-compose.yaml and issue the following command to only stop nginx.
 
-```
+```bash
 docker compose stop nginx
 ```
 
