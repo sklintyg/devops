@@ -36,9 +36,9 @@ curl.exe https://webi.ms/caddy | powershell
 
 install [mkcert](https://github.com/FiloSottile/mkcert) and run
 
-````bash
+```bash
 mkcert -key-file key.pem -cert-file cert.pem *.localtest.me
-``
+```
 
 ## Run Caddy
 
@@ -46,7 +46,7 @@ Make sure the path to `caddy.exe` is avilable in your environment `PATH`
 
 ```bash
 caddy run --config Caddyfile
-````
+```
 
 ## Run caddy as a service
 
