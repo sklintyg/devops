@@ -1,6 +1,6 @@
 # Use Caddy instead of nginx
 
-Alternative to nginx for windows users is to use caddy
+Alternative to nginx for windows users
 
 ## Stop nginx process
 
@@ -12,25 +12,7 @@ docker compose stop nginx
 
 ## Installation
 
-Install caddy for with prefered [method](https://caddyserver.com/docs/install#install).
-
-For example choco:
-
-```bash
-choco install caddy
-```
-
-Or scoop:
-
-```bash
-scoop install caddy
-```
-
-Or using curl:
-
-```bash
-curl.exe https://webi.ms/caddy | powershell
-```
+Install Caddy with prefered [method](https://caddyserver.com/docs/install#install).
 
 ## Add locally signed certificate
 
