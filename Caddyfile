@@ -1,51 +1,69 @@
-{
-    local_certs
-}
-
 wc2.wc.localtest.me {
+    tls ./cert.pem ./key.pem
     reverse_proxy :3000
 }
 
 wc.localtest.me {
+    tls ./cert.pem ./key.pem
     reverse_proxy :8020
 }
 
 sjut.localtest.me {
+    tls ./cert.pem ./key.pem0
     reverse_proxy :8090
 }
 
 it.localtest.me {
+    tls ./cert.pem ./key.pem
     reverse_proxy :8080
 }
 
 rs.localtest.me {
+    tls ./cert.pem ./key.pem
     reverse_proxy :8030
 }
 
+rs2.rs.localtest.me {
+    tls ./cert.pem ./key.pem
+    reverse_proxy :5173
+}
+
 mi.localtest.me {
+    tls ./cert.pem ./key.pem
     reverse_proxy :8040
 }
 
+mi2.mi.localtest.me {
+    tls ./cert.pem ./key.pem
+    reverse_proxy :5174
+}
+
 st.localtest.me {
+    tls ./cert.pem ./key.pem
     reverse_proxy :8050
 }
 
 pp.localtest.me {
+    tls ./cert.pem ./key.pem
     reverse_proxy :8060
 }
 
 ia.localtest.me {
+    tls ./cert.pem ./key.pem
     reverse_proxy :8070
 }
 
 ls.localtest.me {
+    tls ./cert.pem ./key.pem
     reverse_proxy :8010
 }
 
 cts.localtest.me {
+    tls ./cert.pem ./key.pem
     reverse_proxy :18010
 }
 
 amq.localtest.me {
+    tls ./cert.pem ./key.pem
     reverse_proxy :8861
 }
