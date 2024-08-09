@@ -1,0 +1,44 @@
+-- This script deletes certificates and related information for a certain certificate ids.
+USE webcert;
+DELIMITER $$
+CREATE PROCEDURE delete_certificates_in_webcert()
+BEGIN
+	DECLARE errorCode CHAR(5) DEFAULT '00000';
+    DECLARE errorMessage TEXT;
+    DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
+    BEGIN
+    GET DIAGNOSTICS CONDITION 1
+        errorCode = RETURNED_SQLSTATE, errorMessage = MESSAGE_TEXT;
+    END;
+	CREATE TEMPORARY TABLE CERTIFICATE_IDS (
+		ID VARCHAR(64) NOT NULL COLLATE utf8mb3_general_ci, -- Set the collate to same as the tables otherwise a table-scan will be made.
+		PRIMARY KEY (ID)
+	);
+	INSERT INTO CERTIFICATE_IDS (ID) VALUES
+        ('<certificate id>'),
+        ('<certificate id>');
+	START TRANSACTION;
+	SET SQL_SAFE_UPDATES = 0;
+	DELETE FROM webcert.CERTIFICATE_EVENT WHERE CERTIFICATE_ID IN (SELECT ID FROM CERTIFICATE_IDS);
+	DELETE FROM webcert.NOTIFICATION_REDELIVERY WHERE HANDELSE_ID IN (SELECT ID FROM webcert.HANDELSE WHERE INTYGS_ID IN (SELECT ID FROM CERTIFICATE_IDS));
+	DELETE FROM webcert.HANDELSE_METADATA WHERE HANDELSE_ID IN (SELECT ID FROM webcert.HANDELSE WHERE INTYGS_ID IN (SELECT ID FROM CERTIFICATE_IDS));
+	DELETE FROM webcert.HANDELSE WHERE INTYGS_ID IN (SELECT ID FROM CERTIFICATE_IDS);
+	DELETE FROM webcert.SIGNATUR WHERE INTYG_ID IN (SELECT ID FROM CERTIFICATE_IDS);
+	DELETE FROM webcert.REFERENS WHERE INTYG_ID IN (SELECT ID FROM CERTIFICATE_IDS);
+	DELETE FROM webcert.PAGAENDE_SIGNERING WHERE INTYG_ID IN (SELECT ID FROM CERTIFICATE_IDS);
+	DELETE FROM webcert.INTYG WHERE INTYGS_ID IN (SELECT ID FROM CERTIFICATE_IDS);
+	SET SQL_SAFE_UPDATES = 1;
+	DROP TEMPORARY TABLE CERTIFICATE_IDS;
+	IF errorCode = '00000' THEN
+        ROLLBACK;
+        SELECT 'Successfully deleted certificates in webcert.';
+    ELSE
+        ROLLBACK;
+        SELECT CONCAT('Stored procedure failed, no changes were introduced, errorCode = ', errorCode, ', errorMessage = ', errorMessage);
+    END IF;
+END $$
+DELIMITER ;
+CALL delete_certificates_in_webcert;
+DROP PROCEDURE delete_certificates_in_webcert;
+
+
