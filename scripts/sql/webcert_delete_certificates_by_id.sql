@@ -30,7 +30,7 @@ BEGIN
 	SET SQL_SAFE_UPDATES = 1;
 	DROP TEMPORARY TABLE CERTIFICATE_IDS;
 	IF errorCode = '00000' THEN
-        ROLLBACK;
+        COMMIT;
         SELECT 'Successfully deleted certificates in webcert.';
     ELSE
         ROLLBACK;
