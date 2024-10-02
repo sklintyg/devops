@@ -1,5 +1,4 @@
-version: "3.8"
-
+name: apps
 include:
   - frontend-apps/frontend-apps.yaml
   - spring-apps/spring-apps.yaml

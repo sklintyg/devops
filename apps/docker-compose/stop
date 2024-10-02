@@ -1,0 +1,28 @@
+#!/bin/bash
+
+declare -A APPS
+
+APPS=(
+  ["cs"]=certificate-service
+  ["ia"]=intygsadmin
+  ["it"]=intygstjanst
+  ["ls"]=logsender
+  ["mi"]=minaintyg
+  ["pp"]=privatlakarportal
+  ["rs"]=rehabstod
+  ["st"]=statistik
+  ["wc"]=webcert
+  ["cts"]=customer-terminate-service
+  ["ips"]=intyg-proxy-service
+  ["srs"]=srs
+  ["sjut"]=sjut
+)
+
+args=$@
+echo "Stopping containers ${args[@]}"
+
+for APP in ${args[@]}; do
+  app="${APPS[${APP}]}"
+  docker compose stop "$app"
+done
+
