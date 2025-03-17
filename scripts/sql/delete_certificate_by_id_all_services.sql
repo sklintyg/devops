@@ -1,4 +1,4 @@
-USE intygstjanst_environment;
+USE intygstjanst;
 DELIMITER $$
 CREATE PROCEDURE delete_certificate_in_all_databases()
 BEGIN
@@ -20,20 +20,20 @@ BEGIN
 
 
     -- ******** DELETING FROM INTYGSTJANST DATABASE ********
-    DELETE FROM intygstjanst_environment.RELATION WHERE FROM_INTYG_ID = certIdToDelete;
-    DELETE FROM intygstjanst_environment.RELATION WHERE TO_INTYG_ID = certIdToDelete;
-    DELETE FROM intygstjanst_environment.ARENDE WHERE INTYGS_ID = certIdToDelete;
-    DELETE FROM intygstjanst_environment.APPROVED_RECEIVER WHERE CERTIFICATE_ID = certIdToDelete;
-    DELETE FROM intygstjanst_environment.SJUKFALL_CERT WHERE ID = certIdToDelete;
-    DELETE FROM intygstjanst_environment.SJUKFALL_CERT_WORK_CAPACITY WHERE CERTIFICATE_ID = certIdToDelete;
-    DELETE FROM intygstjanst_environment.CERTIFICATE_METADATA WHERE CERTIFICATE_ID = certIdToDelete;
-    DELETE FROM intygstjanst_environment.CERTIFICATE_STATE WHERE CERTIFICATE_ID = certIdToDelete;
-    DELETE FROM intygstjanst_environment.ORIGINAL_CERTIFICATE WHERE CERTIFICATE_ID = certIdToDelete;
-    DELETE FROM intygstjanst_environment.CERTIFICATE WHERE ID = certIdToDelete;
+    DELETE FROM intygstjanst.RELATION WHERE FROM_INTYG_ID = certIdToDelete;
+    DELETE FROM intygstjanst.RELATION WHERE TO_INTYG_ID = certIdToDelete;
+    DELETE FROM intygstjanst.ARENDE WHERE INTYGS_ID = certIdToDelete;
+    DELETE FROM intygstjanst.APPROVED_RECEIVER WHERE CERTIFICATE_ID = certIdToDelete;
+    DELETE FROM intygstjanst.SJUKFALL_CERT WHERE ID = certIdToDelete;
+    DELETE FROM intygstjanst.SJUKFALL_CERT_WORK_CAPACITY WHERE CERTIFICATE_ID = certIdToDelete;
+    DELETE FROM intygstjanst.CERTIFICATE_METADATA WHERE CERTIFICATE_ID = certIdToDelete;
+    DELETE FROM intygstjanst.CERTIFICATE_STATE WHERE CERTIFICATE_ID = certIdToDelete;
+    DELETE FROM intygstjanst.ORIGINAL_CERTIFICATE WHERE CERTIFICATE_ID = certIdToDelete;
+    DELETE FROM intygstjanst.CERTIFICATE WHERE ID = certIdToDelete;
 
 
     -- ******** DELETING FROM INTYGSADMIN DATABASE ********
-    DELETE FROM intygsadmin_environment.intyg_info WHERE intyg_id = certIdToDelete;
+    DELETE FROM intygsadmin.intyg_info WHERE intyg_id = certIdToDelete;
 
 
     -- ******** DELETING FROM STATISTIK DATABASE ********
@@ -41,15 +41,15 @@ BEGIN
     CREATE TEMPORARY TABLE STATISTIK_MESSAGE_KEYS (
                     S_M_KEY BIGINT NOT NULL COLLATE utf8mb3_general_ci,
                     PRIMARY KEY (S_M_KEY));
-    INSERT INTO STATISTIK_MESSAGE_KEYS (S_M_KEY) SELECT meddelandeId FROM statistik_environment.messagewideline WHERE intygid = certIdToDelete;
+    INSERT INTO STATISTIK_MESSAGE_KEYS (S_M_KEY) SELECT meddelandeId FROM statistik.messagewideline WHERE intygid = certIdToDelete;
 
-    DELETE FROM statistik_environment.intyghandelse WHERE CORRELATIONID = certIdToDelete;
-    DELETE FROM statistik_environment.intygsenthandelse WHERE CORRELATIONID = certIdToDelete;
-    DELETE FROM statistik_environment.intygcommon WHERE INTYGID = certIdToDelete;
-    DELETE FROM statistik_environment.messagewideline WHERE intygid = certIdToDelete;
-    DELETE FROM statistik_environment.wideline WHERE correlationId = certIdToDelete;
-    DELETE FROM statistik_environment.meddelandehandelse WHERE correlationId IN (SELECT S_M_KEY FROM STATISTIK_MESSAGE_KEYS);
-    DELETE FROM statistik_environment.hsa WHERE id = certIdToDelete;
+    DELETE FROM statistik.intyghandelse WHERE CORRELATIONID = certIdToDelete;
+    DELETE FROM statistik.intygsenthandelse WHERE CORRELATIONID = certIdToDelete;
+    DELETE FROM statistik.intygcommon WHERE INTYGID = certIdToDelete;
+    DELETE FROM statistik.messagewideline WHERE intygid = certIdToDelete;
+    DELETE FROM statistik.wideline WHERE correlationId = certIdToDelete;
+    DELETE FROM statistik.meddelandehandelse WHERE correlationId IN (SELECT S_M_KEY FROM STATISTIK_MESSAGE_KEYS);
+    DELETE FROM statistik.hsa WHERE id = certIdToDelete;
 
 
     -- ******** DELETING FROM WEBCERT DATABASE ********
@@ -57,39 +57,39 @@ BEGIN
     CREATE TEMPORARY TABLE WEBCERT_HANDELSE_IDS (
                         H_ID BIGINT NOT NULL COLLATE utf8mb3_general_ci,
                         PRIMARY KEY (H_ID));
-    INSERT INTO WEBCERT_HANDELSE_IDS (H_ID) SELECT ID FROM webcert_environment.HANDELSE WHERE INTYGS_ID = certIdToDelete;
+    INSERT INTO WEBCERT_HANDELSE_IDS (H_ID) SELECT ID FROM webcert.HANDELSE WHERE INTYGS_ID = certIdToDelete;
 
     -- Create temporary table to store webcert.ARENDE ARENDE_ID
     CREATE TEMPORARY TABLE WEBCERT_ARENDE_IDS (
                     A_ID BIGINT NOT NULL COLLATE utf8mb3_general_ci,
                     PRIMARY KEY (A_ID));
-    INSERT INTO WEBCERT_ARENDE_IDS (A_ID) SELECT ID FROM webcert_environment.ARENDE WHERE INTYGS_ID = certIdToDelete;
+    INSERT INTO WEBCERT_ARENDE_IDS (A_ID) SELECT ID FROM webcert.ARENDE WHERE INTYGS_ID = certIdToDelete;
 
     -- Create temporary table to store webcert.FRAGASVAR internReferens
     CREATE TEMPORARY TABLE WEBCERT_FRAGASVAR_REFS (
                     F_REF BIGINT NOT NULL COLLATE utf8mb3_general_ci,
                     PRIMARY KEY (F_REF));
-    INSERT INTO WEBCERT_FRAGASVAR_REFS (F_REF) SELECT internReferens FROM webcert_environment.FRAGASVAR WHERE INTYGS_ID = certIdToDelete;
+    INSERT INTO WEBCERT_FRAGASVAR_REFS (F_REF) SELECT internReferens FROM webcert.FRAGASVAR WHERE INTYGS_ID = certIdToDelete;
 
 
 
-    DELETE FROM webcert_environment.CERTIFICATE_EVENT WHERE CERTIFICATE_ID = certIdToDelete;
-    DELETE FROM webcert_environment.NOTIFICATION_REDELIVERY WHERE HANDELSE_ID IN (SELECT H_ID FROM WEBCERT_HANDELSE_IDS);
-    DELETE FROM webcert_environment.HANDELSE_METADATA WHERE HANDELSE_ID IN (SELECT H_ID FROM WEBCERT_HANDELSE_IDS);
-    DELETE FROM webcert_environment.HANDELSE WHERE INTYGS_ID = certIdToDelete;
-    DELETE FROM webcert_environment.SIGNATUR WHERE INTYG_ID = certIdToDelete;
-    DELETE FROM webcert_environment.REFERENS WHERE INTYG_ID = certIdToDelete;
-    DELETE FROM webcert_environment.PAGAENDE_SIGNERING WHERE INTYG_ID = certIdToDelete;
-    DELETE FROM webcert_environment.ARENDE_KONTAKT_INFO WHERE ARENDE_ID IN (SELECT A_ID FROM WEBCERT_ARENDE_IDS);
-    DELETE FROM webcert_environment.MEDICINSKT_ARENDE WHERE ARENDE_ID IN (SELECT A_ID FROM WEBCERT_ARENDE_IDS);
-    DELETE FROM webcert_environment.ARENDE WHERE INTYGS_ID = certIdToDelete;
-    DELETE FROM webcert_environment.ARENDE_UTKAST WHERE INTYGS_ID = certIdToDelete;
-    DELETE FROM webcert_environment.CERTIFICATE_EVENT_FAILED_LOAD WHERE CERTIFICATE_ID = certIdToDelete;
-    DELETE FROM webcert_environment.CERTIFICATE_EVENT_PROCESSED WHERE CERTIFICATE_ID = certIdToDelete;
-    DELETE FROM webcert_environment.KOMPLETTERING WHERE FRAGASVAR_ID IN (SELECT F_REF FROM WEBCERT_FRAGASVAR_REFS);
-    DELETE FROM webcert_environment.EXTERNA_KONTAKTER WHERE FRAGASVAR_ID IN (SELECT F_REF FROM WEBCERT_FRAGASVAR_REFS);
-    DELETE FROM webcert_environment.FRAGASVAR WHERE INTYGS_ID = certIdToDelete;
-    DELETE FROM webcert_environment.INTYG WHERE INTYGS_ID = certIdToDelete;
+    DELETE FROM webcert.CERTIFICATE_EVENT WHERE CERTIFICATE_ID = certIdToDelete;
+    DELETE FROM webcert.NOTIFICATION_REDELIVERY WHERE HANDELSE_ID IN (SELECT H_ID FROM WEBCERT_HANDELSE_IDS);
+    DELETE FROM webcert.HANDELSE_METADATA WHERE HANDELSE_ID IN (SELECT H_ID FROM WEBCERT_HANDELSE_IDS);
+    DELETE FROM webcert.HANDELSE WHERE INTYGS_ID = certIdToDelete;
+    DELETE FROM webcert.SIGNATUR WHERE INTYG_ID = certIdToDelete;
+    DELETE FROM webcert.REFERENS WHERE INTYG_ID = certIdToDelete;
+    DELETE FROM webcert.PAGAENDE_SIGNERING WHERE INTYG_ID = certIdToDelete;
+    DELETE FROM webcert.ARENDE_KONTAKT_INFO WHERE ARENDE_ID IN (SELECT A_ID FROM WEBCERT_ARENDE_IDS);
+    DELETE FROM webcert.MEDICINSKT_ARENDE WHERE ARENDE_ID IN (SELECT A_ID FROM WEBCERT_ARENDE_IDS);
+    DELETE FROM webcert.ARENDE WHERE INTYGS_ID = certIdToDelete;
+    DELETE FROM webcert.ARENDE_UTKAST WHERE INTYGS_ID = certIdToDelete;
+    DELETE FROM webcert.CERTIFICATE_EVENT_FAILED_LOAD WHERE CERTIFICATE_ID = certIdToDelete;
+    DELETE FROM webcert.CERTIFICATE_EVENT_PROCESSED WHERE CERTIFICATE_ID = certIdToDelete;
+    DELETE FROM webcert.KOMPLETTERING WHERE FRAGASVAR_ID IN (SELECT F_REF FROM WEBCERT_FRAGASVAR_REFS);
+    DELETE FROM webcert.EXTERNA_KONTAKTER WHERE FRAGASVAR_ID IN (SELECT F_REF FROM WEBCERT_FRAGASVAR_REFS);
+    DELETE FROM webcert.FRAGASVAR WHERE INTYGS_ID = certIdToDelete;
+    DELETE FROM webcert.INTYG WHERE INTYGS_ID = certIdToDelete;
 
 
 
