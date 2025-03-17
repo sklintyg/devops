@@ -5,7 +5,8 @@ BEGIN
     DECLARE errorCode CHAR(5) DEFAULT '00000';
     DECLARE errorMessage TEXT;
     DECLARE csCertKey BIGINT;
-    DECLARE certIdToDelete VARCHAR(255) DEFAULT '<certificate_id>';
+    DECLARE certIdToDelete VARCHAR(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT '<certificate_id>';
+    DECLARE certIdToDeleteCS VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '<certificate_id>';
 
     DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -95,11 +96,11 @@ BEGIN
 
     -- ******** DELETING FROM CERTIFICATE-SERVICE DATABASE ********
     -- Insert cs certificate key into variable
-    SELECT `KEY` INTO csCertKey FROM certificate_service.certificate WHERE CERTIFICATE_ID = certIdToDelete;
+    SELECT `KEY` INTO csCertKey FROM certificate_service.certificate WHERE CERTIFICATE_ID = certIdToDeleteCS;
 
     -- Create temporary table to store Certificate-service message keys
     CREATE TEMPORARY TABLE CS_MESSAGE_KEYS (
-                    CS_M_KEY BIGINT NOT NULL COLLATE utf8mb3_general_ci,
+                    CS_M_KEY BIGINT NOT NULL COLLATE utf8mb4_0900_ai_ci,
                     PRIMARY KEY (CS_M_KEY)
                 );
     -- Insert message keys into the temporary table
@@ -116,7 +117,7 @@ BEGIN
     DELETE FROM certificate_service.certificate_relation WHERE CHILD_CERTIFICATE_KEY = csCertKey;
     DELETE FROM certificate_service.certificate_data WHERE `KEY` = csCertKey;
     DELETE FROM certificate_service.external_reference WHERE `KEY` = csCertKey;
-    DELETE FROM certificate_service.certificate WHERE CERTIFICATE_ID = certIdToDelete;
+    DELETE FROM certificate_service.certificate WHERE CERTIFICATE_ID = certIdToDeleteCS;
 
     DROP TEMPORARY TABLE CS_MESSAGE_KEYS;
     DROP TEMPORARY TABLE STATISTIK_MESSAGE_KEYS;
