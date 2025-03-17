@@ -44,6 +44,7 @@ BEGIN
     INSERT INTO STATISTIK_MESSAGE_KEYS (S_M_KEY) SELECT meddelandeId FROM statistik_environment.messagewideline WHERE intygid = certIdToDelete;
 
     DELETE FROM statistik_environment.intyghandelse WHERE CORRELATIONID = certIdToDelete;
+    DELETE FROM statistik_environment.intygsenthandelse WHERE CORRELATIONID = certIdToDelete;
     DELETE FROM statistik_environment.intygcommon WHERE INTYGID = certIdToDelete;
     DELETE FROM statistik_environment.messagewideline WHERE intygid = certIdToDelete;
     DELETE FROM statistik_environment.wideline WHERE correlationId = certIdToDelete;
@@ -86,6 +87,7 @@ BEGIN
     DELETE FROM webcert_environment.CERTIFICATE_EVENT_FAILED_LOAD WHERE CERTIFICATE_ID = certIdToDelete;
     DELETE FROM webcert_environment.CERTIFICATE_EVENT_PROCESSED WHERE CERTIFICATE_ID = certIdToDelete;
     DELETE FROM webcert_environment.KOMPLETTERING WHERE FRAGASVAR_ID IN (SELECT F_REF FROM WEBCERT_FRAGASVAR_REFS);
+    DELETE FROM webcert_environment.EXTERNA_KONTAKTER WHERE FRAGASVAR_ID IN (SELECT F_REF FROM WEBCERT_FRAGASVAR_REFS);
     DELETE FROM webcert_environment.FRAGASVAR WHERE INTYGS_ID = certIdToDelete;
     DELETE FROM webcert_environment.INTYG WHERE INTYGS_ID = certIdToDelete;
 
@@ -113,6 +115,7 @@ BEGIN
     DELETE FROM certificate_service.certificate_relation WHERE PARENT_CERTIFICATE_KEY = csCertKey;
     DELETE FROM certificate_service.certificate_relation WHERE CHILD_CERTIFICATE_KEY = csCertKey;
     DELETE FROM certificate_service.certificate_data WHERE `KEY` = csCertKey;
+    DELETE FROM certificate_service.external_reference WHERE `KEY` = csCertKey;
     DELETE FROM certificate_service.certificate WHERE CERTIFICATE_ID = certIdToDelete;
 
     DROP TEMPORARY TABLE CS_MESSAGE_KEYS;
