@@ -1,69 +1,67 @@
-wc2.wc.localtest.me {
-    tls ./cert.pem ./key.pem
-    reverse_proxy :3000
+wc.localhost, wc.localtest.me {
+	tls ./cert.pem ./key.pem
+	reverse_proxy :3000
 }
 
-wc.localtest.me {
-    tls ./cert.pem ./key.pem
-    reverse_proxy :8020
+sjut.localhost, sjut.localtest.me {
+	tls ./cert.pem ./key.pem0
+	reverse_proxy :8090
 }
 
-sjut.localtest.me {
-    tls ./cert.pem ./key.pem0
-    reverse_proxy :8090
+it.localhost, it.localtest.me {
+	tls ./cert.pem ./key.pem
+	reverse_proxy :8080
 }
 
-it.localtest.me {
-    tls ./cert.pem ./key.pem
-    reverse_proxy :8080
+rs.localhost, rs.localtest.me {
+	tls ./cert.pem ./key.pem
+	reverse_proxy :5173
 }
 
-rs.localtest.me {
-    tls ./cert.pem ./key.pem
-    reverse_proxy :8030
+mi.localhost, mi.localtest.me {
+	tls ./cert.pem ./key.pem
+	reverse_proxy :5174
 }
 
-rs2.rs.localtest.me {
-    tls ./cert.pem ./key.pem
-    reverse_proxy :5173
+st.localhost, st.localtest.me {
+	tls ./cert.pem ./key.pem
+	reverse_proxy :8050
 }
 
-mi.localtest.me {
-    tls ./cert.pem ./key.pem
-    reverse_proxy :8040
+pp.localhost, pp.localtest.me {
+	tls ./cert.pem ./key.pem
+	reverse_proxy :8060
 }
 
-mi2.mi.localtest.me {
-    tls ./cert.pem ./key.pem
-    reverse_proxy :5174
+ia.localhost, ia.localtest.me {
+	tls ./cert.pem ./key.pem
+	reverse_proxy :8970 {
+		header_up X-Forwarded-For {remote_host}
+    header_up X-Forwarded-Proto {scheme}
+	}
 }
 
-st.localtest.me {
-    tls ./cert.pem ./key.pem
-    reverse_proxy :8050
+ls.localhost, ls.localtest.me {
+	tls ./cert.pem ./key.pem
+	reverse_proxy :8010
 }
 
-pp.localtest.me {
-    tls ./cert.pem ./key.pem
-    reverse_proxy :8060
+cts.localhost, cts.localtest.me {
+	tls ./cert.pem ./key.pem
+	reverse_proxy :18010
 }
 
-ia.localtest.me {
-    tls ./cert.pem ./key.pem
-    reverse_proxy :8070
+amq.localhost, amq.localtest.me {
+	tls ./cert.pem ./key.pem
+	reverse_proxy :8861
 }
 
-ls.localtest.me {
-    tls ./cert.pem ./key.pem
-    reverse_proxy :8010
-}
+hjmt.localhost, hjmt.localtest.me {
+	tls ./cert.pem ./key.pem
+	reverse_proxy :4200
 
-cts.localtest.me {
-    tls ./cert.pem ./key.pem
-    reverse_proxy :18010
-}
-
-amq.localtest.me {
-    tls ./cert.pem ./key.pem
-    reverse_proxy :8861
+	handle_path /hjmtj* {
+		rewrite * /hjmtj{uri}
+		reverse_proxy :8080
+	}
 }
