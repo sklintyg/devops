@@ -1,4 +1,4 @@
-USE intyg;
+USE intygstjanst;
 
 DELIMITER $$
 CREATE PROCEDURE updateCareProvider()
