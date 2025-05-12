@@ -21,11 +21,12 @@ BEGIN
     -- Start transaction
     START TRANSACTION;
 
+    -- Inactivate safe-updates as we are updating rows based on other columns than primary keys
+    SET SQL_SAFE_UPDATES = 0;
 
     DROP TEMPORARY TABLE IF EXISTS originalCareProviderIds;
     CREATE TEMPORARY TABLE originalCareProviderIds(id VARCHAR(50)
-       NOT NULL COLLATE utf8mb3_general_ci, -- Set the collate to same as the tables otherwise a table-scan will be made.
-       PRIMARY KEY (id)
+       NOT NULL COLLATE utf8mb3_general_ci -- Set the collate to same as the tables otherwise a table-scan will be made.
    );
 
     -- Insert original care provider IDs into the table variable
@@ -65,6 +66,9 @@ BEGIN
         SELECT 'Transaction rolled back due to sql exception. No changes were introduced.';
         SELECT CONCAT('Stored procedure failed, error = ', errorCode, ', message = ', errorMessage);
     END IF;
+
+    -- Activate safe-updates again
+    SET SQL_SAFE_UPDATES = 1;
 
 END$$
 DELIMITER ;
