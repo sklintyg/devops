@@ -35,10 +35,7 @@ pp.localhost, pp.localtest.me {
 
 ia.localhost, ia.localtest.me {
 	tls ./cert.pem ./key.pem
-	reverse_proxy :8970 {
-		header_up X-Forwarded-For {remote_host}
-    header_up X-Forwarded-Proto {scheme}
-	}
+	reverse_proxy :8970
 }
 
 ls.localhost, ls.localtest.me {
@@ -59,9 +56,4 @@ amq.localhost, amq.localtest.me {
 hjmt.localhost, hjmt.localtest.me {
 	tls ./cert.pem ./key.pem
 	reverse_proxy :4200
-
-	handle_path /hjmtj* {
-		rewrite * /hjmtj{uri}
-		reverse_proxy :8080
-	}
 }
