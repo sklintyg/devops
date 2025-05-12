@@ -23,8 +23,7 @@ BEGIN
 
     DROP TEMPORARY TABLE IF EXISTS originalCareProviderIds;
     CREATE TEMPORARY TABLE originalCareProviderIds(id VARCHAR(50)
-       NOT NULL COLLATE utf8mb3_general_ci, -- Set the collate to same as the tables otherwise a table-scan will be made.
-       PRIMARY KEY (id)
+       NOT NULL COLLATE utf8mb3_general_ci -- Set the collate to same as the tables otherwise a table-scan will be made.
    );
 
     -- Insert original care provider IDs into the table variable
