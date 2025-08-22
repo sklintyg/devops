@@ -1,0 +1,40 @@
+x-config: &base-config
+  pull_policy: always
+  restart: on-failure
+  extra_hosts:
+    - host.docker.internal:$WSL_HOST_IP
+    - host.docker.external:host-gateway
+
+
+services:
+  minaintyg-frontend:
+    image: docker.drift.inera.se/intyg/minaintyg-frontend:${MI_FRONTEND_VERSION}
+    container_name: minaintyg-frontend
+    profiles: [ 'mi-frontend' ]
+    ports:
+      - "5174:8080"
+    <<: *base-config
+    environment:
+      - MINAINTYG_API=$MI_HOST:8041
+
+
+  rehabstod-frontend:
+    image: docker.drift.inera.se/intyg/rehabstod-frontend:${RS_FRONTEND_VERSION}
+    container_name: rehabstod-frontend
+    profiles: [ 'rs-frontend' ]
+    ports:
+      - "5173:8080"
+    <<: *base-config
+    environment:
+      - REHABSTOD_API=$RS_HOST:8030
+
+
+  webcert-frontend:
+    image: docker.drift.inera.se/intyg/webcert-frontend:${WC_FRONTEND_VERSION}
+    container_name: webcert-frontend
+    profiles: [ "wc-frontend" ]
+    ports:
+      - "3000:8080"
+    <<: *base-config
+    environment:
+      - WEBCERT_API=$WC_HOST:8020

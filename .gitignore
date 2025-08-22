@@ -1,2 +1,4 @@
 *.iml
 *.pem
+**/sjut/filestore/*
+**/customer-terminate-service/exports/*

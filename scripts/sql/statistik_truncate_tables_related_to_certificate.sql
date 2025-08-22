@@ -1,0 +1,10 @@
+USE statistik;
+SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE handelsepekare;
+TRUNCATE TABLE intygcommon;
+TRUNCATE TABLE intyghandelse;
+TRUNCATE TABLE intygsenthandelse;
+TRUNCATE TABLE meddelandehandelse;
+TRUNCATE TABLE messagewideline;
+TRUNCATE TABLE wideline;
+SET FOREIGN_KEY_CHECKS = 1;

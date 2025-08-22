@@ -1,0 +1,6 @@
+# .ips-env
+APPLICATION_DIR=$APPLICATION_DIR
+DATABASE_SERVER=host.docker.external
+JAVA_OPTS=$JAVA_DEBUG_STRING:18031
+SPRING_ACTIVEMQ_BROKER-URL=tcp://host.docker.external:61616?jms.nonBlockingRedelivery=true&jms.redeliveryPolicy.maximumRedeliveries=3&jms.redeliveryPolicy.maximumRedeliveryDelay=6000&jms.redeliveryPolicy.initialRedeliveryDelay=4000&jms.redeliveryPolicy.useExponentialBackOff=true&jms.redeliveryPolicy.backOffMultiplier=2
+SPRING_CONFIG_ADDITIONAL-LOCATION=$APPLICATION_DIR/config/

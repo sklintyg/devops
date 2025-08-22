@@ -1,0 +1,120 @@
+x-config: &base-config
+  pull_policy: always
+  restart: on-failure
+  extra_hosts:
+    - host.docker.internal:$WSL_HOST_IP
+    - host.docker.external:host-gateway
+
+
+services:
+  intygstjanst:
+    image: docker.drift.inera.se/intyg/intygstjanst:${IT_VERSION}
+    container_name: intygstjanst
+    profiles: [ 'it' ]
+    ports:
+      - "8080:8080"
+      - "8180:8081"
+      - "8880:8880"
+    <<: *base-config
+    env_file:
+      - .spring-app-env
+      - intygstjanst/.it-env
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev,bootstrap,testability-api,caching-enabled,it-fk-stub,wc-hsa-stub,certificate-service-active
+    volumes:
+      - $IT_DEVOPS_CONFIG_PATH/config:/opt/app/config:ro
+
+
+  logsender:
+    image: docker.drift.inera.se/intyg/logsender:${LS_VERSION}
+    container_name: logsender
+    profiles: [ 'ls' ]
+    ports:
+      - "8010:8080"
+      - "8110:8081"
+      - "8810:8810"
+    <<: *base-config
+    env_file:
+      - .spring-app-env
+      - logsender/.ls-env
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev,wc-loggtjanst-stub,testability-api,caching-enabled
+    volumes:
+      - $LS_DEVOPS_CONFIG_PATH/certifikat:/opt/app/certifikat:ro
+      - $LS_DEVOPS_CONFIG_PATH/config:/opt/app/config:ro
+
+  privatlakarportal:
+    image: docker.drift.inera.se/intyg/privatlakarportal:${PP_VERSION}
+    container_name: privatlakarportal
+    profiles: [ 'pp' ]
+    ports:
+      - "8060:8080"
+      - "8160:8081"
+      - "8860:8860"
+    <<: *base-config
+    env_file:
+      - .spring-app-env
+      - privatlakarportal/.pp-env
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev,caching-enabled
+    volumes:
+      - $PP_DEVOPS_CONFIG_PATH/certifikat:/opt/app/certifikat:ro
+      - $PP_DEVOPS_CONFIG_PATH/config:/opt/app/config:ro
+
+
+  rehabstod:
+    image: docker.drift.inera.se/intyg/rehabstod:${RS_VERSION}
+    container_name: rehabstod
+    profiles: [ 'rs' ]
+    ports:
+      - "8030:8080"
+      - "8130:8081"
+      - "8830:8830"
+    <<: *base-config
+    env_file:
+      - .spring-app-env
+      - rehabstod/.rs-env
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev,rhs-samtyckestjanst-stub,rhs-sparrtjanst-stub,rhs-srs-stub,caching-enabled,rhs-security-test,ia-stub
+    volumes:
+      - $RS_DEVOPS_CONFIG_PATH/certifikat:/opt/app/certifikat:ro
+      - $RS_DEVOPS_CONFIG_PATH/config:/opt/app/config:ro
+
+
+  statistik:
+    image: docker.drift.inera.se/intyg/statistik:${ST_VERSION}
+    container_name: statistik
+    profiles: [ 'st' ]
+    ports:
+      - "8050:8080"
+      - "8150:8081"
+      - "8850:8850"
+    <<: *base-config
+    env_file:
+      - .spring-app-env
+      - statistik/.st-env
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev,caching-enabled,hsa-caching-disabled,testapi,hsa-stub,wc-hsa-stub,security-both,noprocessing,ia-stub,request-caching-enabled
+    volumes:
+      - $ST_DEVOPS_CONFIG_PATH/certifikat:/opt/app/certifikat:ro
+      - $ST_DEVOPS_CONFIG_PATH/config:/opt/app/config:ro
+
+
+  webcert:
+    image: docker.drift.inera.se/intyg/webcert:${WC_VERSION}
+    container_name: webcert
+    profiles: [ 'wc' ]
+    ports:
+      - "8020:8080"
+      - "8120:8081"
+      - "8820:8820"
+    <<: *base-config
+    env_file:
+      - .spring-app-env
+      - webcert/.wc-env
+    environment:
+      - LOGBACK_FILE=$APPLICATION_DIR/config/logback-dev.xml
+      - SPRING_PROFILES_ACTIVE=dev,caching-enabled,wc-security-test,ia-stub,certificate-service-active,hsa-integration-intyg-proxy-service,servicenow-integration
+    volumes:
+      - $WC_DEVOPS_CONFIG_PATH/certifikat:/opt/app/certifikat:ro
+      - $WC_DEVOPS_CONFIG_PATH/config:/opt/app/config:ro
