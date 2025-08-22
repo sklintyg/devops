@@ -19,13 +19,13 @@ The local CA is now installed in the system trust store! ⚡️
 The local CA is now installed in the Firefox trust store (requires browser restart)! 🦊
 ```
 
-Generate certificates with PowerShell script `generate-certs.ps1`. a bash and [Nushell](https://www.nushell.sh/) version of the script is included in the repo.
+From the `proxy` folder, generate certificates with PowerShell script `generate-certs.ps1`. a bash and [Nushell](https://www.nushell.sh/) version of the script is also included in the repo.
 
 ```shell
-proxy/generate-certs.ps1
+generate-certs.ps1
 ```
 
-Launch caddy
+Launch Caddy
 
 ```shell
 caddy run --config Caddyfile
