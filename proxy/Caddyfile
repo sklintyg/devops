@@ -1,0 +1,59 @@
+wc.localhost, wc.localtest.me {
+	tls ./cert.pem ./key.pem
+	reverse_proxy :3000
+}
+
+sjut.localhost, sjut.localtest.me {
+	tls ./cert.pem ./key.pem0
+	reverse_proxy :8090
+}
+
+it.localhost, it.localtest.me {
+	tls ./cert.pem ./key.pem
+	reverse_proxy :8080
+}
+
+rs.localhost, rs.localtest.me {
+	tls ./cert.pem ./key.pem
+	reverse_proxy :5173
+}
+
+mi.localhost, mi.localtest.me {
+	tls ./cert.pem ./key.pem
+	reverse_proxy :5174
+}
+
+st.localhost, st.localtest.me {
+	tls ./cert.pem ./key.pem
+	reverse_proxy :8050
+}
+
+pp.localhost, pp.localtest.me {
+	tls ./cert.pem ./key.pem
+	reverse_proxy :8060
+}
+
+ia.localhost, ia.localtest.me {
+	tls ./cert.pem ./key.pem
+	reverse_proxy :8970
+}
+
+ls.localhost, ls.localtest.me {
+	tls ./cert.pem ./key.pem
+	reverse_proxy :8010
+}
+
+cts.localhost, cts.localtest.me {
+	tls ./cert.pem ./key.pem
+	reverse_proxy :18010
+}
+
+amq.localhost, amq.localtest.me {
+	tls ./cert.pem ./key.pem
+	reverse_proxy :8861
+}
+
+hjmt.localhost, hjmt.localtest.me {
+	tls ./cert.pem ./key.pem
+	reverse_proxy :4200
+}
