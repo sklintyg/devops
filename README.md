@@ -31,6 +31,10 @@ Launch Caddy
 caddy run --config Caddyfile
 ```
 
+### Run caddy as a service
+
+Documentation for running Caddy as a service can be found on the [official website](https://caddyserver.com/docs/running#windows-service).
+
 ### Troubleshoot
 
 PowerShell might need to be setup to allow user scripts, open PowerShell as **Administrator** and run:
