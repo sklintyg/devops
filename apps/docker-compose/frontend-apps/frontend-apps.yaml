@@ -1,5 +1,3 @@
-version: "3.8"
-
 x-config: &base-config
   pull_policy: always
   restart: on-failure
@@ -10,18 +8,18 @@ x-config: &base-config
 
 services:
   minaintyg-frontend:
-    image: docker.drift.inera.se/intyg/minaintyg-frontend:latest
+    image: docker.drift.inera.se/intyg/minaintyg-frontend:${MI_FRONTEND_VERSION}
     container_name: minaintyg-frontend
     profiles: [ 'mi-frontend' ]
     ports:
       - "5174:8080"
     <<: *base-config
     environment:
-      - MINAINTYG_API=$MI2_HOST:8041
+      - MINAINTYG_API=$MI_HOST:8041
 
 
   rehabstod-frontend:
-    image: docker.drift.inera.se/intyg/rehabstod-frontend:latest
+    image: docker.drift.inera.se/intyg/rehabstod-frontend:${RS_FRONTEND_VERSION}
     container_name: rehabstod-frontend
     profiles: [ 'rs-frontend' ]
     ports:
@@ -32,7 +30,7 @@ services:
 
 
   webcert-frontend:
-    image: docker.drift.inera.se/intyg/webcert-frontend:latest
+    image: docker.drift.inera.se/intyg/webcert-frontend:${WC_FRONTEND_VERSION}
     container_name: webcert-frontend
     profiles: [ "wc-frontend" ]
     ports:

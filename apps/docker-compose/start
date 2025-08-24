@@ -1,0 +1,98 @@
+#!/bin/bash
+
+# DEFAULT_APPS is a space separated list of apps to run in docker containers locally
+# start containers with command ./startapps.sh
+DEFAULT_APPS=("wc-frontend" "wc" "it" "ips")
+
+# OPTIONS:
+# frontends: 'wc-frontend' 'rs-frontend' 'mi-frontend'
+# spring apps: 'wc' 'it' 'rs' 'st' 'pp' 'ls'
+# springboot apps: 'cs' 'ia' 'cts' 'ips' 'mi' 'sjut' 'srs'
+
+ALL_APPS=("cs" "ia" "it" "ls" "mi" "pp" "rs" "st" "wc" "cts" "ips" "srs" "sjut")
+
+
+# returns 'host.docker.external' if $1 in $DEFAULT_APPS, else returns 'host.docker.internal'
+function getHost() {
+  host=$(contains $1 && echo 'external' || echo 'internal')
+  echo "host.docker.$host"
+}
+
+# returns 0 (true) if $1 in $DEFAULT_APPS, otherwise 1 (false)
+function contains() {
+  if [[ -z ${args[@]} ]]; then
+    apps="$DEFAULT_APPS"
+  else
+    apps="$args"
+  fi
+  for app in ${apps[@]}; do
+    if [[ $app == $1 ]] || [[ $app == $1:* ]]; then return 0; fi
+  done
+  return 1
+}
+
+# exports environment variable with name $1 and value $2 and prints it
+function setEnv() {
+  export "$1=$2"
+  echo "$1: $2"
+}
+
+function getApps() {
+  local args=("$@")
+  if [[ -z ${args[@]} ]]; then
+    echo ${DEFAULT_APPS[@]}
+  fi
+  echo ${args[@]}
+}
+
+function collectProfiles() {
+  local args=("$@")
+  profiles=()
+  apps=$(getApps $args)
+
+  for app in $apps; do
+    split=(${app/:/ })
+    profiles+=(${split[0]})
+  done
+
+  profileString="${profiles[*]}"
+  echo "${profileString//${IFS:0:1}/,}"
+}
+
+function setVersions() {
+  local args=("$@")
+  apps=$(getApps $args)
+  for app in $apps; do
+    split=(${app/:/ })
+    appUpper=$(echo ${split[0]} | tr [:lower:] [:upper:])
+    appUpperUnderScore=${appUpper//-/_}
+    version=${split[1]}
+
+    if [[ -z "$version" ]]; then
+      version='latest'
+    fi
+
+    setEnv "${appUpperUnderScore}_VERSION" "$version"
+  done
+}
+
+args=$@
+setEnv 'WSL_HOST_IP' "$(ip addr | grep eth0 | grep -oPm1 '(?<=inet )\d+(.\d+){2}\.')$(echo '1')"
+setEnv 'COMPOSE_PROFILES' $(collectProfiles "${args[@]}")
+setVersions "${args[@]}"
+
+setEnv CS_HOST   $(getHost 'cs')
+setEnv IA_HOST   $(getHost 'ia')
+setEnv IT_HOST   $(getHost 'it')
+setEnv LS_HOST   $(getHost 'ls')
+setEnv MI_HOST   $(getHost 'mi')
+setEnv PP_HOST   $(getHost 'pp')
+setEnv RS_HOST   $(getHost 'rs')
+setEnv ST_HOST   $(getHost 'st')
+setEnv WC_HOST   $(getHost 'wc')
+setEnv CTS_HOST  $(getHost 'cts')
+setEnv IPS_HOST  $(getHost 'ips')
+setEnv SRS_HOST  $(getHost 'srs')
+setEnv SJUT_HOST $(getHost 'sjut')
+
+exec docker compose -p apps up
