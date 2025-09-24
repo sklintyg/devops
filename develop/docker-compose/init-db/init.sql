@@ -41,3 +41,7 @@ GRANT ALL PRIVILEGES ON * . * TO 'cts'@'%' WITH GRANT OPTION;
 CREATE DATABASE certificate_service;
 CREATE USER 'cs'@'%' IDENTIFIED BY 'cs';
 GRANT ALL PRIVILEGES ON * . * TO 'cs'@'%' WITH GRANT OPTION;
+
+CREATE DATABASE certificate_analytics_service;
+CREATE USER 'cas'@'%' IDENTIFIED BY 'cas';
+GRANT ALL PRIVILEGES ON * . * TO 'cas'@'%' WITH GRANT OPTION;
