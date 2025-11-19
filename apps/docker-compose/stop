@@ -12,10 +12,16 @@ APPS=(
   ["rs"]=rehabstod
   ["st"]=statistik
   ["wc"]=webcert
+  ["cas"]=certificate-analytics-service
+  ["cps"]=certificate-print-service
   ["cts"]=customer-terminate-service
   ["ips"]=intyg-proxy-service
+  ["pps"]=private-practitioner-service
   ["srs"]=srs
   ["sjut"]=sjut
+  ["wc-frontend"]=webcert-frontend
+  ["rs-frontend"]=rehabstod-frontend
+  ["mi-frontend"]=mianintyg-frontend
 )
 
 args=$@

@@ -9,7 +9,7 @@ DEFAULT_APPS=("wc-frontend" "wc" "it" "ips")
 # spring apps: 'wc' 'it' 'rs' 'st' 'pp' 'ls'
 # springboot apps: 'cs' 'ia' 'cts' 'ips' 'mi' 'sjut' 'srs'
 
-ALL_APPS=("cs" "ia" "it" "ls" "mi" "pp" "rs" "st" "wc" "cts" "ips" "srs" "sjut")
+ALL_APPS=("cs" "ia" "it" "ls" "mi" "pp" "rs" "st" "wc" "cas" "cps" "cts" "ips" "pps" "srs" "sjut")
 
 
 # returns 'host.docker.external' if $1 in $DEFAULT_APPS, else returns 'host.docker.internal'
@@ -77,7 +77,7 @@ function setVersions() {
 }
 
 args=$@
-setEnv 'WSL_HOST_IP' "$(ip addr | grep eth0 | grep -oPm1 '(?<=inet )\d+(.\d+){2}\.')$(echo '1')"
+setEnv 'WSL_HOST_IP' "$(ip route | grep default | awk '{print $3}')"
 setEnv 'COMPOSE_PROFILES' $(collectProfiles "${args[@]}")
 setVersions "${args[@]}"
 
@@ -90,8 +90,11 @@ setEnv PP_HOST   $(getHost 'pp')
 setEnv RS_HOST   $(getHost 'rs')
 setEnv ST_HOST   $(getHost 'st')
 setEnv WC_HOST   $(getHost 'wc')
+setEnv CAS_HOST  $(getHost 'cas')
+setEnv CPS_HOST  $(getHost 'cps')
 setEnv CTS_HOST  $(getHost 'cts')
 setEnv IPS_HOST  $(getHost 'ips')
+setEnv PPS_HOST  $(getHost 'pps')
 setEnv SRS_HOST  $(getHost 'srs')
 setEnv SJUT_HOST $(getHost 'sjut')
 
