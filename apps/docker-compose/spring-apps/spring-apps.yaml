@@ -20,9 +20,9 @@ services:
       - .spring-app-env
       - intygstjanst/.it-env
     environment:
-      - SPRING_PROFILES_ACTIVE=dev,bootstrap,testability-api,caching-enabled,it-fk-stub,wc-hsa-stub,certificate-service-active
+      - SPRING_PROFILES_ACTIVE=dev,bootstrap,testability-api,caching-enabled,it-fk-stub,certificate-service-active,pu-integration-intyg-proxy-service
     volumes:
-      - $IT_DEVOPS_CONFIG_PATH/config:/opt/app/config:ro
+      - $IT_DEVOPS_CONFIG_PATH/config:$APPLICATION_DIR/config:ro
 
 
   logsender:
@@ -38,10 +38,10 @@ services:
       - .spring-app-env
       - logsender/.ls-env
     environment:
-      - SPRING_PROFILES_ACTIVE=dev,wc-loggtjanst-stub,testability-api,caching-enabled
+      - SPRING_PROFILES_ACTIVE=dev,wc-loggtjanst-stub,caching-enabled
     volumes:
-      - $LS_DEVOPS_CONFIG_PATH/certifikat:/opt/app/certifikat:ro
-      - $LS_DEVOPS_CONFIG_PATH/config:/opt/app/config:ro
+      - $LS_DEVOPS_CONFIG_PATH/certifikat:$APPLICATION_DIR/certifikat:ro
+      - $LS_DEVOPS_CONFIG_PATH/config:$APPLICATION_DIR/config:ro
 
   privatlakarportal:
     image: docker.drift.inera.se/intyg/privatlakarportal:${PP_VERSION}
@@ -56,10 +56,11 @@ services:
       - .spring-app-env
       - privatlakarportal/.pp-env
     environment:
-      - SPRING_PROFILES_ACTIVE=dev,caching-enabled
+      - LOGBACK_FILE=/opt/app/config/logback-dev.xml
+      - SPRING_PROFILES_ACTIVE=dev,caching-enabled,testability,pu-integration-intyg-proxy-service
     volumes:
-      - $PP_DEVOPS_CONFIG_PATH/certifikat:/opt/app/certifikat:ro
-      - $PP_DEVOPS_CONFIG_PATH/config:/opt/app/config:ro
+      - $PP_DEVOPS_CONFIG_PATH/certifikat:$APPLICATION_DIR/certifikat:ro
+      - $PP_DEVOPS_CONFIG_PATH/config:$APPLICATION_DIR/config:ro
 
 
   rehabstod:
@@ -75,10 +76,10 @@ services:
       - .spring-app-env
       - rehabstod/.rs-env
     environment:
-      - SPRING_PROFILES_ACTIVE=dev,rhs-samtyckestjanst-stub,rhs-sparrtjanst-stub,rhs-srs-stub,caching-enabled,rhs-security-test,ia-stub
+      - SPRING_PROFILES_ACTIVE=dev,rhs-samtyckestjanst-stub,rhs-sparrtjanst-stub,rhs-srs-stub,caching-enabled,rhs-security-test,ia-stub,testability,pu-integration-intyg-proxy-service
     volumes:
-      - $RS_DEVOPS_CONFIG_PATH/certifikat:/opt/app/certifikat:ro
-      - $RS_DEVOPS_CONFIG_PATH/config:/opt/app/config:ro
+      - $RS_DEVOPS_CONFIG_PATH/certifikat:$APPLICATION_DIR/certifikat:ro
+      - $RS_DEVOPS_CONFIG_PATH/config:$APPLICATION_DIR/config:ro
 
 
   statistik:
@@ -94,10 +95,10 @@ services:
       - .spring-app-env
       - statistik/.st-env
     environment:
-      - SPRING_PROFILES_ACTIVE=dev,caching-enabled,hsa-caching-disabled,testapi,hsa-stub,wc-hsa-stub,security-both,noprocessing,ia-stub,request-caching-enabled
+      - SPRING_PROFILES_ACTIVE=dev,caching-enabled,hsa-caching-disabled,testapi,hsa-stub,wc-hsa-stub,security-both,noprocessing,ia-stub,request-caching-enabled,hsa-integration-intyg-proxy-service,testability
     volumes:
-      - $ST_DEVOPS_CONFIG_PATH/certifikat:/opt/app/certifikat:ro
-      - $ST_DEVOPS_CONFIG_PATH/config:/opt/app/config:ro
+      - $ST_DEVOPS_CONFIG_PATH/certifikat:$APPLICATION_DIR/certifikat:ro
+      - $ST_DEVOPS_CONFIG_PATH/config:$APPLICATION_DIR/config:ro
 
 
   webcert:
@@ -113,8 +114,7 @@ services:
       - .spring-app-env
       - webcert/.wc-env
     environment:
-      - LOGBACK_FILE=$APPLICATION_DIR/config/logback-dev.xml
-      - SPRING_PROFILES_ACTIVE=dev,caching-enabled,wc-security-test,ia-stub,certificate-service-active,hsa-integration-intyg-proxy-service,servicenow-integration
+      - SPRING_PROFILES_ACTIVE=dev,private-practitioner-service-active,caching-enabled,wc-security-test,ia-stub,certificate-service-active,servicenow-integration-v2,pu-integration-intyg-proxy-service,grp-rest-api,certificate-analytics-service-active
     volumes:
-      - $WC_DEVOPS_CONFIG_PATH/certifikat:/opt/app/certifikat:ro
-      - $WC_DEVOPS_CONFIG_PATH/config:/opt/app/config:ro
+      - $WC_DEVOPS_CONFIG_PATH/certifikat:$APPLICATION_DIR/certifikat:ro
+      - $WC_DEVOPS_CONFIG_PATH/config:$APPLICATION_DIR/config:ro
