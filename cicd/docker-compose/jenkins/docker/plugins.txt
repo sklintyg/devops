@@ -1,0 +1,8 @@
+# Latest plugin versions can be found at: https://plugins.jenkins.io/
+blueocean:1.27.23
+config-file-provider:1002.v93e06b_792d44
+configuration-as-code:2006.v001a_2ca_6b_574
+docker-workflow:634.vedc7242b_eda_7
+json-path-api:2.10.0-202.va_9cc16c1e476
+pipeline-utility-steps:2.20.0
+uno-choice:2.8.8

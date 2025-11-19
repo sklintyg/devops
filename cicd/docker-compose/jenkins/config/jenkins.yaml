@@ -1,0 +1,32 @@
+jenkins:
+  systemMessage: "Jenkins on localhost:49000 - Configured by JCasC"
+  numExecutors: 2
+  securityRealm:
+    local:
+      allowsSignup: false
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+appearance:
+  themeManager:
+    theme: "dark"
+  pipelineGraphView:
+    showGraphOnJobPage: true
+    showGraphOnBuildPage: false
+    showStageDurations: true
+    showStageNames: true
+unclassified:
+  timestamper:
+    allPipelines: true
+    elapsedTimeFormat: "HH:mm:ss.S"
+  globalLibraries:
+    libraries:
+      - name: "essLib"
+        defaultVersion: "local-development"
+        retriever:
+          modernSCM:
+            scm:
+              gitSource:
+                id: "essLib"
+                remote: "/jenkins-library"
+                credentialsId: ""
