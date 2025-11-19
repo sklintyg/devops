@@ -5,8 +5,37 @@ x-config: &base-config
     - host.docker.internal:$WSL_HOST_IP
     - host.docker.external:host-gateway
 
-
 services:
+  certificate-analytics-service:
+    image: docker.drift.inera.se/intyg/certificate-analytics-service:${CAS_VERSION}
+    container_name: certificate-analytics-service
+    profiles: [ "cps" ]
+    ports:
+      - "18050:18050"
+      - "18051:18051"
+    <<: *base-config
+    env_file: certificate-analytics-service/.cas-env
+    environment:
+      - SPRING_PROFILES_ACTIVE=testability,dev
+    volumes:
+      - $CAS_DEVOPS_CONFIG_PATH/config:$APPLICATION_DIR/config:ro
+
+
+  certificate-print-service:
+    image: docker.drift.inera.se/intyg/certificate-print-service:${CPS_VERSION}
+    container_name: certificate-print-service
+    profiles: [ "cps" ]
+    ports:
+      - "18040:18040"
+      - "18041:18041"
+    <<: *base-config
+    env_file: certificate-print-service/.cps-env
+    environment:
+      - SPRING_PROFILES_ACTIVE=testability,dev
+    volumes:
+      - $CPS_DEVOPS_CONFIG_PATH/config:$APPLICATION_DIR/config:ro
+
+
   certificate-service:
     image: docker.drift.inera.se/intyg/certificate-service:${CS_VERSION}
     container_name: certificate-service
@@ -19,7 +48,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=testability,dev
     volumes:
-      - $CS_DEVOPS_CONFIG_PATH/config:$APPLICATION_DIR/config
+      - $CS_DEVOPS_CONFIG_PATH/config:$APPLICATION_DIR/config:ro
 
 
   customer-terminate-service:
@@ -34,9 +63,10 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=testability,dev
     volumes:
-      - $CTS_DEVOPS_CONFIG_PATH/certificate:$APPLICATION_DIR/certificate
+      - $CTS_DEVOPS_CONFIG_PATH/certificate:$APPLICATION_DIR/certificate:ro
+      - $CTS_DEVOPS_CONFIG_PATH/config:$APPLICATION_DIR/config:ro
       - ./customer-terminate-service/exports:$APPLICATION_DIR/exports
-      - $CTS_DEVOPS_CONFIG_PATH:$APPLICATION_DIR/additional-config
+
 
   intyg-proxy-service:
     image: docker.drift.inera.se/intyg/intyg-proxy-service:${IPS_VERSION}
@@ -50,9 +80,8 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=testability,dev,fakepu,fakehsa
     volumes:
-      - $IPS_DEVOPS_CONFIG_PATH/certificate:$APPLICATION_DIR/certificate
-      - $IPS_DEVOPS_CONFIG_PATH/config:$APPLICATION_DIR/config
-      - $IPS_ADDITIONAL_CONFIG_PATH:$APPLICATION_DIR/additional-config
+      - $IPS_DEVOPS_CONFIG_PATH/certificate:$APPLICATION_DIR/certificate:ro
+      - $IPS_DEVOPS_CONFIG_PATH/config:$APPLICATION_DIR/config:ro
 
 
   intygsadmin:
@@ -68,7 +97,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=dev,fake,caching-enabled
     volumes:
-      - $IA_DEVOPS_CONFIG_PATH/config:$APPLICATION_DIR/config
+      - $IA_DEVOPS_CONFIG_PATH/config:$APPLICATION_DIR/config:ro
 
 
   minaintyg:
@@ -82,10 +111,25 @@ services:
     <<: *base-config
     env_file: minaintyg/.mi-env
     environment:
+      - SPRING_PROFILES_ACTIVE=testability,dev,citizen-ips-integration,certificate-analytics-service-active
+    volumes:
+      - $MI_DEVOPS_CONFIG_PATH/certificates:$APPLICATION_DIR/certificates:ro
+      - $MI_DEVOPS_CONFIG_PATH/config:$APPLICATION_DIR/config:ro
+
+
+  private-practitioner-service:
+    image: docker.drift.inera.se/intyg/private-practitioner-service:${PPS_VERSION}
+    container_name: private-practitioner-service
+    profiles: [ "pps" ]
+    ports:
+      - "18070:18070"
+      - "18071:18071"
+    <<: *base-config
+    env_file: private-practitioner-service/.pps-env
+    environment:
       - SPRING_PROFILES_ACTIVE=testability,dev
     volumes:
-      - $MI_DEVOPS_CONFIG_PATH/certificates:$APPLICATION_DIR/certificates
-      - $MI_DEVOPS_CONFIG_PATH/config:$APPLICATION_DIR/config
+      - $PPS_DEVOPS_CONFIG_PATH/config:$APPLICATION_DIR/config:ro
 
 
   sjut:
@@ -100,8 +144,8 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=fake,dev
     volumes:
-      - $SJUT_DEVOPS_CONFIG_PATH/config:$APPLICATION_DIR/config
-      - $SJUT_DEVOPS_CONFIG_PATH/certifikat:$APPLICATION_DIR/certifikat
+      - $SJUT_DEVOPS_CONFIG_PATH/config:$APPLICATION_DIR/config:ro
+      - $SJUT_DEVOPS_CONFIG_PATH/certificates:$APPLICATION_DIR/certificates:ro
       - $SJUT_DEVOPS_CONFIG_PATH/filestore:$APPLICATION_DIR/filestore
 
 
@@ -116,5 +160,3 @@ services:
     env_file: srs/.srs-env
     environment:
       - SPRING_PROFILES_ACTIVE=runtime,it,bootstrap
-    volumes:
-      - ./srs/refdata:$APPLICATION_DIR/refdata

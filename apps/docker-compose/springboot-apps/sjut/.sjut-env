@@ -4,5 +4,5 @@ DATABASE_SERVER=host.docker.external
 DEV_CONFIG_FILE=$APPLICATION_DIR/config/application-dev.properties
 JAVA_OPTS=$JAVA_DEBUG_STRING:8890
 OPERATING_SYSTEM_WINDOWS=true
-REDIS_HOST=host.docker.external
+SPRING_DATA_REDIS_HOST=host.docker.external
 SJUT_FILESTORE_PATH=$APPLICATION_DIR/filestore

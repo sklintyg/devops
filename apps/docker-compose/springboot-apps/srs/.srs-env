@@ -1,7 +1,6 @@
 # .srs-env
 DATABASE_NAME=srs
 JAVA_OPTS=$JAVA_DEBUG_STRING:18880
-REFDATA_URL=file://$APPLICATION_DIR/refdata/refdata-2.0.4.jar
 SPRING.DATASOURCE.PASSWORD=srs
 SPRING_DATASOURCE_URL=jdbc:mysql://host.docker.external:3306/srs?useSSL=false&serverTimezone=Europe/Stockholm&allowPublicKeyRetrieval=true
 SPRING.DATASOURCE.USERNAME=srs
