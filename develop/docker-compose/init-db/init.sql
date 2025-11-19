@@ -10,10 +10,6 @@ CREATE DATABASE statistik;
 CREATE USER 'statistik'@'%' IDENTIFIED BY 'statistik';
 GRANT ALL PRIVILEGES ON * . * TO 'statistik'@'%' WITH GRANT OPTION;
 
-CREATE DATABASE intygsbestallning;
-CREATE USER 'intygsbestallning'@'%' IDENTIFIED BY 'intygsbestallning';
-GRANT ALL PRIVILEGES ON * . * TO 'intygsbestallning'@'%' WITH GRANT OPTION;
-
 CREATE DATABASE privatlakarportal;
 CREATE USER 'privatlakarportal'@'%' IDENTIFIED BY 'privatlakarportal';
 GRANT ALL PRIVILEGES ON * . * TO 'privatlakarportal'@'%' WITH GRANT OPTION;
@@ -41,3 +37,7 @@ GRANT ALL PRIVILEGES ON * . * TO 'cts'@'%' WITH GRANT OPTION;
 CREATE DATABASE certificate_service;
 CREATE USER 'cs'@'%' IDENTIFIED BY 'cs';
 GRANT ALL PRIVILEGES ON * . * TO 'cs'@'%' WITH GRANT OPTION;
+
+CREATE DATABASE certificate_analytics_service;
+CREATE USER 'cas'@'%' IDENTIFIED BY 'cas';
+GRANT ALL PRIVILEGES ON * . * TO 'cas'@'%' WITH GRANT OPTION;
