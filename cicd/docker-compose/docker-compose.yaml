@@ -16,13 +16,12 @@ services:
     ports:
       - "49000:8080"
       - "50000:50000"
-    environment:
-      - DOCKER_HOST=tcp://cicd_network:2376
-      - DOCKER_CERT_PATH=/certs/client
-      - DOCKER_TLS_VERIFY=1
+    env_file:
+      - ./jenkins/.env
     volumes:
-      - ./jenkins/data:/var/jenkins_home
+      - jenkins_home:/var/jenkins_home
       - jenkins-docker-certs:/certs/client:ro
+      - ./jenkins/config/jenkins.yaml:/var/jenkins_home/jenkins.yaml:ro
 
   docker:
     image: docker:dind
@@ -34,11 +33,16 @@ services:
     environment:
       - DOCKER_TLS_CERTDIR=/certs
     volumes:
-      - ./jenkins/data:/var/jenkins_home
       - jenkins-docker-certs:/certs/client
       - type: bind
         source: ./registry/auth/host-docker-internal.crt
-        target: /etc/docker/certs.d/host.docker.internal:5000/ca.crt
+        target: /tmp/registry-ca.crt
+        read_only: true
+    command: >
+        sh -c "mkdir -p /etc/docker/certs.d/host.docker.internal:5000 &&
+               cp /tmp/registry-ca.crt /etc/docker/certs.d/host.docker.internal:5000/ca.crt &&
+               echo '{\"max-concurrent-downloads\": 3, \"registry-mirrors\": []}' > /etc/docker/daemon.json &&
+               dockerd-entrypoint.sh"
 
   registry:
     image: registry:latest
@@ -53,7 +57,7 @@ services:
       - ./registry/data:/var/lib/registry
 
   sonarqube:
-    image: sonarqube:lts-community
+    image: sonarqube:community
     container_name: sonarqube
     <<: *base-config
     ports:
@@ -75,6 +79,7 @@ services:
       - ./nexus/data:/nexus-data
 
 volumes:
+  jenkins_home:
   jenkins-docker-certs:
 
 networks:
