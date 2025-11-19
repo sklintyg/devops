@@ -5,7 +5,7 @@ FROM jenkins/jenkins:2.528.2-lts-jdk21
 USER root
 
 RUN apt-get update \
-    && apt-get install -y ca-certificates curl docker-cli lsb-release \
+    && apt-get install --yes --no-install-recommends ca-certificates curl docker-cli lsb-release \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
