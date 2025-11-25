@@ -48,14 +48,20 @@ services:
     volumes:
       - ./activemq/activemq.xml:/opt/apache-activemq-$ACTIVEMQ_VERSION/conf/activemq.xml
 
+  mailhog:
+    container_name: intyg-mailhog
+    image: mailhog/mailhog:latest
+    restart: on-failure
+    pull_policy: missing
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
   nginx:
     image: nginx:latest
     container_name: nginx
     restart: always
     tty: true
-    extra_hosts:
-      - host.docker.internal:$WSL_HOST_IP
-      - host.docker.external:host-gateway
     ports:
       - "80:80"
       - "443:443"
