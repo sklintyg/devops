@@ -9,7 +9,7 @@ services:
   certificate-analytics-service:
     image: docker.drift.inera.se/intyg/certificate-analytics-service:${CAS_VERSION}
     container_name: certificate-analytics-service
-    profiles: [ "cps" ]
+    profiles: [ "cas" ]
     ports:
       - "18050:18050"
       - "18051:18051"
