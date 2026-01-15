@@ -121,6 +121,9 @@
           <authenticationUser username="activemqUser" password="activemqPassword" groups="users,admins"/>
         </users>
       </simpleAuthenticationPlugin>
+      <!-- lets enable detailed logging in the broker -->
+      <loggingBrokerPlugin logAll="true"/>
+      <traceBrokerPathPlugin/>
     </plugins>
 
   </broker>
