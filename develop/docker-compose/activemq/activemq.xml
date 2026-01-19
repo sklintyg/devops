@@ -122,7 +122,7 @@
         </users>
       </simpleAuthenticationPlugin>
       <!-- lets enable detailed logging in the broker -->
-      <loggingBrokerPlugin logAll="true"/>
+      <loggingBrokerPlugin logTransactionEvents="true" logConsumerEvents="true"/>
       <traceBrokerPathPlugin/>
     </plugins>
 
