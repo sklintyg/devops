@@ -1,7 +1,7 @@
 USE webcert;
 
 DELIMITER $$
-CREATE PROCEDURE updateCareProvider()
+CREATE PROCEDURE updateCareUnitWebcert()
 
 BEGIN
     -- Declare variables
@@ -169,5 +169,5 @@ END$$
 DELIMITER ;
 
 -- Call the stored procedure
-CALL updateCareProvider;
-DROP PROCEDURE updateCareProvider;
+CALL updateCareUnitWebcert;
+DROP PROCEDURE updateCareUnitWebcert;
