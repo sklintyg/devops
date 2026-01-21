@@ -7,6 +7,8 @@ BEGIN
     -- Declare variables
     DECLARE updatedCareProviderId VARCHAR(50);
     DECLARE updatedCareProviderName VARCHAR(100);
+    DECLARE schemaVersion1Value TINYINT;
+    DECLARE schemaVersion3Value TINYINT;
     DECLARE errorCode CHAR(5) DEFAULT '00000';
     DECLARE errorMessage TEXT;
 
@@ -19,6 +21,8 @@ BEGIN
 
     SET updatedCareProviderId = 'SE2321000198-054374';
     SET updatedCareProviderName = 'Region Gävleborg Din Hälsocentral AB';
+    SET schemaVersion1Value = 0;
+    SET schemaVersion3Value = 1;
 
     -- Start transaction
     START TRANSACTION;
@@ -135,13 +139,22 @@ BEGIN
     SET f.ENHETS_ID = i.updatedId,
         f.VARDGIVAR_ID = updatedCareProviderId;
 
-    -- Update INTEGRERADE_VARDENHETER table
+    -- Update INTEGRERADE_VARDENHETER table where ENHETS_ID matches originalId
     UPDATE INTEGRERADE_VARDENHETER f
     INNER JOIN organizationProvider i ON f.ENHETS_ID = i.originalId
     SET f.ENHETS_ID = i.updatedId,
         f.ENHETS_NAMN = i.updatedName,
         f.VARDGIVAR_ID = updatedCareProviderId,
         f.VARDGIVAR_NAMN = updatedCareProviderName;
+
+    -- Insert new records for updatedIds that don't exist yet in INTEGRERADE_VARDENHETER
+    INSERT INTO INTEGRERADE_VARDENHETER (ENHETS_ID, ENHETS_NAMN, VARDGIVAR_ID, VARDGIVAR_NAMN, SKAPAD_DATUM, SCHEMA_VERSION_1, SCHEMA_VERSION_3)
+    SELECT i.updatedId, i.updatedName, updatedCareProviderId, updatedCareProviderName, NOW(), schemaVersion1Value, schemaVersion3Value
+    FROM organizationProvider i
+    WHERE NOT EXISTS (
+        SELECT 1 FROM INTEGRERADE_VARDENHETER v
+        WHERE v.ENHETS_ID = i.updatedId
+    );
 
     -- Update INTYG table
     UPDATE INTYG f
