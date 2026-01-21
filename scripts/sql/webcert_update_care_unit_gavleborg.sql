@@ -34,14 +34,9 @@ BEGIN
         updatedName VARCHAR(100) NOT NULL COLLATE utf8mb3_general_ci
     );
 
-    -- Insert original care provider IDs into the table variable
+    -- Insert original care unit IDs into the table variable
     INSERT INTO organizationProvider
-    VALUES ('SE2321000198-019448', 'Primärvård Södra Hälsingland',                              'SE2321000198-054394', 'VO Alfta Din hälsocentral'),
-           ('SE2321000198-019315', 'Primärvård Gävle',                                          'SE2321000198-054377', 'VO Andersberg Din hälsocentral'),
-           ('SE2321000198-019340', 'Primärvård Hudiksvall',                                     'SE2321000198-054386', 'VO Delsbo - Friggesund Din hälsocentral'),
-           ('SE2321000198-019363', 'Primärvård Ljusdal',                                        'SE2321000198-054390', 'VO Färila - Los Din hälsocentral'),
-           ('SE2321000198-019471', 'Primärvård Västra Gästrikland',                             'SE2321000198-054401', 'VO Hofors Din hälsocentral'),
-
+    VALUES
            ('SE2321000198-019456', 'Alfta Din hälsocentral S',                                  'SE2321000198-054443', 'Alfta Din hälsocentral'),
            ('SE2321000198-021090', 'Barnavårdscentral Alfta Din hälsocentral S',                'SE2321000198-054444', 'Barnavårdscentral Alfta Din hälsocentral'),
 
@@ -155,7 +150,7 @@ BEGIN
 
     IF errorCode = '00000' THEN
         COMMIT;
-        SELECT 'Updated care provider successfully.';
+        SELECT 'Updated care units successfully.';
     ELSE
         ROLLBACK;
         SELECT 'Transaction rolled back due to sql exception. No changes were introduced.';
