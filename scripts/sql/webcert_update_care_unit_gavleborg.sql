@@ -147,8 +147,8 @@ BEGIN
     SELECT i.updatedId, i.updatedName, updatedCareProviderId, updatedCareProviderName, NOW(), schemaVersion1Value, schemaVersion3Value
     FROM organizationProvider i
     WHERE NOT EXISTS (
-        SELECT 1 FROM INTEGRERADE_VARDENHETER v
-        WHERE v.ENHETS_ID = i.originalId
+        SELECT 1 FROM INTEGRERADE_VARDENHETER f
+        WHERE f.ENHETS_ID = i.updatedId
     );
 
     -- Update INTYG table
