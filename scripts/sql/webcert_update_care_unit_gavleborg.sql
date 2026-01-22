@@ -148,7 +148,7 @@ BEGIN
     FROM organizationProvider i
     WHERE NOT EXISTS (
         SELECT 1 FROM INTEGRERADE_VARDENHETER v
-        WHERE v.ENHETS_ID = i.updatedId
+        WHERE v.ENHETS_ID = i.originalId
     );
 
     -- Update INTYG table
