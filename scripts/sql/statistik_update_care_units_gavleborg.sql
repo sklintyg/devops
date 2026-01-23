@@ -25,6 +25,13 @@ BEGIN
     -- Inactivate safe-updates as we are updating rows based on other columns than primary keys
     SET SQL_SAFE_UPDATES = 0;
 
+    DROP TEMPORARY TABLE IF EXISTS update_report;
+    CREATE TEMPORARY TABLE update_report (
+        step VARCHAR(100),
+        affected_rows INT,
+        message VARCHAR(255)
+    );
+
     DROP TEMPORARY TABLE IF EXISTS organizationProvider;
     CREATE TEMPORARY TABLE organizationProvider(
         originalEnhetId VARCHAR(50) NOT NULL COLLATE utf8mb3_general_ci,
@@ -190,27 +197,15 @@ BEGIN
     ('SE2321000198-048873', 'Handrehabilitering Valbo Din hälsocentral S', 'SE2321000198-019315',                     'SE2321000198-054427', 'Handrehabilitering Valbo Din hälsocentral', 'SE2321000198-054384'),
     ('SE2321000198-019315', 'Primärvård Gävle', 'SE2321000198-019315',                                                'SE2321000198-054384', 'VO Valbo Din hälsocentral', 'SE2321000198-054384');
 
-
-    -- Show what will be updated in ENHET table
-    SELECT 'ENHET Table - Records to be updated:' AS '';
-    SELECT
-        e.id,
-        e.enhetId AS 'Current EnhetId',
-        op.updatedEnhetId AS 'New EnhetId',
-        e.namn AS 'Current Name',
-        op.updatedEnhetName AS 'New Name',
-        e.vardenhetId AS 'Current VardenhetId',
-        op.updatedVardEnhetId AS 'New VardenhetId'
-    FROM enhet e
-             INNER JOIN organizationProvider op ON e.enhetId = op.originalEnhetId
-    ORDER BY e.id;
-
     -- Get count before update
-    SELECT COUNT(*) AS 'Total ENHET rows to be updated'
+    INSERT INTO update_report (step, affected_rows, message)
+    SELECT
+        'ENHET (before update)',
+        COUNT(*),
+        'Rows that will be updated'
     FROM enhet e
              INNER JOIN organizationProvider op ON e.enhetId = op.originalEnhetId;
 
-    SELECT '========================================' AS '';
 
     -- Update ENHET table
     UPDATE enhet e INNER JOIN organizationProvider op ON e.enhetId = op.originalEnhetId
@@ -219,15 +214,18 @@ BEGIN
             e.vardgivareId = updatedCareProviderId,
             e.vardenhetId = op.updatedVardEnhetId;
 
-    SELECT CONCAT('Updated ', ROW_COUNT(), ' rows in ENHET table') AS 'Status';
+    INSERT INTO update_report (step, affected_rows, message)
+    VALUES ('ENHET (after update)', ROW_COUNT(), 'Rows updated');
 
     -- Show what will be updated in INTYGCOMMON table
-    SELECT 'INTYGCOMMON Table - Records to be updated:' AS '';
-    SELECT COUNT(*) AS 'Total INTYGCOMMON rows to be updated'
+    INSERT INTO update_report (step, affected_rows, message)
+    SELECT
+        'INTYGCOMMON (before update)',
+        COUNT(*),
+        'Rows that will be updated'
     FROM intygcommon ic
              INNER JOIN organizationProvider op ON ic.enhet = op.originalEnhetId;
 
-    SELECT '========================================' AS '';
 
     -- Update INTYGCOMMON table
     UPDATE intygcommon ic INNER JOIN organizationProvider op ON ic.enhet = op.originalEnhetId
@@ -235,7 +233,8 @@ BEGIN
         ic.vardgivareid = updatedCareProviderId,
         ic.vardenhet = op.updatedVardEnhetId;
 
-    SELECT CONCAT('Updated ', ROW_COUNT(), ' rows in INTYGCOMMON table') AS 'Status';
+    INSERT INTO update_report (step, affected_rows, message)
+    VALUES ('INTYGCOMMON (after update)', ROW_COUNT(), 'Rows updated');
 
 # TODO: Should LAKARE table be updated as well to the new care provider?
 #     -- Update LAKARE table
@@ -244,8 +243,11 @@ BEGIN
 
 
     -- Update MESSAGEWIDELINE table
-    SELECT 'MESSAGEWIDELINE Table - Records to be updated:' AS '';
-    SELECT COUNT(*) AS 'Total MESSAGEWIDELINE rows to be updated'
+    INSERT INTO update_report (step, affected_rows, message)
+    SELECT
+        'MESSAGEWIDELINE (before update)',
+        COUNT(*),
+        'Rows that will be updated'
     FROM messagewideline mwl
              INNER JOIN organizationProvider op ON mwl.enhet = op.originalEnhetId;
 
@@ -254,11 +256,15 @@ BEGIN
         mwl.vardgivareid = updatedCareProviderId,
         mwl.vardenhet = op.updatedVardEnhetId;
 
-    SELECT CONCAT('Updated ', ROW_COUNT(), ' rows in MESSAGEWIDELINE table') AS 'Status';
+    INSERT INTO update_report (step, affected_rows, message)
+    VALUES ('MESSAGEWIDELINE (after update)', ROW_COUNT(), 'Rows updated');
 
     -- Update WIDELINE table
-    SELECT 'WIDELINE Table - Records to be updated:' AS '';
-    SELECT COUNT(*) AS 'Total WIDELINE rows to be updated'
+    INSERT INTO update_report (step, affected_rows, message)
+    SELECT
+        'WIDELINE (before update)',
+        COUNT(*),
+        'Rows that will be updated'
     FROM wideline wl
              INNER JOIN organizationProvider op ON wl.enhet = op.originalEnhetId;
 
@@ -267,7 +273,8 @@ BEGIN
         wl.vardgivareid = updatedCareProviderId,
         wl.vardenhet = op.updatedVardEnhetId;
 
-    SELECT CONCAT('Updated ', ROW_COUNT(), ' rows in WIDELINE table') AS 'Status';
+    INSERT INTO update_report (step, affected_rows, message)
+    VALUES ('WIDELINE (after update)', ROW_COUNT(), 'Rows updated');
 
     DROP TEMPORARY TABLE IF EXISTS originalCareProviderIds;
 
@@ -279,6 +286,15 @@ BEGIN
         SELECT 'Transaction rolled back due to sql exception. No changes were introduced.';
         SELECT CONCAT('Stored procedure failed, error = ', errorCode, ', message = ', errorMessage);
     END IF;
+
+    SELECT
+        step,
+        affected_rows,
+        message
+    FROM update_report
+    ORDER BY step DESC;
+
+    DROP TEMPORARY TABLE IF EXISTS update_report;
 
     -- Activate safe-updates again
     SET SQL_SAFE_UPDATES = 1;
