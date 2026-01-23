@@ -51,8 +51,8 @@ BEGIN
     ('SE2321000198-019448', 'Primärvård Södra Hälsingland', 'SE2321000198-019448',                                    'SE2321000198-054394', 'VO Alfta Din hälsocentral', 'SE2321000198-054394'),
 
     -- VO Andersberg Din hälsocentral
-    -- Original Enhet ID,       Original Enhet Name,    Original Vård Enhet ID,                                         Updated Enhet ID,       Updated Enhet Name,     Updated Vård Enhet ID
-    ('SE2321000198-019318', 'Andersberg Din hälsocentral S', 'SE2321000198-019315',     'SE2321000198-054410',        'Andersberg Din hälsocentral', 'SE2321000198-054377'),
+    -- Original Enhet ID,       Original Enhet Name,    Original Vård Enhet ID,                                                                                                    Updated Enhet ID,       Updated Enhet Name,     Updated Vård Enhet ID
+    ('SE2321000198-019318', 'Andersberg Din hälsocentral S', 'SE2321000198-019315',                                   'SE2321000198-054410',        'Andersberg Din hälsocentral', 'SE2321000198-054377'),
     ('SE2321000198-022588', 'Barnavårdscentral Andersberg Din hälsocentral S', 'SE2321000198-019315',                 'SE2321000198-054411', 'Barnavårdscentral Andersberg Din hälsocentral', 'SE2321000198-054377'),
     ('SE2321000198-019315', 'Primärvård Gävle', 'SE2321000198-019315',                                                'SE2321000198-054377', 'VO Andersberg Din hälsocentral', 'SE2321000198-054377'),
 
