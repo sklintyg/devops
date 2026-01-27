@@ -10,6 +10,7 @@ BEGIN
     DECLARE errorMessage TEXT;
     DECLARE customError VARCHAR(255) DEFAULT '';
     DECLARE originalCareProviderId VARCHAR(50);
+    DECLARE issueDate DATE DEFAULT DATE('2025-01-14');
 
     -- Declare handler
     DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
@@ -159,7 +160,7 @@ BEGIN
 
     -- Update CERTIFICATE table
     UPDATE CERTIFICATE f
-    INNER JOIN organizationProvider i ON f.CARE_UNIT_ID = i.originalId
+    INNER JOIN organizationProvider i ON f.CARE_UNIT_ID = i.originalId AND f.SIGNED_DATE >= issueDate
     SET f.CARE_UNIT_ID = i.updatedId,
         f.CARE_UNIT_NAME = i.updatedName,
         f.CARE_GIVER_ID = updatedCareProviderId;
@@ -173,11 +174,11 @@ BEGIN
     SELECT ROW_COUNT() INTO @rekoUpdated;
 
     -- Update SJUKFALL_CERT table
-    UPDATE SJUKFALL_CERT
-    INNER JOIN organizationProvider i ON SJUKFALL_CERT.CARE_UNIT_ID = i.originalId
-    SET SJUKFALL_CERT.CARE_UNIT_ID = i.updatedId,
-        SJUKFALL_CERT.CARE_UNIT_NAME = i.updatedName,
-        SJUKFALL_CERT.CARE_GIVER_ID = updatedCareProviderId;
+    UPDATE SJUKFALL_CERT f
+    INNER JOIN organizationProvider i ON f.CARE_UNIT_ID = i.originalId AND f.SIGNING_DATETIME >= issueDate
+    SET f.CARE_UNIT_ID = i.updatedId,
+        f.CARE_UNIT_NAME = i.updatedName,
+        f.CARE_GIVER_ID = updatedCareProviderId;
     SELECT ROW_COUNT() INTO @sjukfallUpdated;
 
     -- Summary before commit
