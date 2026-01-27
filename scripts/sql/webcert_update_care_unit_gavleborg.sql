@@ -13,6 +13,7 @@ BEGIN
     DECLARE errorMessage TEXT;
     DECLARE customError VARCHAR(255) DEFAULT '';
     DECLARE originalCareProviderId VARCHAR(50);
+    DECLARE issueDate DATE DEFAULT DATE('2025-01-14');
 
     -- Declare handler
     DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
@@ -138,7 +139,7 @@ BEGIN
         op.updatedName,
         (SELECT COUNT(*) FROM FRAGASVAR f WHERE f.ENHETS_ID = op.originalId) AS fragasvar_count,
         (SELECT COUNT(*) FROM HANDELSE h WHERE h.ENHETS_ID = op.originalId) AS handelse_count,
-        (SELECT COUNT(*) FROM INTEGRERADE_VARDENHETER iv WHERE iv.ENHETS_ID = op.originalId) AS integrerade_vardenheter_count,
+        (SELECT COUNT(*) FROM INTEGRERADE_VARDENHETER iv WHERE iv.ENHETS_ID = op.updatedId) AS integrerade_vardenheter_count,
         (SELECT COUNT(*) FROM INTYG i WHERE i.ENHETS_ID = op.originalId) AS intyg_count
     FROM organizationProvider op
     ORDER BY op.originalName;
@@ -164,16 +165,6 @@ BEGIN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = customError;
     END IF;
 
-    SELECT COUNT(*) INTO @invalidIntegreradeVardenheter
-    FROM INTEGRERADE_VARDENHETER iv
-    WHERE iv.ENHETS_ID IN (SELECT originalId FROM organizationProvider)
-      AND iv.VARDGIVAR_ID != originalCareProviderId;
-
-    IF @invalidIntegreradeVardenheter > 0 THEN
-        SET customError = CONCAT('Some INTEGRERADE_VARDENHETER records do not belong to the expected care provider ', originalCareProviderId, '. Count: ', @invalidIntegreradeVardenheter);
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = customError;
-    END IF;
-
     SELECT COUNT(*) INTO @invalidIntyg
     FROM INTYG i
     WHERE i.ENHETS_ID IN (SELECT originalId FROM organizationProvider)
@@ -189,7 +180,7 @@ BEGIN
 
     -- Update FRAGASVAR table
     UPDATE FRAGASVAR f
-    INNER JOIN organizationProvider i ON f.ENHETS_ID = i.originalId
+    INNER JOIN organizationProvider i ON f.ENHETS_ID = i.originalId AND f.FRAGE_SIGNERINGS_DATUM >= issueDate
     SET f.ENHETS_ID = i.updatedId,
         f.ENHETSNAMN = i.updatedName,
         f.VARDGIVAR_ID = updatedCareProviderId,
@@ -203,28 +194,18 @@ BEGIN
         f.VARDGIVAR_ID = updatedCareProviderId;
     SELECT ROW_COUNT() INTO @handelseUpdated;
 
-    -- Update INTEGRERADE_VARDENHETER table where ENHETS_ID matches originalId
-    UPDATE INTEGRERADE_VARDENHETER f
-    INNER JOIN organizationProvider i ON f.ENHETS_ID = i.originalId
-    SET f.ENHETS_ID = i.updatedId,
-        f.ENHETS_NAMN = i.updatedName,
-        f.VARDGIVAR_ID = updatedCareProviderId,
-        f.VARDGIVAR_NAMN = updatedCareProviderName;
-    SELECT ROW_COUNT() INTO @integreradeVardenheterUpdated;
-
-    -- Insert new records for updatedIds that don't exist yet in INTEGRERADE_VARDENHETER
+    -- Insert new records for updatedIds to INTEGRERADE_VARDENHETER (only if they don't already exist)
     INSERT INTO INTEGRERADE_VARDENHETER (ENHETS_ID, ENHETS_NAMN, VARDGIVAR_ID, VARDGIVAR_NAMN, SKAPAD_DATUM, SCHEMA_VERSION_1, SCHEMA_VERSION_3)
     SELECT i.updatedId, i.updatedName, updatedCareProviderId, updatedCareProviderName, NOW(), schemaVersion1Value, schemaVersion3Value
     FROM organizationProvider i
     WHERE NOT EXISTS (
-        SELECT 1 FROM INTEGRERADE_VARDENHETER f
-        WHERE f.ENHETS_ID = i.updatedId
+        SELECT 1 FROM INTEGRERADE_VARDENHETER iv WHERE iv.ENHETS_ID = i.updatedId
     );
     SELECT ROW_COUNT() INTO @integreradeVardenheterInserted;
 
     -- Update INTYG table
     UPDATE INTYG f
-    INNER JOIN organizationProvider i ON f.ENHETS_ID = i.originalId
+    INNER JOIN organizationProvider i ON f.ENHETS_ID = i.originalId AND f.SKAPAD >= issueDate
     SET f.ENHETS_ID = i.updatedId,
         f.ENHETS_NAMN = i.updatedName,
         f.VARDGIVAR_ID = updatedCareProviderId,
