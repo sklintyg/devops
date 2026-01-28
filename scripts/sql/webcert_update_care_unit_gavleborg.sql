@@ -33,7 +33,7 @@ BEGIN
     FROM webcert.INTYG
     WHERE ENHETS_ID = updatedCareProviderId;
 
-    IF @existingUnits > 0 THEN
+    IF @existingProviders > 0 THEN
         SET customError = CONCAT('One or more care units already exist, count: ', @existingProviders);
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = customError;
     END IF;
@@ -232,7 +232,6 @@ BEGIN
     SELECT
         @fragasvarUpdated AS total_fragasvar_updated,
         @handelseUpdated AS total_handelse_updated,
-        @integreradeVardenheterUpdated AS total_integrerade_vardenheter_updated,
         @integreradeVardenheterInserted AS total_integrerade_vardenheter_inserted,
         @intygUpdated AS total_intyg_updated;
 
