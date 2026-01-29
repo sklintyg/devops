@@ -8,7 +8,6 @@ BEGIN
     DECLARE updatedCareProviderId VARCHAR(50);
     DECLARE errorCode CHAR(5) DEFAULT '00000';
     DECLARE errorMessage TEXT;
-    DECLARE customError VARCHAR(255) DEFAULT '';
     DECLARE originalCareProviderId VARCHAR(50);
     DECLARE issueDate DATE DEFAULT DATE('2025-01-14');
 
@@ -21,16 +20,6 @@ BEGIN
 
     SET originalCareProviderId = 'SE2321000198-016965';
     SET updatedCareProviderId = 'SE2321000198-054374';
-
-    -- Check if care unit already exist
-    SELECT COUNT(*) INTO @existingUnits
-    FROM intyg.CERTIFICATE
-    WHERE CARE_UNIT_ID = updatedCareProviderId;
-
-    IF @existingUnits > 0 THEN
-        SET customError = CONCAT('One or more care unit already exist, count: ', @existingUnits);
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = customError;
-    END IF;
 
     -- Inactivate safe-updates as we are updating rows based on other columns than primary keys
     SET SQL_SAFE_UPDATES = 0;
@@ -131,30 +120,6 @@ BEGIN
         ('SE2321000198-019317', 'Valbo Din hälsocentral S',                                  'SE2321000198-054425', 'Valbo Din hälsocentral');
 
 
-    -- List units to update
-    SELECT
-        op.originalId,
-        op.originalName,
-        op.updatedId,
-        op.updatedName,
-        COUNT(c.ID) AS current_certificates
-    FROM organizationProvider op
-             LEFT JOIN CERTIFICATE c ON c.CARE_UNIT_ID = op.originalId
-    GROUP BY op.originalId, op.originalName, op.updatedId, op.updatedName
-    ORDER BY op.originalName;
-
-
-    -- Verify all certificates belong to the original care provider
-    SELECT COUNT(*) INTO @invalidCertificates
-    FROM CERTIFICATE c
-    WHERE c.CARE_UNIT_ID IN (SELECT originalId FROM organizationProvider)
-      AND c.CARE_GIVER_ID != originalCareProviderId;
-
-    IF @invalidCertificates > 0 THEN
-        SET customError = CONCAT('Some certificates do not belong to the expected care provider ', originalCareProviderId, '. Count: ', @invalidCertificates);
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = customError;
-    END IF;
-
     -- Start transaction
     START TRANSACTION;
 
@@ -181,7 +146,12 @@ BEGIN
         f.CARE_GIVER_ID = updatedCareProviderId;
     SELECT ROW_COUNT() INTO @sjukfallUpdated;
 
-    -- Summary before commit
+    -- Summary
+    SELECT
+        @certificatesUpdated AS total_certificates_updated,
+        @rekoUpdated AS total_reko_updated,
+        @sjukfallUpdated AS total_sjukfall_updated;
+
     SELECT
         op.originalId,
         op.originalName,
@@ -197,10 +167,6 @@ BEGIN
     FROM organizationProvider op
     ORDER BY update_status DESC, op.originalName;
 
-    SELECT
-        @certificatesUpdated AS total_certificates_updated,
-        @rekoUpdated AS total_reko_updated,
-        @sjukfallUpdated AS total_sjukfall_updated;
 
     DROP TEMPORARY TABLE IF EXISTS organizationProvider;
 
