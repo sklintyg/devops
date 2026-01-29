@@ -140,7 +140,8 @@ BEGIN
         (SELECT COUNT(*) FROM FRAGASVAR f WHERE f.ENHETS_ID = op.originalId) AS fragasvar_count,
         (SELECT COUNT(*) FROM HANDELSE h WHERE h.ENHETS_ID = op.originalId) AS handelse_count,
         (SELECT COUNT(*) FROM INTEGRERADE_VARDENHETER iv WHERE iv.ENHETS_ID = op.updatedId) AS integrerade_vardenheter_count,
-        (SELECT COUNT(*) FROM INTYG i WHERE i.ENHETS_ID = op.originalId) AS intyg_count
+        (SELECT COUNT(*) FROM INTYG i WHERE i.ENHETS_ID = op.originalId) AS intyg_count,
+        (SELECT COUNT(*) FROM ARENDE i WHERE i.ENHET = op.originalId) AS arende_count
     FROM organizationProvider op
     ORDER BY op.originalName;
 
@@ -175,6 +176,16 @@ BEGIN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = customError;
     END IF;
 
+    SELECT COUNT(*) INTO @invalidArende
+    FROM ARENDE i
+    WHERE i.ENHET IN (SELECT originalId FROM organizationProvider)
+      AND i.VARDGIVARE_NAME != updatedCareProviderName;
+
+    IF @invalidArende > 0 THEN
+        SET customError = CONCAT('Some Arende records do not belong to the expected care provider ', originalCareProviderId, '. Count: ', @invalidArende);
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = customError;
+    END IF;
+
     -- Start transaction
     START TRANSACTION;
 
@@ -189,7 +200,8 @@ BEGIN
 
     -- Update HANDELSE table
     UPDATE HANDELSE f
-    INNER JOIN organizationProvider i ON f.ENHETS_ID = i.originalId
+    INNER JOIN organizationProvider i ON f.ENHETS_ID = i.originalId AND f.TIMESTAMP >= issueDate
+    INNER JOIN INTYG it ON it.INTYGS_ID = f.INTYGS_ID AND it.SKAPAD >= issueDate
     SET f.ENHETS_ID = i.updatedId,
         f.VARDGIVAR_ID = updatedCareProviderId;
     SELECT ROW_COUNT() INTO @handelseUpdated;
@@ -212,6 +224,15 @@ BEGIN
         f.VARDGIVAR_NAMN = updatedCareProviderName;
     SELECT ROW_COUNT() INTO @intygUpdated;
 
+    -- Update ARENDE table
+    UPDATE ARENDE f
+    INNER JOIN organizationProvider i ON f.ENHET = i.originalId AND f.TIMESTAMP >= issueDate
+    INNER JOIN INTYG it ON it.INTYGS_ID = f.INTYGS_ID AND it.SKAPAD >= issueDate
+    SET f.ENHET = i.updatedId,
+        f.ENHET_NAME = i.updatedName,
+        f.VARDGIVARE_NAME = updatedCareProviderName;
+    SELECT ROW_COUNT() INTO @arendeUpdated;
+
     -- Summary before commit
     SELECT
         op.originalId,
@@ -225,7 +246,8 @@ BEGIN
         (SELECT COUNT(*) FROM FRAGASVAR f WHERE f.ENHETS_ID = op.updatedId) AS fragasvar_count,
         (SELECT COUNT(*) FROM HANDELSE h WHERE h.ENHETS_ID = op.updatedId) AS handelse_count,
         (SELECT COUNT(*) FROM INTEGRERADE_VARDENHETER iv WHERE iv.ENHETS_ID = op.updatedId) AS integrerade_vardenheter_count,
-        (SELECT COUNT(*) FROM INTYG i WHERE i.ENHETS_ID = op.updatedId) AS intyg_count
+        (SELECT COUNT(*) FROM INTYG i WHERE i.ENHETS_ID = op.updatedId) AS intyg_count,
+        (SELECT COUNT(*) FROM ARENDE i WHERE i.ENHET = op.updatedId) AS arende_count
     FROM organizationProvider op
     ORDER BY update_status DESC, op.originalName;
 
@@ -233,7 +255,8 @@ BEGIN
         @fragasvarUpdated AS total_fragasvar_updated,
         @handelseUpdated AS total_handelse_updated,
         @integreradeVardenheterInserted AS total_integrerade_vardenheter_inserted,
-        @intygUpdated AS total_intyg_updated;
+        @intygUpdated AS total_intyg_updated,
+        @arendeUpdated AS total_arende_updated;
 
     DROP TEMPORARY TABLE IF EXISTS organizationProvider;
 

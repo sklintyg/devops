@@ -168,7 +168,7 @@ BEGIN
 
     -- Update REKO table
     UPDATE REKO f
-    INNER JOIN organizationProvider i ON f.CARE_UNIT_ID = i.originalId
+    INNER JOIN organizationProvider i ON f.CARE_UNIT_ID = i.originalId AND f.REGISTRATION_TIMESTAMP >= issueDate
     SET f.CARE_UNIT_ID = i.updatedId,
         f.CARE_PROVIDER_ID = updatedCareProviderId;
     SELECT ROW_COUNT() INTO @rekoUpdated;
