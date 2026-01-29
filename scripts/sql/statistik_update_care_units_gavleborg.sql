@@ -6,7 +6,9 @@ CREATE PROCEDURE updateOrganizationStatistik()
 BEGIN
     -- Declare variables
     DECLARE updatedCareProviderId VARCHAR(50);
+    DECLARE originalCareProviderId VARCHAR(50);
     DECLARE errorCode CHAR(5) DEFAULT '00000';
+    DECLARE effectiveFromDate DATE DEFAULT '2025-01-14';
     DECLARE errorMessage TEXT;
 
     -- Declare handler
@@ -16,7 +18,7 @@ BEGIN
             errorCode = RETURNED_SQLSTATE, errorMessage = MESSAGE_TEXT;
     END;
 
-#     SET originalCareProviderId = 'SE2321000198-016965';
+    SET originalCareProviderId = 'SE2321000198-016965';
     SET updatedCareProviderId = 'SE2321000198-054374';
 
     -- Start transaction
@@ -207,6 +209,17 @@ BEGIN
              INNER JOIN organizationProvider op ON e.enhetId = op.originalEnhetId;
 
 
+    -- Verify all ENHET rows to be updated belong to the original care provider
+    SELECT COUNT(*) INTO @mismatchedEnhetCount
+    FROM enhet e
+    WHERE e.enhetId IN (SELECT originalEnhetId FROM organizationProvider)
+      AND e.vardgivareId <> originalCareProviderId;
+    IF @mismatchedEnhetCount > 0 THEN
+        SET @errorMsg = CONCAT('Data integrity check failed: ', @mismatchedEnhetCount, ' rows in ENHET table do not belong to the original care provider.');
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = @errorMsg;
+    END IF;
+
     -- Update ENHET table
     UPDATE enhet e INNER JOIN organizationProvider op ON e.enhetId = op.originalEnhetId
     SET e.enhetId = op.updatedEnhetId,
@@ -224,11 +237,23 @@ BEGIN
         COUNT(*),
         'Rows that will be updated'
     FROM intygcommon ic
-             INNER JOIN organizationProvider op ON ic.enhet = op.originalEnhetId;
+             INNER JOIN organizationProvider op ON ic.enhet = op.originalEnhetId AND ic.signeringsdatum >= effectiveFromDate;
 
+
+    -- Verify all INTYGCOMMON rows to be updated belong to the original care provider
+    SELECT COUNT(*) INTO @mismatchedIntygCommonCount
+    FROM intygcommon ic
+    WHERE ic.enhet IN (SELECT originalEnhetId FROM organizationProvider)
+      AND ic.vardgivareid <> originalCareProviderId;
+    IF @mismatchedIntygCommonCount > 0 THEN
+        SET @errorMsg = CONCAT('Data integrity check failed: ', @mismatchedIntygCommonCount, ' rows in INTYGCOMMON table do not belong to the original care provider.');
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = @errorMsg;
+    END IF;
 
     -- Update INTYGCOMMON table
-    UPDATE intygcommon ic INNER JOIN organizationProvider op ON ic.enhet = op.originalEnhetId
+    UPDATE intygcommon ic
+    INNER JOIN organizationProvider op ON ic.enhet = op.originalEnhetId AND ic.signeringsdatum >= effectiveFromDate
     SET ic.enhet =  op.updatedEnhetId,
         ic.vardgivareid = updatedCareProviderId,
         ic.vardenhet = op.updatedVardEnhetId;
@@ -242,6 +267,17 @@ BEGIN
     #     SET lk.vardgivareid = updatedCareProviderId;
 
 
+    -- Verify all MESSAGEWIDELINE rows to be updated belong to the original care provider
+    SELECT COUNT(*) INTO @mismatchedMessageWideLineCount
+    FROM messagewideline mwl
+    WHERE mwl.enhet IN (SELECT originalEnhetId FROM organizationProvider)
+      AND mwl.vardgivareid <> originalCareProviderId;
+    IF @mismatchedMessageWideLineCount > 0 THEN
+        SET @errorMsg = CONCAT('Data integrity check failed: ', @mismatchedMessageWideLineCount, ' rows in MESSAGEWIDELINE table do not belong to the original care provider.');
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = @errorMsg;
+    END IF;
+
     -- Update MESSAGEWIDELINE table
     INSERT INTO update_report (step, affected_rows, message)
     SELECT
@@ -249,15 +285,27 @@ BEGIN
         COUNT(*),
         'Rows that will be updated'
     FROM messagewideline mwl
-             INNER JOIN organizationProvider op ON mwl.enhet = op.originalEnhetId;
+             INNER JOIN organizationProvider op ON mwl.enhet = op.originalEnhetId AND mwl.intygSigneringsdatum >= effectiveFromDate;
 
-    UPDATE messagewideline mwl INNER JOIN organizationProvider op ON mwl.enhet = op.originalEnhetId
+    UPDATE messagewideline mwl
+    INNER JOIN organizationProvider op ON mwl.enhet = op.originalEnhetId AND mwl.intygSigneringsdatum >= effectiveFromDate
     SET mwl.enhet =  op.updatedEnhetId,
         mwl.vardgivareid = updatedCareProviderId,
         mwl.vardenhet = op.updatedVardEnhetId;
 
     INSERT INTO update_report (step, affected_rows, message)
     VALUES ('MESSAGEWIDELINE (after update)', ROW_COUNT(), 'Rows updated');
+
+    -- Verify all WIDELINE rows to be updated belong to the original care provider
+    SELECT COUNT(*) INTO @mismatchedWideLineCount
+    FROM wideline wl
+    WHERE wl.enhet IN (SELECT originalEnhetId FROM organizationProvider)
+      AND wl.vardgivareid <> originalCareProviderId;
+    IF @mismatchedWideLineCount > 0 THEN
+        SET @errorMsg = CONCAT('Data integrity check failed: ', @mismatchedWideLineCount, ' rows in WIDELINE table do not belong to the original care provider.');
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = @errorMsg;
+    END IF;
 
     -- Update WIDELINE table
     INSERT INTO update_report (step, affected_rows, message)
@@ -268,7 +316,8 @@ BEGIN
     FROM wideline wl
              INNER JOIN organizationProvider op ON wl.enhet = op.originalEnhetId;
 
-    UPDATE wideline wl INNER JOIN organizationProvider op ON wl.enhet = op.originalEnhetId
+    UPDATE wideline wl
+    INNER JOIN organizationProvider op ON wl.enhet = op.originalEnhetId
     SET wl.enhet =  op.updatedEnhetId,
         wl.vardgivareid = updatedCareProviderId,
         wl.vardenhet = op.updatedVardEnhetId;
