@@ -187,19 +187,13 @@ BEGIN
             c.issued_on_unit_key = new_subunit.`key`
     WHERE c.created >= createdAt;
 
-    -- commit transaction
-    COMMIT;
-
-    -- Activate safe-updates again
-    SET SQL_SAFE_UPDATES = 1;
-
     -- Summary
 
     -- Total certificates updated
     SELECT COUNT(*) AS total_certificates_updated
     FROM certificate c
-             INNER JOIN unit new_subunit ON c.issued_on_unit_key = new_subunit.`key`
-             INNER JOIN organizationProvider op ON new_subunit.hsa_id = op.updatedSubunitId;
+         INNER JOIN unit new_subunit ON c.issued_on_unit_key = new_subunit.`key`
+         INNER JOIN organizationProvider op ON new_subunit.hsa_id = op.updatedSubunitId;
 
     -- Detailed summary
     SELECT
@@ -226,6 +220,14 @@ BEGIN
         op.updatedPrimaryName,
         new_subunit.hsa_id
     ORDER BY unit_status DESC, op.originalSubunitName;
+
+    DROP TEMPORARY TABLE IF EXISTS organizationProvider;
+
+    -- commit transaction
+    COMMIT;
+
+    -- Activate safe-updates again
+    SET SQL_SAFE_UPDATES = 1;
 
 END$$
 DELIMITER ;
