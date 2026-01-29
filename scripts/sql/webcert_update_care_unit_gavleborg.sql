@@ -11,7 +11,6 @@ BEGIN
     DECLARE schemaVersion3Value TINYINT;
     DECLARE errorCode CHAR(5) DEFAULT '00000';
     DECLARE errorMessage TEXT;
-    DECLARE customError VARCHAR(255) DEFAULT '';
     DECLARE originalCareProviderId VARCHAR(50);
     DECLARE issueDate DATE DEFAULT DATE('2025-01-14');
 
@@ -27,16 +26,6 @@ BEGIN
     SET updatedCareProviderName = 'Region Gävleborg Din Hälsocentral AB';
     SET schemaVersion1Value = 0;
     SET schemaVersion3Value = 1;
-
-    -- Check if care provider already exist
-    SELECT COUNT(*) INTO @existingProviders
-    FROM webcert.INTYG
-    WHERE ENHETS_ID = updatedCareProviderId;
-
-    IF @existingProviders > 0 THEN
-        SET customError = CONCAT('One or more care units already exist, count: ', @existingProviders);
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = customError;
-    END IF;
 
     -- Inactivate safe-updates as we are updating rows based on other columns than primary keys
     SET SQL_SAFE_UPDATES = 0;
@@ -131,56 +120,13 @@ BEGIN
            ('SE2321000198-048873', 'Handrehabilitering Valbo Din hälsocentral S',               'SE2321000198-054427', 'Handrehabilitering Valbo Din hälsocentral'),
            ('SE2321000198-019317', 'Valbo Din hälsocentral S',                                  'SE2321000198-054425', 'Valbo Din hälsocentral');
 
-    -- List units to update
-    SELECT
-        op.originalId,
-        op.originalName,
-        op.updatedId,
-        op.updatedName,
-        (SELECT COUNT(*) FROM FRAGASVAR f WHERE f.ENHETS_ID = op.originalId) AS fragasvar_count,
-        (SELECT COUNT(*) FROM HANDELSE h WHERE h.ENHETS_ID = op.originalId) AS handelse_count,
-        (SELECT COUNT(*) FROM INTEGRERADE_VARDENHETER iv WHERE iv.ENHETS_ID = op.updatedId) AS integrerade_vardenheter_count,
-        (SELECT COUNT(*) FROM INTYG i WHERE i.ENHETS_ID = op.originalId) AS intyg_count
-    FROM organizationProvider op
-    ORDER BY op.originalName;
-
-    -- Verify all records belong to the original care provider
-    SELECT COUNT(*) INTO @invalidFragasvar
-    FROM FRAGASVAR f
-    WHERE f.ENHETS_ID IN (SELECT originalId FROM organizationProvider)
-      AND f.VARDGIVAR_ID != originalCareProviderId;
-
-    IF @invalidFragasvar > 0 THEN
-        SET customError = CONCAT('Some FRAGASVAR records do not belong to the expected care provider ', originalCareProviderId, '. Count: ', @invalidFragasvar);
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = customError;
-    END IF;
-
-    SELECT COUNT(*) INTO @invalidHandelse
-    FROM HANDELSE h
-    WHERE h.ENHETS_ID IN (SELECT originalId FROM organizationProvider)
-      AND h.VARDGIVAR_ID != originalCareProviderId;
-
-    IF @invalidHandelse > 0 THEN
-        SET customError = CONCAT('Some HANDELSE records do not belong to the expected care provider ', originalCareProviderId, '. Count: ', @invalidHandelse);
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = customError;
-    END IF;
-
-    SELECT COUNT(*) INTO @invalidIntyg
-    FROM INTYG i
-    WHERE i.ENHETS_ID IN (SELECT originalId FROM organizationProvider)
-      AND i.VARDGIVAR_ID != originalCareProviderId;
-
-    IF @invalidIntyg > 0 THEN
-        SET customError = CONCAT('Some INTYG records do not belong to the expected care provider ', originalCareProviderId, '. Count: ', @invalidIntyg);
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = customError;
-    END IF;
-
     -- Start transaction
     START TRANSACTION;
 
     -- Update FRAGASVAR table
     UPDATE FRAGASVAR f
-    INNER JOIN organizationProvider i ON f.ENHETS_ID = i.originalId AND f.FRAGE_SIGNERINGS_DATUM >= issueDate
+    INNER JOIN organizationProvider i ON f.ENHETS_ID = i.originalId
+    INNER JOIN INTYG it ON it.INTYGS_ID = f.INTYGS_ID AND it.SKAPAD >= issueDate
     SET f.ENHETS_ID = i.updatedId,
         f.ENHETSNAMN = i.updatedName,
         f.VARDGIVAR_ID = updatedCareProviderId,
@@ -190,6 +136,7 @@ BEGIN
     -- Update HANDELSE table
     UPDATE HANDELSE f
     INNER JOIN organizationProvider i ON f.ENHETS_ID = i.originalId
+    INNER JOIN INTYG it ON it.INTYGS_ID = f.INTYGS_ID AND it.SKAPAD >= issueDate
     SET f.ENHETS_ID = i.updatedId,
         f.VARDGIVAR_ID = updatedCareProviderId;
     SELECT ROW_COUNT() INTO @handelseUpdated;
@@ -203,6 +150,15 @@ BEGIN
     );
     SELECT ROW_COUNT() INTO @integreradeVardenheterInserted;
 
+    -- Update ARENDE table
+    UPDATE ARENDE f
+    INNER JOIN organizationProvider i ON f.ENHET = i.originalId
+    INNER JOIN INTYG it ON it.INTYGS_ID = f.INTYGS_ID AND it.SKAPAD >= issueDate
+    SET f.ENHET = i.updatedId,
+        f.ENHET_NAME = i.updatedName,
+        f.VARDGIVARE_NAME = updatedCareProviderName;
+    SELECT ROW_COUNT() INTO @arendeUpdated;
+
     -- Update INTYG table
     UPDATE INTYG f
     INNER JOIN organizationProvider i ON f.ENHETS_ID = i.originalId AND f.SKAPAD >= issueDate
@@ -212,7 +168,14 @@ BEGIN
         f.VARDGIVAR_NAMN = updatedCareProviderName;
     SELECT ROW_COUNT() INTO @intygUpdated;
 
-    -- Summary before commit
+    -- Summary
+    SELECT
+        @fragasvarUpdated AS total_fragasvar_updated,
+        @handelseUpdated AS total_handelse_updated,
+        @integreradeVardenheterInserted AS total_integrerade_vardenheter_inserted,
+        @intygUpdated AS total_intyg_updated,
+        @arendeUpdated AS total_arende_updated;
+
     SELECT
         op.originalId,
         op.originalName,
@@ -225,15 +188,10 @@ BEGIN
         (SELECT COUNT(*) FROM FRAGASVAR f WHERE f.ENHETS_ID = op.updatedId) AS fragasvar_count,
         (SELECT COUNT(*) FROM HANDELSE h WHERE h.ENHETS_ID = op.updatedId) AS handelse_count,
         (SELECT COUNT(*) FROM INTEGRERADE_VARDENHETER iv WHERE iv.ENHETS_ID = op.updatedId) AS integrerade_vardenheter_count,
-        (SELECT COUNT(*) FROM INTYG i WHERE i.ENHETS_ID = op.updatedId) AS intyg_count
+        (SELECT COUNT(*) FROM INTYG i WHERE i.ENHETS_ID = op.updatedId) AS intyg_count,
+        (SELECT COUNT(*) FROM ARENDE i WHERE i.ENHET = op.updatedId) AS arende_count
     FROM organizationProvider op
     ORDER BY update_status DESC, op.originalName;
-
-    SELECT
-        @fragasvarUpdated AS total_fragasvar_updated,
-        @handelseUpdated AS total_handelse_updated,
-        @integreradeVardenheterInserted AS total_integrerade_vardenheter_inserted,
-        @intygUpdated AS total_intyg_updated;
 
     DROP TEMPORARY TABLE IF EXISTS organizationProvider;
 
