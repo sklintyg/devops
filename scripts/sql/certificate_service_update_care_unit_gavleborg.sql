@@ -8,7 +8,6 @@ BEGIN
     DECLARE errorCode CHAR(5) DEFAULT '00000';
     DECLARE errorMessage TEXT;
     DECLARE customError VARCHAR(255) DEFAULT '';
-    DECLARE originalCareProviderId VARCHAR(50);
     DECLARE updatedCareProviderId VARCHAR(50);
     DECLARE updatedCareProviderName VARCHAR(100);
     DECLARE createdAt DATETIME;
@@ -34,7 +33,6 @@ BEGIN
     END;
 
 
-    SET originalCareProviderId = 'SE2321000198-016965';
     SET updatedCareProviderId = 'SE2321000198-054374';
     SET updatedCareProviderName = 'Region Gävleborg Din Hälsocentral AB';
     SET createdAt = '2025-01-14 00:00:00';
@@ -187,8 +185,7 @@ BEGIN
             c.care_provider_unit_key = new_provider.`key`,
             c.care_unit_unit_key = new_primary.`key`,
             c.issued_on_unit_key = new_subunit.`key`
-    WHERE orig_subunit.hsa_id IN (SELECT DISTINCT originalSubunitId FROM organizationProvider)
-      AND c.created >= createdAt;
+    WHERE c.created >= createdAt;
 
     -- commit transaction
     COMMIT;
@@ -197,6 +194,14 @@ BEGIN
     SET SQL_SAFE_UPDATES = 1;
 
     -- Summary
+
+    -- Total certificates updated
+    SELECT COUNT(*) AS total_certificates_updated
+    FROM certificate c
+             INNER JOIN unit new_subunit ON c.issued_on_unit_key = new_subunit.`key`
+             INNER JOIN organizationProvider op ON new_subunit.hsa_id = op.updatedSubunitId;
+
+    -- Detailed summary
     SELECT
         op.originalSubunitId AS original_unit_id,
         op.originalSubunitName AS original_unit_name,
