@@ -30,8 +30,16 @@ BEGIN
     -- Inactivate safe-updates as we are updating rows based on other columns than primary keys
     SET SQL_SAFE_UPDATES = 0;
 
-    DROP TEMPORARY TABLE IF EXISTS organizationProvider;
-    CREATE TEMPORARY TABLE organizationProvider(
+    DROP TEMPORARY TABLE IF EXISTS organizationCareUnitProvider;
+    CREATE TEMPORARY TABLE organizationCareUnitProvider(
+        originalId VARCHAR(50) NOT NULL COLLATE utf8mb3_general_ci,
+        originalName VARCHAR(100) NOT NULL COLLATE utf8mb3_general_ci,
+        updatedId VARCHAR(50) NOT NULL COLLATE utf8mb3_general_ci,
+        updatedName VARCHAR(100) NOT NULL COLLATE utf8mb3_general_ci
+    );
+
+    DROP TEMPORARY TABLE IF EXISTS organizationSubCareUnitProvider;
+    CREATE TEMPORARY TABLE organizationSubCareUnitProvider(
         originalId VARCHAR(50) NOT NULL COLLATE utf8mb3_general_ci,
         originalName VARCHAR(100) NOT NULL COLLATE utf8mb3_general_ci,
         updatedId VARCHAR(50) NOT NULL COLLATE utf8mb3_general_ci,
@@ -39,7 +47,16 @@ BEGIN
     );
 
     -- Insert original care unit IDs into the table variable
-    INSERT INTO organizationProvider
+    INSERT INTO organizationCareUnitProvider
+    VALUES
+        ('SE2321000198-019448', 'Primärvård Södra Hälsingland',                              'SE2321000198-054394', 'VO Alfta Din hälsocentral'),
+        ('SE2321000198-019315', 'Primärvård Gävle',                                          'SE2321000198-054377', 'VO Andersberg Din hälsocentral'),
+        ('SE2321000198-019340', 'Primärvård Hudiksvall',                                     'SE2321000198-054386', 'VO Delsbo - Friggesund Din hälsocentral'),
+        ('SE2321000198-019363', 'Primärvård Ljusdal',                                        'SE2321000198-054390', 'VO Färila - Los Din hälsocentral'),
+        ('SE2321000198-019471', 'Primärvård Västra Gästrikland',                             'SE2321000198-054401', 'VO Hofors Din hälsocentral');
+
+    -- Insert original care sub-unit IDs into the table variable
+    INSERT INTO organizationSubCareUnitProvider
     VALUES
            ('SE2321000198-019456', 'Alfta Din hälsocentral S',                                  'SE2321000198-054443', 'Alfta Din hälsocentral'),
            ('SE2321000198-021090', 'Barnavårdscentral Alfta Din hälsocentral S',                'SE2321000198-054444', 'Barnavårdscentral Alfta Din hälsocentral'),
@@ -125,7 +142,7 @@ BEGIN
 
     -- Update FRAGASVAR table
     UPDATE FRAGASVAR f
-    INNER JOIN organizationProvider i ON f.ENHETS_ID = i.originalId
+    INNER JOIN organizationSubCareUnitProvider i ON f.ENHETS_ID = i.originalId
     INNER JOIN INTYG it ON it.INTYGS_ID = f.INTYGS_ID AND it.SKAPAD >= issueDate
     SET f.ENHETS_ID = i.updatedId,
         f.ENHETSNAMN = i.updatedName,
@@ -135,8 +152,7 @@ BEGIN
 
     -- Update HANDELSE table
     UPDATE HANDELSE f
-    INNER JOIN organizationProvider i ON f.ENHETS_ID = i.originalId
-    INNER JOIN INTYG it ON it.INTYGS_ID = f.INTYGS_ID AND it.SKAPAD >= issueDate
+    INNER JOIN organizationSubCareUnitProvider i ON f.ENHETS_ID = i.originalId AND f.TIMESTAMP >= issueDate
     SET f.ENHETS_ID = i.updatedId,
         f.VARDGIVAR_ID = updatedCareProviderId;
     SELECT ROW_COUNT() INTO @handelseUpdated;
@@ -144,7 +160,16 @@ BEGIN
     -- Insert new records for updatedIds to INTEGRERADE_VARDENHETER (only if they don't already exist)
     INSERT INTO INTEGRERADE_VARDENHETER (ENHETS_ID, ENHETS_NAMN, VARDGIVAR_ID, VARDGIVAR_NAMN, SKAPAD_DATUM, SCHEMA_VERSION_1, SCHEMA_VERSION_3)
     SELECT i.updatedId, i.updatedName, updatedCareProviderId, updatedCareProviderName, NOW(), schemaVersion1Value, schemaVersion3Value
-    FROM organizationProvider i
+    FROM organizationSubCareUnitProvider i
+    WHERE NOT EXISTS (
+        SELECT 1 FROM INTEGRERADE_VARDENHETER iv WHERE iv.ENHETS_ID = i.updatedId
+    );
+    SELECT ROW_COUNT() INTO @integreradeVardenheterInserted;
+
+    -- Insert new records for updatedIds to INTEGRERADE_VARDENHETER (only if they don't already exist)
+    INSERT INTO INTEGRERADE_VARDENHETER (ENHETS_ID, ENHETS_NAMN, VARDGIVAR_ID, VARDGIVAR_NAMN, SKAPAD_DATUM, SCHEMA_VERSION_1, SCHEMA_VERSION_3)
+    SELECT i.updatedId, i.updatedName, updatedCareProviderId, updatedCareProviderName, NOW(), schemaVersion1Value, schemaVersion3Value
+    FROM organizationCareUnitProvider i
     WHERE NOT EXISTS (
         SELECT 1 FROM INTEGRERADE_VARDENHETER iv WHERE iv.ENHETS_ID = i.updatedId
     );
@@ -152,7 +177,7 @@ BEGIN
 
     -- Update ARENDE table
     UPDATE ARENDE f
-    INNER JOIN organizationProvider i ON f.ENHET = i.originalId
+    INNER JOIN organizationSubCareUnitProvider i ON f.ENHET = i.originalId
     INNER JOIN INTYG it ON it.INTYGS_ID = f.INTYGS_ID AND it.SKAPAD >= issueDate
     SET f.ENHET = i.updatedId,
         f.ENHET_NAME = i.updatedName,
@@ -161,7 +186,7 @@ BEGIN
 
     -- Update INTYG table
     UPDATE INTYG f
-    INNER JOIN organizationProvider i ON f.ENHETS_ID = i.originalId AND f.SKAPAD >= issueDate
+    INNER JOIN organizationSubCareUnitProvider i ON f.ENHETS_ID = i.originalId AND f.SKAPAD >= issueDate
     SET f.ENHETS_ID = i.updatedId,
         f.ENHETS_NAMN = i.updatedName,
         f.VARDGIVAR_ID = updatedCareProviderId,
@@ -190,10 +215,10 @@ BEGIN
         (SELECT COUNT(*) FROM INTEGRERADE_VARDENHETER iv WHERE iv.ENHETS_ID = op.updatedId) AS integrerade_vardenheter_count,
         (SELECT COUNT(*) FROM INTYG i WHERE i.ENHETS_ID = op.updatedId) AS intyg_count,
         (SELECT COUNT(*) FROM ARENDE i WHERE i.ENHET = op.updatedId) AS arende_count
-    FROM organizationProvider op
+    FROM organizationSubCareUnitProvider op
     ORDER BY update_status DESC, op.originalName;
 
-    DROP TEMPORARY TABLE IF EXISTS organizationProvider;
+    DROP TEMPORARY TABLE IF EXISTS organizationSubCareUnitProvider;
 
     IF errorCode = '00000' THEN
         COMMIT;
