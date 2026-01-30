@@ -44,15 +44,15 @@ BEGIN
         originalPrimaryName VARCHAR(100) NOT NULL,
         originalSubunitId VARCHAR(50) NOT NULL,
         originalSubunitName VARCHAR(100) NOT NULL,
-        updatedPrimaryId VARCHAR(50) NOT NULL,
-        updatedPrimaryName VARCHAR(100) NOT NULL,
+        updatedCareUnitId VARCHAR(50) NOT NULL,
+        updatedCareUnitName VARCHAR(100) NOT NULL,
         updatedSubunitId VARCHAR(50) NOT NULL,
         updatedSubunitName VARCHAR(100) NOT NULL
     );
 
-    -- Insert mappings with primary care units and their subunits
+    -- Insert mappings with care units and their subunits
     INSERT INTO organizationProvider VALUES
-        -- originalPrimaryId     originalPrimaryName                 originalSubunitId      originalSubunitName                                         updatedPrimaryId       updatedPrimaryName                              updatedSubunitId       updatedSubunitName
+        -- originalCareUnitId     originalCareUnitName               originalSubunitId      originalSubunitName                                         updatedCareUnitId      updatedCareUnitName                             updatedSubunitId       updatedSubunitName
         ('SE2321000198-019448', 'Primärvård Södra Hälsingland',     'SE2321000198-019456', 'Alfta Din hälsocentral S',                                 'SE2321000198-054394', 'VO Alfta Din hälsocentral',                    'SE2321000198-054443', 'Alfta Din hälsocentral'),
         ('SE2321000198-019448', 'Primärvård Södra Hälsingland',     'SE2321000198-021090', 'Barnavårdscentral Alfta Din hälsocentral S',               'SE2321000198-054394', 'VO Alfta Din hälsocentral',                    'SE2321000198-054444', 'Barnavårdscentral Alfta Din hälsocentral'),
 
@@ -146,18 +146,18 @@ BEGIN
         WHERE u.hsa_id = updatedCareProviderId
     );
 
-    -- Add updated primary care units
+    -- Add updated care units
     INSERT INTO unit (hsa_id, name, unit_type_key, version)
     SELECT DISTINCT
-        op.updatedPrimaryId,
-        op.updatedPrimaryName,
+        op.updatedCareUnitId,
+        op.updatedCareUnitName,
         2,
         0
     FROM organizationProvider op
     WHERE NOT EXISTS (
         SELECT 1
         FROM unit u
-        WHERE u.hsa_id = op.updatedPrimaryId
+        WHERE u.hsa_id = op.updatedCareUnitId
     );
 
     -- Add updated subunits
@@ -178,7 +178,7 @@ BEGIN
     UPDATE certificate c
         INNER JOIN unit orig_subunit ON c.issued_on_unit_key = orig_subunit.`key`
         INNER JOIN organizationProvider op ON orig_subunit.hsa_id = op.originalSubunitId
-        INNER JOIN unit new_primary ON new_primary.hsa_id = op.updatedPrimaryId
+        INNER JOIN unit new_primary ON new_primary.hsa_id = op.updatedCareUnitId
         INNER JOIN unit new_subunit ON new_subunit.hsa_id = op.updatedSubunitId
         INNER JOIN unit new_provider ON new_provider.hsa_id = updatedCareProviderId
         SET
@@ -201,8 +201,8 @@ BEGIN
         op.originalSubunitName AS original_unit_name,
         op.updatedSubunitId AS new_unit_id,
         op.updatedSubunitName AS new_unit_name,
-        op.updatedPrimaryId AS new_primary_unit_id,
-        op.updatedPrimaryName AS new_primary_unit_name,
+        op.updatedCareUnitId AS new_care_unit_id,
+        op.updatedCareUnitName AS new_care_unit_name,
         CASE
             WHEN new_subunit.hsa_id IS NOT NULL THEN 'Added'
             ELSE 'Not Found'
@@ -216,8 +216,8 @@ BEGIN
         op.originalSubunitName,
         op.updatedSubunitId,
         op.updatedSubunitName,
-        op.updatedPrimaryId,
-        op.updatedPrimaryName,
+        op.updatedCareUnitId,
+        op.updatedCareUnitName,
         new_subunit.hsa_id
     ORDER BY unit_status DESC, op.originalSubunitName;
 
