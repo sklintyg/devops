@@ -54,10 +54,34 @@ BEGIN
     INSERT INTO organizationCareUnitProvider
     VALUES
         ('SE2321000198-019448', 'Primärvård Södra Hälsingland',                              'SE2321000198-054394', 'VO Alfta Din hälsocentral'),
+        ('SE2321000198-019448', 'Primärvård Södra Hälsingland',                              'SE2321000198-054395', 'VO Arbrå Din hälsocentral'),
+        ('SE2321000198-019448', 'Primärvård Södra Hälsingland',                              'SE2321000198-054396', 'VO Edsbyn Din hälsocentral'),
+        ('SE2321000198-019448', 'Primärvård Södra Hälsingland',                              'SE2321000198-054397', 'VO Kilafors Din hälsocentral'),
+        ('SE2321000198-019448', 'Primärvård Södra Hälsingland',                              'SE2321000198-054398', 'VO Linden Din hälsocentral'),
+        ('SE2321000198-019448', 'Primärvård Södra Hälsingland',                              'SE2321000198-054399', 'VO Söderhamn Din hälsocentral'),
+
         ('SE2321000198-019315', 'Primärvård Gävle',                                          'SE2321000198-054377', 'VO Andersberg Din hälsocentral'),
+        ('SE2321000198-019315', 'Primärvård Gävle',                                          'SE2321000198-054378', 'VO Gävle Strand Din hälsocentral'),
+        ('SE2321000198-019315', 'Primärvård Gävle',                                          'SE2321000198-054379', 'VO Hamrånge Din hälsocentral'),
+        ('SE2321000198-019315', 'Primärvård Gävle',                                          'SE2321000198-054380', 'VO Hedesunda Färnebo Din hälsocentral'),
+        ('SE2321000198-019315', 'Primärvård Gävle',                                          'SE2321000198-054381', 'VO Strömsbro Din hälsocentral'),
+        ('SE2321000198-019315', 'Primärvård Gävle',                                          'SE2321000198-054382', 'VO Sätra Din hälsocentral'),
+        ('SE2321000198-019315', 'Primärvård Gävle',                                          'SE2321000198-054383', 'VO Södertull Din hälsocentral'),
+        ('SE2321000198-019315', 'Primärvård Gävle',                                          'SE2321000198-054384', 'VO Valbo Din hälsocentral'),
+
         ('SE2321000198-019340', 'Primärvård Hudiksvall',                                     'SE2321000198-054386', 'VO Delsbo - Friggesund Din hälsocentral'),
+        ('SE2321000198-019340', 'Primärvård Hudiksvall',                                     'SE2321000198-054387', 'VO Hudiksvall din hälsocentral'),
+        ('SE2321000198-019340', 'Primärvård Hudiksvall',                                     'SE2321000198-054388', 'VO Iggesund Din hälsocentral'),
+
         ('SE2321000198-019363', 'Primärvård Ljusdal',                                        'SE2321000198-054390', 'VO Färila - Los Din hälsocentral'),
-        ('SE2321000198-019471', 'Primärvård Västra Gästrikland',                             'SE2321000198-054401', 'VO Hofors Din hälsocentral');
+        ('SE2321000198-019363', 'Primärvård Ljusdal',                                        'SE2321000198-054391', 'VO Järvsö Din hälsocentral'),
+        ('SE2321000198-019363', 'Primärvård Ljusdal',                                        'SE2321000198-054392', 'VO Ljusdal - Ramsjö Din hälsocentral'),
+
+        ('SE2321000198-019471', 'Primärvård Västra Gästrikland',                             'SE2321000198-054401', 'VO Hofors Din hälsocentral'),
+        ('SE2321000198-019471', 'Primärvård Västra Gästrikland',                             'SE2321000198-054402', 'VO Ockelbo Din hälsocentral'),
+        ('SE2321000198-019471', 'Primärvård Västra Gästrikland',                             'SE2321000198-054403', 'VO Sandviken Norra Din hälsocentral'),
+        ('SE2321000198-019471', 'Primärvård Västra Gästrikland',                             'SE2321000198-054404', 'VO Sandviken Södra Din hälsocentral'),
+        ('SE2321000198-019471', 'Primärvård Västra Gästrikland',                             'SE2321000198-054405', 'VO Storvik Din hälsocentral');
 
     -- Insert original care sub-unit IDs into the table variable
     INSERT INTO organizationSubCareUnitProvider
