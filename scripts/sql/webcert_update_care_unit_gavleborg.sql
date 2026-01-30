@@ -179,6 +179,14 @@ BEGIN
     );
     SELECT ROW_COUNT() INTO @integreradeVardenheterInserted;
 
+    -- Insert new sub-unit that didn't exist (only if it doesn't already exist)
+    INSERT INTO INTEGRERADE_VARDENHETER (ENHETS_ID, ENHETS_NAMN, VARDGIVAR_ID, VARDGIVAR_NAMN, SKAPAD_DATUM, SCHEMA_VERSION_1, SCHEMA_VERSION_3)
+    SELECT newSubUnitId, newSubUnitName, updatedCareProviderId, updatedCareProviderName, NOW(), schemaVersion1Value, schemaVersion3Value
+    WHERE NOT EXISTS (
+        SELECT 1 FROM INTEGRERADE_VARDENHETER iv WHERE iv.ENHETS_ID = newSubUnitId
+    );
+    SELECT ROW_COUNT() INTO @newVardenheterInserted;
+
     -- Update ARENDE table
     UPDATE ARENDE f
     INNER JOIN organizationSubCareUnitProvider i ON f.ENHET = i.originalId
@@ -196,14 +204,6 @@ BEGIN
         f.VARDGIVAR_ID = updatedCareProviderId,
         f.VARDGIVAR_NAMN = updatedCareProviderName;
     SELECT ROW_COUNT() INTO @intygUpdated;
-
-    -- Insert new sub-unit that didn't exist (only if it doesn't already exist)
-    INSERT INTO INTEGRERADE_VARDENHETER (ENHETS_ID, ENHETS_NAMN, VARDGIVAR_ID, VARDGIVAR_NAMN, SKAPAD_DATUM, SCHEMA_VERSION_1, SCHEMA_VERSION_3)
-    SELECT newSubUnitId, newSubUnitName, updatedCareProviderId, updatedCareProviderName, NOW(), schemaVersion1Value, schemaVersion3Value
-    WHERE NOT EXISTS (
-        SELECT 1 FROM INTEGRERADE_VARDENHETER iv WHERE iv.ENHETS_ID = newSubUnitId
-    );
-    SELECT ROW_COUNT() INTO @newVardenheterInserted;
 
     -- Summary
     SELECT
