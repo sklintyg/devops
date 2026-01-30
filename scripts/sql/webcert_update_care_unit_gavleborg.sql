@@ -101,8 +101,8 @@ BEGIN
            ('SE2321000198-019457', 'Edsbyn Din hälsocentral S',                                 'SE2321000198-054447', 'Edsbyn Din hälsocentral'),
            ('SE2321000198-021096', 'Barnvårdscentral Edsbyn Din hälsocentral S',                'SE2321000198-054448', 'Barnvårdscentral Edsbyn Din hälsocentral'),
 
-           ('SE2321000198-019370', 'Färila - Los Din hälsocentral S',                           'SE2321000198-054435', 'Barnavårdscentral Färila - Los Din hälsocentral'),
-           ('SE2321000198-021163', 'Barnavårdscentral Färila - Los Din hälsocentral S',         'SE2321000198-054434', 'Färila - Los Din hälsocentral'),
+           ('SE2321000198-019370', 'Färila - Los Din hälsocentral S',                           'SE2321000198-054434', 'Färila - Los Din hälsocentral'),
+           ('SE2321000198-021163', 'Barnavårdscentral Färila - Los Din hälsocentral S',         'SE2321000198-054435', 'Barnavårdscentral Färila - Los Din hälsocentral'),
 
            ('SE2321000198-024141', 'Gävle Strand Din hälsocentral S',                           'SE2321000198-054412', 'Gävle Strand Din hälsocentral'),
            ('SE2321000198-043530', 'Barnavårdscentral Gävle Strand Din hälsocentral S',         'SE2321000198-054413', 'Barnavårdscentral Gävle Strand Din hälsocentral'),
