@@ -6,7 +6,6 @@ CREATE PROCEDURE updateOrganizationStatistik()
 BEGIN
     -- Declare variables
     DECLARE updatedCareProviderId VARCHAR(50);
-    DECLARE originalCareProviderId VARCHAR(50);
     DECLARE errorCode CHAR(5) DEFAULT '00000';
     DECLARE effectiveFromDate DATE DEFAULT '2025-01-14';
     DECLARE errorMessage TEXT;
@@ -18,7 +17,6 @@ BEGIN
             errorCode = RETURNED_SQLSTATE, errorMessage = MESSAGE_TEXT;
     END;
 
-    SET originalCareProviderId = 'SE2321000198-016965';
     SET updatedCareProviderId = 'SE2321000198-054374';
 
     -- Start transaction
@@ -26,13 +24,6 @@ BEGIN
 
     -- Inactivate safe-updates as we are updating rows based on other columns than primary keys
     SET SQL_SAFE_UPDATES = 0;
-
-    DROP TEMPORARY TABLE IF EXISTS update_report;
-    CREATE TEMPORARY TABLE update_report (
-        step VARCHAR(100),
-        affected_rows INT,
-        message VARCHAR(255)
-    );
 
     DROP TEMPORARY TABLE IF EXISTS organizationProvider;
     CREATE TEMPORARY TABLE organizationProvider(
@@ -72,14 +63,14 @@ BEGIN
 
     -- VO Edsbyn Din hälsocentral
     -- Original Enhet ID,       Original Enhet Name,    Original Vård Enhet ID,                                         Updated Enhet ID,       Updated Enhet Name,     Updated Vård Enhet ID
-    ('SE2321000198-019457', 'Edsbyn Din hälsocentral S', 'SE2321000198-019448',                                       'SE2321000198-054448', 'Edsbyn Din hälsocentral', 'SE2321000198-054396'),
+    ('SE2321000198-019457', 'Edsbyn Din hälsocentral S', 'SE2321000198-019448',                                       'SE2321000198-054447', 'Edsbyn Din hälsocentral', 'SE2321000198-054396'),
     ('SE2321000198-021096', 'Barnvårdscentral Edsbyn Din hälsocentral S', 'SE2321000198-019448',                      'SE2321000198-054448', 'Barnvårdscentral Edsbyn Din hälsocentral', 'SE2321000198-054396'),
     ('SE2321000198-019448', 'Primärvård Södra Hälsingland', 'SE2321000198-019448',                                    'SE2321000198-054396', 'VO Edsbyn Din hälsocentral', 'SE2321000198-054396'),
 
     -- VO Färila - Los Din hälsocentral
     -- Original Enhet ID,       Original Enhet Name,    Original Vård Enhet ID,                                         Updated Enhet ID,       Updated Enhet Name,     Updated Vård Enhet ID
-    ('SE2321000198-019370', 'Färila - Los Din hälsocentral S', 'SE2321000198-019363',                                 'SE2321000198-054434', 'Färila - Los Din hälsocentral', 'SE2321000198-054390'),
-    ('SE2321000198-021163', 'Barnavårdscentral Färila - Los Din hälsocentral S', 'SE2321000198-019363',               'SE2321000198-054435', 'Barnavårdscentral Färila - Los Din hälsocentral', 'SE2321000198-054390'),
+    ('SE2321000198-019370', 'Färila - Los Din hälsocentral S', 'SE2321000198-019363',                                 'SE2321000198-054435', 'Barnavårdscentral Färila - Los Din hälsocentral', 'SE2321000198-054390'),
+    ('SE2321000198-021163', 'Barnavårdscentral Färila - Los Din hälsocentral S', 'SE2321000198-019363',               'SE2321000198-054434', 'Färila - Los Din hälsocentral', 'SE2321000198-054390'),
     ('SE2321000198-019363', 'Primärvård Ljusdal', 'SE2321000198-019363',                                              'SE2321000198-054390', 'VO Färila - Los Din hälsocentral', 'SE2321000198-054390'),
 
     -- VO Gävle Strand Din hälsocentral
@@ -97,7 +88,7 @@ BEGIN
     -- VO Hedesunda Färnebo Din hälsocentral
     -- Original Enhet ID,       Original Enhet Name,    Original Vård Enhet ID,                                         Updated Enhet ID,       Updated Enhet Name,     Updated Vård Enhet ID
     ('SE2321000198-039751', 'Badverksamhet Gävle S', 'SE2321000198-019315',                                           'SE2321000198-054927', 'Badverksamhet Gävle', 'SE2321000198-054380'),
-    ('SE2321000198-020990', 'Barnavårdscentral Hamrånge Din hälsocentral S', 'SE2321000198-019315',                   'SE2321000198-054417', 'Barnavårdscentral Hedesunda Din hälsocentral', 'SE2321000198-054380'),
+    ('SE2321000198-020986', 'Barnavårdscentral Hedesunda Din hälsocentral S', 'SE2321000198-019315',                   'SE2321000198-054417', 'Barnavårdscentral Hedesunda Din hälsocentral', 'SE2321000198-054380'),
     ('SE2321000198-048874', 'Distriktssköterskomottagning Färnebo Din hälsocentral S', 'SE2321000198-019315',         'SE2321000198-054418', 'Distriktssköterskomottagning Färnebo Din hälsocentral', 'SE2321000198-054380'),
     ('SE2321000198-019319', 'Hedesunda Färnebo Din hälsocentral S', 'SE2321000198-019315',                            'SE2321000198-054416', 'Hedesunda Färnebo Din hälsocentral', 'SE2321000198-054380'),
     ('SE2321000198-019315', 'Primärvård Gävle', 'SE2321000198-019315',                                                'SE2321000198-054380', 'VO Hedesunda Färnebo Din hälsocentral', 'SE2321000198-054380'),
@@ -152,8 +143,8 @@ BEGIN
 
     -- VO Sandviken Norra Din hälsocentral
     -- Original Enhet ID,       Original Enhet Name,    Original Vård Enhet ID,                                         Updated Enhet ID,       Updated Enhet Name,     Updated Vård Enhet ID
-    ('SE2321000198-021123', 'Sandviken Norra Din hälsocentral S', 'SE2321000198-019471',                              'SE2321000198-054464', 'Sandviken Norra Din hälsocentral', 'SE2321000198-054403'),
     ('SE2321000198-021126', 'Barnavårdscentral Sandviken Norra Din hälsocentral S', 'SE2321000198-019471',            'SE2321000198-054465', 'Barnavårdscentral Sandviken Norra Din hälsocentral', 'SE2321000198-054403'),
+    ('SE2321000198-021123', 'Sandviken Norra Din hälsocentral S', 'SE2321000198-019471',                              'SE2321000198-054464', 'Sandviken Norra Din hälsocentral', 'SE2321000198-054403'),
     ('SE2321000198-019471', 'Primärvård Västra Gästrikland', 'SE2321000198-019471',                                   'SE2321000198-054403', 'VO Sandviken Norra Din hälsocentral', 'SE2321000198-054403'),
 
     -- VO Sandviken Södra Din hälsocentral
@@ -199,57 +190,33 @@ BEGIN
     ('SE2321000198-048873', 'Handrehabilitering Valbo Din hälsocentral S', 'SE2321000198-019315',                     'SE2321000198-054427', 'Handrehabilitering Valbo Din hälsocentral', 'SE2321000198-054384'),
     ('SE2321000198-019315', 'Primärvård Gävle', 'SE2321000198-019315',                                                'SE2321000198-054384', 'VO Valbo Din hälsocentral', 'SE2321000198-054384');
 
-    -- Get count before update
-    INSERT INTO update_report (step, affected_rows, message)
+
+
+    -- Insert new enhet to ENHET table if not exists
+    INSERT INTO enhet (enhetId, namn, lansId, kommunId, verksamhetsTyper, vardgivareId, vardenhetId)
     SELECT
-        'ENHET (before update)',
-        COUNT(*),
-        'Rows that will be updated'
-    FROM enhet e
-             INNER JOIN organizationProvider op ON e.enhetId = op.originalEnhetId;
+        op.updatedEnhetId,
+        op.updatedEnhetName,
+        '00',
+        '00',
+        '00',
+        updatedCareProviderId,
+        op.updatedVardEnhetId
+    FROM organizationProvider op
+    WHERE NOT EXISTS (
+        SELECT 1
+        FROM enhet e
+        WHERE e.enhetId = op.updatedEnhetId
+    );
 
-
-    -- Verify all ENHET rows to be updated belong to the original care provider
-    SELECT COUNT(*) INTO @mismatchedEnhetCount
-    FROM enhet e
-    WHERE e.enhetId IN (SELECT originalEnhetId FROM organizationProvider)
-      AND e.vardgivareId <> originalCareProviderId;
-    IF @mismatchedEnhetCount > 0 THEN
-        SET @errorMsg = CONCAT('Data integrity check failed: ', @mismatchedEnhetCount, ' rows in ENHET table do not belong to the original care provider.');
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = @errorMsg;
-    END IF;
-
-    -- Update ENHET table
-    UPDATE enhet e INNER JOIN organizationProvider op ON e.enhetId = op.originalEnhetId
-    SET e.enhetId = op.updatedEnhetId,
-            e.namn = op.updatedEnhetName,
-            e.vardgivareId = updatedCareProviderId,
-            e.vardenhetId = op.updatedVardEnhetId;
-
-    INSERT INTO update_report (step, affected_rows, message)
-    VALUES ('ENHET (after update)', ROW_COUNT(), 'Rows updated');
-
-    -- Show what will be updated in INTYGCOMMON table
-    INSERT INTO update_report (step, affected_rows, message)
-    SELECT
-        'INTYGCOMMON (before update)',
-        COUNT(*),
-        'Rows that will be updated'
-    FROM intygcommon ic
-             INNER JOIN organizationProvider op ON ic.enhet = op.originalEnhetId AND ic.signeringsdatum >= effectiveFromDate;
-
-
-    -- Verify all INTYGCOMMON rows to be updated belong to the original care provider
-    SELECT COUNT(*) INTO @mismatchedIntygCommonCount
-    FROM intygcommon ic
-    WHERE ic.enhet IN (SELECT originalEnhetId FROM organizationProvider)
-      AND ic.vardgivareid <> originalCareProviderId;
-    IF @mismatchedIntygCommonCount > 0 THEN
-        SET @errorMsg = CONCAT('Data integrity check failed: ', @mismatchedIntygCommonCount, ' rows in INTYGCOMMON table do not belong to the original care provider.');
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = @errorMsg;
-    END IF;
+    -- Add new subunit for Badverksamhet Sandviken
+    INSERT INTO enhet (enhetId, namn, lansId, kommunId, verksamhetsTyper, vardgivareId, vardenhetId)
+    SELECT 'SE2321000198-054928', 'Badverksamhet Sandviken', '00', '00', '00', updatedCareProviderId, 'SE2321000198-054403'
+    WHERE NOT EXISTS (
+        SELECT 1
+        FROM enhet e
+        WHERE e.enhetId = 'SE2321000198-054928'
+    );
 
     -- Update INTYGCOMMON table
     UPDATE intygcommon ic
@@ -258,34 +225,10 @@ BEGIN
         ic.vardgivareid = updatedCareProviderId,
         ic.vardenhet = op.updatedVardEnhetId;
 
-    INSERT INTO update_report (step, affected_rows, message)
-    VALUES ('INTYGCOMMON (after update)', ROW_COUNT(), 'Rows updated');
-
 # TODO: Should LAKARE table be updated as well to the new care provider?
 #     -- Update LAKARE table
 #     UPDATE lakare lk INNER JOIN organizationProvider op ON lk.vardgivareid = originalCareProviderId
     #     SET lk.vardgivareid = updatedCareProviderId;
-
-
-    -- Verify all MESSAGEWIDELINE rows to be updated belong to the original care provider
-    SELECT COUNT(*) INTO @mismatchedMessageWideLineCount
-    FROM messagewideline mwl
-    WHERE mwl.enhet IN (SELECT originalEnhetId FROM organizationProvider)
-      AND mwl.vardgivareid <> originalCareProviderId;
-    IF @mismatchedMessageWideLineCount > 0 THEN
-        SET @errorMsg = CONCAT('Data integrity check failed: ', @mismatchedMessageWideLineCount, ' rows in MESSAGEWIDELINE table do not belong to the original care provider.');
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = @errorMsg;
-    END IF;
-
-    -- Update MESSAGEWIDELINE table
-    INSERT INTO update_report (step, affected_rows, message)
-    SELECT
-        'MESSAGEWIDELINE (before update)',
-        COUNT(*),
-        'Rows that will be updated'
-    FROM messagewideline mwl
-             INNER JOIN organizationProvider op ON mwl.enhet = op.originalEnhetId AND mwl.intygSigneringsdatum >= effectiveFromDate;
 
     UPDATE messagewideline mwl
     INNER JOIN organizationProvider op ON mwl.enhet = op.originalEnhetId AND mwl.intygSigneringsdatum >= effectiveFromDate
@@ -293,37 +236,12 @@ BEGIN
         mwl.vardgivareid = updatedCareProviderId,
         mwl.vardenhet = op.updatedVardEnhetId;
 
-    INSERT INTO update_report (step, affected_rows, message)
-    VALUES ('MESSAGEWIDELINE (after update)', ROW_COUNT(), 'Rows updated');
-
-    -- Verify all WIDELINE rows to be updated belong to the original care provider
-    SELECT COUNT(*) INTO @mismatchedWideLineCount
-    FROM wideline wl
-    WHERE wl.enhet IN (SELECT originalEnhetId FROM organizationProvider)
-      AND wl.vardgivareid <> originalCareProviderId;
-    IF @mismatchedWideLineCount > 0 THEN
-        SET @errorMsg = CONCAT('Data integrity check failed: ', @mismatchedWideLineCount, ' rows in WIDELINE table do not belong to the original care provider.');
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = @errorMsg;
-    END IF;
-
-    -- Update WIDELINE table
-    INSERT INTO update_report (step, affected_rows, message)
-    SELECT
-        'WIDELINE (before update)',
-        COUNT(*),
-        'Rows that will be updated'
-    FROM wideline wl
-             INNER JOIN organizationProvider op ON wl.enhet = op.originalEnhetId;
-
     UPDATE wideline wl
     INNER JOIN organizationProvider op ON wl.enhet = op.originalEnhetId
+    INNER JOIN intygcommon ic ON wl.correlationId = ic.intygid AND ic.signeringsdatum >= effectiveFromDate
     SET wl.enhet =  op.updatedEnhetId,
         wl.vardgivareid = updatedCareProviderId,
         wl.vardenhet = op.updatedVardEnhetId;
-
-    INSERT INTO update_report (step, affected_rows, message)
-    VALUES ('WIDELINE (after update)', ROW_COUNT(), 'Rows updated');
 
     DROP TEMPORARY TABLE IF EXISTS originalCareProviderIds;
 
@@ -335,13 +253,6 @@ BEGIN
         SELECT 'Transaction rolled back due to sql exception. No changes were introduced.';
         SELECT CONCAT('Stored procedure failed, error = ', errorCode, ', message = ', errorMessage);
     END IF;
-
-    SELECT
-        step,
-        affected_rows,
-        message
-    FROM update_report
-    ORDER BY step DESC;
 
     DROP TEMPORARY TABLE IF EXISTS update_report;
 
