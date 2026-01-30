@@ -65,7 +65,7 @@ BEGIN
         ('SE2321000198-019340', 'Primärvård Hudiksvall',            'SE2321000198-019350', 'Delsbo - Friggesund Din hälsocentral S',                   'SE2321000198-054386', 'VO Delsbo - Friggesund Din hälsocentral',      'SE2321000198-054428', 'Delsbo - Friggesund Din hälsocentral'),
         ('SE2321000198-019340', 'Primärvård Hudiksvall',            'SE2321000198-021006', 'Barnavårdscentral Delsbo Din hälsocentral S',              'SE2321000198-054386', 'VO Delsbo - Friggesund Din hälsocentral',      'SE2321000198-054429', 'Barnavårdscentral Delsbo Din hälsocentral'),
 
-        ('SE2321000198-019448', 'Primärvård Södra Hälsingland',     'SE2321000198-019457', 'Edsbyn Din hälsocentral S',                                'SE2321000198-054396', 'VO Edsbyn Din hälsocentral',                   'SE2321000198-054448', 'Edsbyn Din hälsocentral'),
+        ('SE2321000198-019448', 'Primärvård Södra Hälsingland',     'SE2321000198-019457', 'Edsbyn Din hälsocentral S',                                'SE2321000198-054396', 'VO Edsbyn Din hälsocentral',                   'SE2321000198-054447', 'Edsbyn Din hälsocentral'),
         ('SE2321000198-019448', 'Primärvård Södra Hälsingland',     'SE2321000198-021096', 'Barnvårdscentral Edsbyn Din hälsocentral S',               'SE2321000198-054396', 'VO Edsbyn Din hälsocentral',                   'SE2321000198-054448', 'Barnvårdscentral Edsbyn Din hälsocentral'),
 
         ('SE2321000198-019363', 'Primärvård Ljusdal',               'SE2321000198-019370', 'Färila - Los Din hälsocentral S',                          'SE2321000198-054390', 'VO Färila - Los Din hälsocentral',             'SE2321000198-054435', 'Barnavårdscentral Färila - Los Din hälsocentral'),
@@ -78,7 +78,7 @@ BEGIN
         ('SE2321000198-019315', 'Primärvård Gävle',                 'SE2321000198-020990', 'Barnavårdscentral Hamrånge Din hälsocentral S',            'SE2321000198-054379', 'VO Hamrånge Din hälsocentral',                 'SE2321000198-054415', 'Barnavårdscentral Hamrånge Din hälsocentral'),
 
         ('SE2321000198-019315', 'Primärvård Gävle',                 'SE2321000198-039751', 'Badverksamhet Gävle S',                                    'SE2321000198-054380', 'VO Hedesunda Färnebo Din hälsocentral',        'SE2321000198-054927', 'Badverksamhet Gävle'),
-        ('SE2321000198-019315', 'Primärvård Gävle',                 'SE2321000198-020990', 'Barnavårdscentral Hamrånge Din hälsocentral S',            'SE2321000198-054380', 'VO Hedesunda Färnebo Din hälsocentral',        'SE2321000198-054417', 'Barnavårdscentral Hedesunda Din hälsocentral'),
+        ('SE2321000198-019315', 'Primärvård Gävle',                 'SE2321000198-020986', 'Barnavårdscentral Hedesunda Din hälsocentral S',           'SE2321000198-054380', 'VO Hedesunda Färnebo Din hälsocentral',        'SE2321000198-054417', 'Barnavårdscentral Hedesunda Din hälsocentral'),
         ('SE2321000198-019315', 'Primärvård Gävle',                 'SE2321000198-048874', 'Distriktssköterskemottagning Färnebo Din hälsocentral S',  'SE2321000198-054380', 'VO Hedesunda Färnebo Din hälsocentral',        'SE2321000198-054418', 'Distriktssköterskemottagning Färnebo Din hälsocentral'),
         ('SE2321000198-019315', 'Primärvård Gävle',                 'SE2321000198-019319', 'Hedesunda Färnebo Din hälsocentral S',                     'SE2321000198-054380', 'VO Hedesunda Färnebo Din hälsocentral',        'SE2321000198-054416', 'Hedesunda Färnebo Din hälsocentral'),
 
@@ -172,6 +172,15 @@ BEGIN
         SELECT 1
         FROM unit u
         WHERE u.hsa_id = op.updatedSubunitId
+    );
+
+    -- Add the new care unit without mapping
+    INSERT INTO unit (hsa_id, name, unit_type_key, version)
+    SELECT 'SE2321000198-054928', 'Badverksamhet Sandviken', 3, 0
+    WHERE NOT EXISTS (
+        SELECT 1
+        FROM unit u
+        WHERE u.hsa_id = 'SE2321000198-054928'
     );
 
     -- Update certificate unit references
