@@ -197,9 +197,13 @@ BEGIN
         f.VARDGIVAR_NAMN = updatedCareProviderName;
     SELECT ROW_COUNT() INTO @intygUpdated;
 
-    -- Insert new sub-unit that didn't exist
+    -- Insert new sub-unit that didn't exist (only if it doesn't already exist)
     INSERT INTO INTEGRERADE_VARDENHETER (ENHETS_ID, ENHETS_NAMN, VARDGIVAR_ID, VARDGIVAR_NAMN, SKAPAD_DATUM, SCHEMA_VERSION_1, SCHEMA_VERSION_3)
-    VALUES (newSubUnitId, newSubUnitName, updatedCareProviderId, updatedCareProviderName, NOW(), schemaVersion1Value, schemaVersion3Value);
+    SELECT newSubUnitId, newSubUnitName, updatedCareProviderId, updatedCareProviderName, NOW(), schemaVersion1Value, schemaVersion3Value
+    WHERE NOT EXISTS (
+        SELECT 1 FROM INTEGRERADE_VARDENHETER iv WHERE iv.ENHETS_ID = newSubUnitId
+    );
+    SELECT ROW_COUNT() INTO @newVardenheterInserted;
 
     -- Summary
     SELECT
@@ -208,7 +212,8 @@ BEGIN
         @integreradeUnderVardenheterInserted AS total_integrerade_under_vardenheter_inserted,
         @integreradeVardenheterInserted AS total_integrerade_vardenheter_inserted,
         @intygUpdated AS total_intyg_updated,
-        @arendeUpdated AS total_arende_updated;
+        @arendeUpdated AS total_arende_updated,
+        @newVardenheterInserted AS total_new_sub_vardenheter_inserted;
 
     SELECT
         op.originalId,
