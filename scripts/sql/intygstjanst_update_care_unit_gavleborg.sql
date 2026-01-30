@@ -125,23 +125,24 @@ BEGIN
     -- Update CERTIFICATE table
     UPDATE CERTIFICATE f
     INNER JOIN organizationProvider i ON f.CARE_UNIT_ID = i.originalSubunitId AND f.SIGNED_DATE >= issueDate
-    SET f.CARE_UNIT_ID = i.updatedPrimaryId,
-        f.CARE_UNIT_NAME = i.updatedPrimaryName,
+    SET f.CARE_UNIT_ID = i.updatedSubunitId,
+        f.CARE_UNIT_NAME = i.updatedSubunitName,
         f.CARE_GIVER_ID = updatedCareProviderId;
     SELECT ROW_COUNT() INTO @certificatesUpdated;
 
-    -- Update REKO table -- gå på unit_id and update care_unit_id (utgå från cs tabellen)
+    -- Update REKO table
     UPDATE REKO f
     INNER JOIN organizationProvider i ON f.UNIT_ID = i.originalSubunitId AND f.REGISTRATION_TIMESTAMP >= issueDate
-    SET f.CARE_UNIT_ID = i.updatedPrimaryId,
+    SET f.UNIT_ID = i.updatedSubunitId,
+        f.CARE_UNIT_ID = i.updatedPrimaryId,
         f.CARE_PROVIDER_ID = updatedCareProviderId;
     SELECT ROW_COUNT() INTO @rekoUpdated;
 
     -- Update SJUKFALL_CERT table
     UPDATE SJUKFALL_CERT f
     INNER JOIN organizationProvider i ON f.CARE_UNIT_ID = i.originalSubunitId AND f.SIGNING_DATETIME >= issueDate
-    SET f.CARE_UNIT_ID = i.originalSubunitId,
-        f.CARE_UNIT_NAME = i.updatedPrimaryName,
+    SET f.CARE_UNIT_ID = i.updatedSubunitId,
+        f.CARE_UNIT_NAME = i.updatedSubunitName,
         f.CARE_GIVER_ID = updatedCareProviderId;
     SELECT ROW_COUNT() INTO @sjukfallUpdated;
 
