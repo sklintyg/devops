@@ -40,8 +40,8 @@ BEGIN
     -- Create table with primary care unit and subunits
     DROP TEMPORARY TABLE IF EXISTS organizationProvider;
     CREATE TEMPORARY TABLE organizationProvider(
-        originalPrimaryId VARCHAR(50) NOT NULL,
-        originalPrimaryName VARCHAR(100) NOT NULL,
+        originalCareUnitId VARCHAR(50) NOT NULL,
+        originalCareUnitName VARCHAR(100) NOT NULL,
         originalSubunitId VARCHAR(50) NOT NULL,
         originalSubunitName VARCHAR(100) NOT NULL,
         updatedCareUnitId VARCHAR(50) NOT NULL,
