@@ -13,6 +13,8 @@ BEGIN
     DECLARE errorMessage TEXT;
     DECLARE originalCareProviderId VARCHAR(50);
     DECLARE issueDate DATE DEFAULT DATE('2025-01-14');
+    DECLARE newSubUnitId VARCHAR(50);
+    DECLARE newSubUnitName VARCHAR(100);
 
     -- Declare handler
     DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
@@ -26,6 +28,8 @@ BEGIN
     SET updatedCareProviderName = 'Region Gävleborg Din Hälsocentral AB';
     SET schemaVersion1Value = 0;
     SET schemaVersion3Value = 1;
+    SET newSubUnitId = 'SE2321000198-054928';
+    SET newSubUnitName = 'Badverksamhet Sandviken';
 
     -- Inactivate safe-updates as we are updating rows based on other columns than primary keys
     SET SQL_SAFE_UPDATES = 0;
@@ -70,7 +74,7 @@ BEGIN
            ('SE2321000198-019350', 'Delsbo - Friggesund Din hälsocentral S',                    'SE2321000198-054428', 'Delsbo - Friggesund Din hälsocentral'),
            ('SE2321000198-021006', 'Barnavårdscentral Delsbo Din hälsocentral S',               'SE2321000198-054429', 'Barnavårdscentral Delsbo Din hälsocentral'),
 
-           ('SE2321000198-019457', 'Edsbyn Din hälsocentral S',                                 'SE2321000198-054448', 'Edsbyn Din hälsocentral'),
+           ('SE2321000198-019457', 'Edsbyn Din hälsocentral S',                                 'SE2321000198-054447', 'Edsbyn Din hälsocentral'),
            ('SE2321000198-021096', 'Barnvårdscentral Edsbyn Din hälsocentral S',                'SE2321000198-054448', 'Barnvårdscentral Edsbyn Din hälsocentral'),
 
            ('SE2321000198-019370', 'Färila - Los Din hälsocentral S',                           'SE2321000198-054435', 'Barnavårdscentral Färila - Los Din hälsocentral'),
@@ -83,7 +87,7 @@ BEGIN
            ('SE2321000198-020990', 'Barnavårdscentral Hamrånge Din hälsocentral S',             'SE2321000198-054415', 'Barnavårdscentral Hamrånge Din hälsocentral'),
 
            ('SE2321000198-039751', 'Badverksamhet Gävle S',                                     'SE2321000198-054927', 'Badverksamhet Gävle'),
-           ('SE2321000198-020990', 'Barnavårdscentral Hamrånge Din hälsocentral S',             'SE2321000198-054417', 'Barnavårdscentral Hedesunda Din hälsocentral'),
+           ('SE2321000198-020986', 'Barnavårdscentral Hedesunda Din hälsocentral S',            'SE2321000198-054417', 'Barnavårdscentral Hedesunda Din hälsocentral'),
            ('SE2321000198-048874', 'Distriktssköterskemottagning Färnebo Din hälsocentral S',   'SE2321000198-054418', 'Distriktssköterskemottagning Färnebo Din hälsocentral'),
            ('SE2321000198-019319', 'Hedesunda Färnebo Din hälsocentral S',                      'SE2321000198-054416', 'Hedesunda Färnebo Din hälsocentral'),
 
@@ -164,7 +168,7 @@ BEGIN
     WHERE NOT EXISTS (
         SELECT 1 FROM INTEGRERADE_VARDENHETER iv WHERE iv.ENHETS_ID = i.updatedId
     );
-    SELECT ROW_COUNT() INTO @integreradeVardenheterInserted;
+    SELECT ROW_COUNT() INTO @integreradeUnderVardenheterInserted;
 
     -- Insert new records for updatedIds to INTEGRERADE_VARDENHETER (only if they don't already exist)
     INSERT INTO INTEGRERADE_VARDENHETER (ENHETS_ID, ENHETS_NAMN, VARDGIVAR_ID, VARDGIVAR_NAMN, SKAPAD_DATUM, SCHEMA_VERSION_1, SCHEMA_VERSION_3)
@@ -193,10 +197,15 @@ BEGIN
         f.VARDGIVAR_NAMN = updatedCareProviderName;
     SELECT ROW_COUNT() INTO @intygUpdated;
 
+    -- Insert new sub-unit that didn't exist
+    INSERT INTO INTEGRERADE_VARDENHETER (ENHETS_ID, ENHETS_NAMN, VARDGIVAR_ID, VARDGIVAR_NAMN, SKAPAD_DATUM, SCHEMA_VERSION_1, SCHEMA_VERSION_3)
+    VALUES (newSubUnitId, newSubUnitName, updatedCareProviderId, updatedCareProviderName, NOW(), schemaVersion1Value, schemaVersion3Value);
+
     -- Summary
     SELECT
         @fragasvarUpdated AS total_fragasvar_updated,
         @handelseUpdated AS total_handelse_updated,
+        @integreradeUnderVardenheterInserted AS total_integrerade_under_vardenheter_inserted,
         @integreradeVardenheterInserted AS total_integrerade_vardenheter_inserted,
         @intygUpdated AS total_intyg_updated,
         @arendeUpdated AS total_arende_updated;
