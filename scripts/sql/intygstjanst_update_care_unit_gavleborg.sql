@@ -8,7 +8,6 @@ BEGIN
     DECLARE updatedCareProviderId VARCHAR(50);
     DECLARE errorCode CHAR(5) DEFAULT '00000';
     DECLARE errorMessage TEXT;
-    DECLARE originalCareProviderId VARCHAR(50);
     DECLARE issueDate DATE DEFAULT DATE('2025-01-14');
 
     -- Declare handler
@@ -18,7 +17,6 @@ BEGIN
             errorCode = RETURNED_SQLSTATE, errorMessage = MESSAGE_TEXT;
     END;
 
-    SET originalCareProviderId = 'SE2321000198-016965';
     SET updatedCareProviderId = 'SE2321000198-054374';
 
     -- Inactivate safe-updates as we are updating rows based on other columns than primary keys

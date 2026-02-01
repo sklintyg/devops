@@ -11,7 +11,6 @@ BEGIN
     DECLARE schemaVersion3Value TINYINT;
     DECLARE errorCode CHAR(5) DEFAULT '00000';
     DECLARE errorMessage TEXT;
-    DECLARE originalCareProviderId VARCHAR(50);
     DECLARE issueDate DATE DEFAULT DATE('2025-01-14');
     DECLARE newSubUnitId VARCHAR(50);
     DECLARE newSubUnitName VARCHAR(100);
@@ -23,7 +22,6 @@ BEGIN
             errorCode = RETURNED_SQLSTATE, errorMessage = MESSAGE_TEXT;
     END;
 
-    SET originalCareProviderId = 'SE2321000198-016965';
     SET updatedCareProviderId = 'SE2321000198-054374';
     SET updatedCareProviderName = 'Region Gävleborg Din Hälsocentral AB';
     SET schemaVersion1Value = 0;

@@ -90,6 +90,12 @@ FROM unit u
 WHERE cp.hsa_id != 'SE2321000198-016965'
 GROUP BY u.hsa_id, u.name, cp.hsa_id, cp.name;
 
+-- Total certificates on updated units
+SELECT COUNT(c.certificate_id) AS total_certificates_on_updated_units
+FROM certificate c
+         INNER JOIN unit u ON c.issued_on_unit_key = u.`key`
+         INNER JOIN updated_units upd ON u.hsa_id = upd.u_hsa_id;
+
 -- Cleanup
 DROP TEMPORARY TABLE IF EXISTS original_units;
 DROP TEMPORARY TABLE IF EXISTS updated_units;

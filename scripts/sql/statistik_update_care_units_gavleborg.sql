@@ -153,17 +153,14 @@ BEGIN
         ic.vardgivareid = updatedCareProviderId,
         ic.vardenhet = op.updatedCareUnitId;
 
-# TODO: Should LAKARE table be updated as well to the new care provider?
-#     -- Update LAKARE table
-#     UPDATE lakare lk INNER JOIN organizationProvider op ON lk.vardgivareid = originalCareProviderId
-    #     SET lk.vardgivareid = updatedCareProviderId;
-
+    -- Update messagewideline table
     UPDATE messagewideline mwl
     INNER JOIN organizationProvider op ON mwl.enhet = op.originalSubunitId AND mwl.intygSigneringsdatum >= effectiveFromDate
     SET mwl.enhet =  op.updatedSubunitId,
         mwl.vardgivareid = updatedCareProviderId,
         mwl.vardenhet = op.updatedCareUnitId;
 
+    -- Update wideline table
     UPDATE wideline wl
     INNER JOIN organizationProvider op ON wl.enhet = op.originalSubunitId
     INNER JOIN intygcommon ic ON wl.correlationId = ic.intygid AND ic.signeringsdatum >= effectiveFromDate
