@@ -27,14 +27,14 @@ BEGIN
 
     DROP TEMPORARY TABLE IF EXISTS organizationProvider;
     CREATE TEMPORARY TABLE organizationProvider(
-        originalCareUnitId VARCHAR(50) NOT NULL,
-        originalCareUnitName VARCHAR(100) NOT NULL,
-        originalSubunitId VARCHAR(50) NOT NULL,
-        originalSubunitName VARCHAR(100) NOT NULL,
-        updatedCareUnitId VARCHAR(50) NOT NULL,
-        updatedCareUnitName VARCHAR(100) NOT NULL,
-        updatedSubunitId VARCHAR(50) NOT NULL,
-        updatedSubunitName VARCHAR(100) NOT NULL
+        originalCareUnitId VARCHAR(50) NOT NULL COLLATE utf8mb3_general_ci,
+        originalCareUnitName VARCHAR(100) NOT NULL COLLATE utf8mb3_general_ci,
+        originalSubunitId VARCHAR(50) NOT NULL COLLATE utf8mb3_general_ci,
+        originalSubunitName VARCHAR(100) NOT NULL COLLATE utf8mb3_general_ci,
+        updatedCareUnitId VARCHAR(50) NOT NULL COLLATE utf8mb3_general_ci,
+        updatedCareUnitName VARCHAR(100) NOT NULL COLLATE utf8mb3_general_ci,
+        updatedSubunitId VARCHAR(50) NOT NULL COLLATE utf8mb3_general_ci,
+        updatedSubunitName VARCHAR(100) NOT NULL COLLATE utf8mb3_general_ci
     );
 
     -- Insert original care provider IDs into the table variable

@@ -25,14 +25,14 @@ BEGIN
     -- Create table with primary care unit and subunits
     DROP TEMPORARY TABLE IF EXISTS organizationProvider;
     CREATE TEMPORARY TABLE organizationProvider(
-                                                   originalPrimaryId VARCHAR(50) NOT NULL,
-                                                   originalPrimaryName VARCHAR(100) NOT NULL,
-                                                   originalSubunitId VARCHAR(50) NOT NULL,
-                                                   originalSubunitName VARCHAR(100) NOT NULL,
-                                                   updatedPrimaryId VARCHAR(50) NOT NULL,
-                                                   updatedPrimaryName VARCHAR(100) NOT NULL,
-                                                   updatedSubunitId VARCHAR(50) NOT NULL,
-                                                   updatedSubunitName VARCHAR(100) NOT NULL
+                                                   originalPrimaryId VARCHAR(50) NOT NULL COLLATE utf8mb3_general_ci,
+                                                   originalPrimaryName VARCHAR(100) NOT NULL COLLATE utf8mb3_general_ci,
+                                                   originalSubunitId VARCHAR(50) NOT NULL COLLATE utf8mb3_general_ci,
+                                                   originalSubunitName VARCHAR(100) NOT NULL COLLATE utf8mb3_general_ci,
+                                                   updatedPrimaryId VARCHAR(50) NOT NULL COLLATE utf8mb3_general_ci,
+                                                   updatedPrimaryName VARCHAR(100) NOT NULL COLLATE utf8mb3_general_ci,
+                                                   updatedSubunitId VARCHAR(50) NOT NULL COLLATE utf8mb3_general_ci,
+                                                   updatedSubunitName VARCHAR(100) NOT NULL COLLATE utf8mb3_general_ci
     );
 
     -- Insert mappings with primary care units and their subunits
@@ -148,22 +148,6 @@ BEGIN
         @certificatesUpdated AS total_certificates_updated,
         @rekoUpdated AS total_reko_updated,
         @sjukfallUpdated AS total_sjukfall_updated;
-
-    SELECT
-        op.originalSubunitId,
-        op.originalSubunitName,
-        op.updatedSubunitId,
-        op.updatedSubunitName,
-        CASE
-            WHEN EXISTS(SELECT 1 FROM CERTIFICATE c WHERE c.CARE_UNIT_ID = op.originalSubunitId LIMIT 1) THEN 'Updated'
-            ELSE 'Not Found'
-            END AS update_status,
-        (SELECT COUNT(*) FROM CERTIFICATE c WHERE c.CARE_UNIT_ID = op.updatedSubunitId) AS certificates_count,
-        (SELECT COUNT(*) FROM REKO r WHERE r.CARE_UNIT_ID = op.updatedSubunitId) AS reko_count,
-        (SELECT COUNT(*) FROM SJUKFALL_CERT s WHERE s.CARE_UNIT_ID = op.updatedSubunitId) AS sjukfall_count
-    FROM organizationProvider op
-    ORDER BY update_status DESC, op.originalSubunitName;
-
 
     DROP TEMPORARY TABLE IF EXISTS organizationProvider;
 
