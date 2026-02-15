@@ -9,6 +9,8 @@ BEGIN
     DECLARE errorCode CHAR(5) DEFAULT '00000';
     DECLARE errorMessage TEXT;
 
+    DECLARE originalCareProviderId VARCHAR(50);
+
     -- Declare handler
     DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -17,6 +19,7 @@ BEGIN
     END;
 
     SET updatedCareProviderId = 'SE2321000016-A9KJ';
+    SET originalCareProviderId = 'SE2321000016-A1A6DT';
 
     -- Start transaction
     START TRANSACTION;
@@ -27,17 +30,17 @@ BEGIN
     -- Update CERTIFICATE table
     UPDATE CERTIFICATE
     SET CARE_GIVER_ID = updatedCareProviderId
-    WHERE CARE_GIVER_ID = 'SE2321000016-A1A6DT';
+    WHERE CARE_GIVER_ID = originalCareProviderId;
 
     -- Update REKO table
     UPDATE REKO
     SET CARE_PROVIDER_ID = updatedCareProviderId
-    WHERE CARE_PROVIDER_ID = 'SE2321000016-A1A6DT';
+    WHERE CARE_PROVIDER_ID = originalCareProviderId;
 
     -- Update SJUKFALL_CERT table
     UPDATE SJUKFALL_CERT
     SET CARE_GIVER_ID = updatedCareProviderId
-    WHERE CARE_GIVER_ID = 'SE2321000016-A1A6DT';
+    WHERE CARE_GIVER_ID = originalCareProviderId;
 
     DROP TEMPORARY TABLE IF EXISTS originalCareProviderIds;
 

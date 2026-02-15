@@ -9,6 +9,8 @@ BEGIN
     DECLARE errorCode CHAR(5) DEFAULT '00000';
     DECLARE errorMessage TEXT;
 
+    DECLARE originalCareProviderId VARCHAR(50);
+
     -- Declare handler
     DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -19,6 +21,9 @@ BEGIN
     -- Set the new key
     SELECT `key` INTO newKey FROM unit WHERE hsa_id = 'SE2321000016-A9KJ';
 
+    -- Set the default care provider ID
+    SET originalCareProviderId = 'SE2321000016-A1A6DT';
+
     -- Start transaction
     START TRANSACTION;
 
@@ -26,7 +31,7 @@ BEGIN
     UPDATE certificate
     SET care_provider_unit_key = newKey
     WHERE care_provider_unit_key IN (
-        SELECT `key` FROM unit WHERE hsa_id = 'SE2321000016-A1A6DT'
+        SELECT `key` FROM unit WHERE hsa_id = originalCareProviderId
     );
 
     -- Commit or rollback based on error code
