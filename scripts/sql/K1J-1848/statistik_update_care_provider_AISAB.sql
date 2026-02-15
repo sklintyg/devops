@@ -9,7 +9,7 @@ BEGIN
     DECLARE errorCode CHAR(5) DEFAULT '00000';
     DECLARE errorMessage TEXT;
 
-    DECLARE defaultCareProviderId VARCHAR(50);
+    DECLARE originalCareProviderId VARCHAR(50);
 
     -- Declare handler
     DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
@@ -19,7 +19,7 @@ BEGIN
     END;
 
     SET updatedCareProviderId = 'SE2321000016-A9KJ';
-    SET defaultCareProviderId = 'SE2321000016-A1A6DT';
+    SET originalCareProviderId = 'SE2321000016-A1A6DT';
 
     -- Start transaction
     START TRANSACTION;
@@ -30,27 +30,27 @@ BEGIN
     -- Update ENHET table
     UPDATE enhet
     SET vardgivareId = updatedCareProviderId
-    WHERE vardgivareId = defaultCareProviderId;
+    WHERE vardgivareId = originalCareProviderId;
 
     -- Update INTYGCOMMON table
     UPDATE intygcommon
     SET vardgivareid = updatedCareProviderId
-    WHERE vardgivareid = defaultCareProviderId;
+    WHERE vardgivareid = originalCareProviderId;
 
     -- Update LAKARE table
     UPDATE lakare
     SET vardgivareid = updatedCareProviderId
-    WHERE vardgivareid = defaultCareProviderId;
+    WHERE vardgivareid = originalCareProviderId;
 
     -- Update MESSAGEWIDELINE table
     UPDATE messagewideline
     SET vardgivareid = updatedCareProviderId
-    WHERE vardgivareid = defaultCareProviderId;
+    WHERE vardgivareid = originalCareProviderId;
 
     -- Update WIDELINE table
     UPDATE wideline
     SET vardgivareid = updatedCareProviderId
-    WHERE vardgivareid = defaultCareProviderId;
+    WHERE vardgivareid = originalCareProviderId;
 
     IF errorCode = '00000' THEN
         COMMIT;
