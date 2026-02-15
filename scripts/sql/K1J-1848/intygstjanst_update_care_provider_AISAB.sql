@@ -42,7 +42,6 @@ BEGIN
     SET CARE_GIVER_ID = updatedCareProviderId
     WHERE CARE_GIVER_ID = originalCareProviderId;
 
-    DROP TEMPORARY TABLE IF EXISTS originalCareProviderIds;
 
     IF errorCode = '00000' THEN
         COMMIT;
