@@ -3,12 +3,12 @@ USE certificate_service;
 -- Create temporary tables for original and updated unit IDs
 DROP TEMPORARY TABLE IF EXISTS original_units;
 CREATE TEMPORARY TABLE original_units (
-    hsa_id VARCHAR(50) PRIMARY KEY
+    o_hsa_id VARCHAR(50) PRIMARY KEY
 );
 
 DROP TEMPORARY TABLE IF EXISTS updated_units;
 CREATE TEMPORARY TABLE updated_units (
-    hsa_id VARCHAR(50) PRIMARY KEY
+    u_hsa_id VARCHAR(50) PRIMARY KEY
 );
 
 -- Insert original unit IDs
@@ -73,7 +73,8 @@ INSERT INTO updated_units VALUES
 SELECT COUNT(c.certificate_id) AS total_certificates_to_update
 FROM certificate c
          INNER JOIN unit u ON c.issued_on_unit_key = u.`key`
-         INNER JOIN original_units orig ON u.hsa_id = orig.hsa_id;
+         INNER JOIN original_units orig ON u.hsa_id = orig.o_hsa_id
+WHERE c.created >= '2025-01-14 00:00:00';
 
 -- Original care units with unexpected care provider
 SELECT
@@ -85,23 +86,15 @@ SELECT
 FROM unit u
          INNER JOIN certificate c ON c.issued_on_unit_key = u.`key`
          INNER JOIN unit cp ON c.care_provider_unit_key = cp.`key`
-         INNER JOIN original_units orig ON u.hsa_id = orig.hsa_id
+         INNER JOIN original_units orig ON u.hsa_id = orig.o_hsa_id
 WHERE cp.hsa_id != 'SE2321000198-016965'
 GROUP BY u.hsa_id, u.name, cp.hsa_id, cp.name;
 
--- Updated care units that already exist in database
-SELECT
-    u.hsa_id AS existing_updated_unit_id,
-    u.name AS existing_updated_unit_name,
-    u.unit_type_key
-FROM unit u
-         INNER JOIN updated_units upd ON u.hsa_id = upd.hsa_id;
-
--- Total certificates updated after migration (verification)
-SELECT COUNT(c.certificate_id) AS total_certificates_updated
+-- Total certificates on updated units
+SELECT COUNT(c.certificate_id) AS total_certificates_on_updated_units
 FROM certificate c
          INNER JOIN unit u ON c.issued_on_unit_key = u.`key`
-         INNER JOIN updated_units upd ON u.hsa_id = upd.hsa_id;
+         INNER JOIN updated_units upd ON u.hsa_id = upd.u_hsa_id;
 
 -- Cleanup
 DROP TEMPORARY TABLE IF EXISTS original_units;

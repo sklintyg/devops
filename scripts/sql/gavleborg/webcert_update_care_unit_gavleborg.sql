@@ -11,8 +11,9 @@ BEGIN
     DECLARE schemaVersion3Value TINYINT;
     DECLARE errorCode CHAR(5) DEFAULT '00000';
     DECLARE errorMessage TEXT;
-    DECLARE customError VARCHAR(255) DEFAULT '';
-    DECLARE originalCareProviderId VARCHAR(50);
+    DECLARE issueDate DATE DEFAULT DATE('2026-02-01');
+    DECLARE newSubUnitId VARCHAR(50);
+    DECLARE newSubUnitName VARCHAR(100);
 
     -- Declare handler
     DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
@@ -21,27 +22,26 @@ BEGIN
             errorCode = RETURNED_SQLSTATE, errorMessage = MESSAGE_TEXT;
     END;
 
-    SET originalCareProviderId = 'SE2321000198-016965';
     SET updatedCareProviderId = 'SE2321000198-054374';
     SET updatedCareProviderName = 'Region Gävleborg Din Hälsocentral AB';
     SET schemaVersion1Value = 0;
     SET schemaVersion3Value = 1;
-
-    -- Check if care provider already exist
-    SELECT COUNT(*) INTO @existingProviders
-    FROM webcert.INTYG
-    WHERE ENHETS_ID = updatedCareProviderId;
-
-    IF @existingUnits > 0 THEN
-        SET customError = CONCAT('One or more care units already exist, count: ', @existingProviders);
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = customError;
-    END IF;
+    SET newSubUnitId = 'SE2321000198-054928';
+    SET newSubUnitName = 'Badverksamhet Sandviken';
 
     -- Inactivate safe-updates as we are updating rows based on other columns than primary keys
     SET SQL_SAFE_UPDATES = 0;
 
-    DROP TEMPORARY TABLE IF EXISTS organizationProvider;
-    CREATE TEMPORARY TABLE organizationProvider(
+    DROP TEMPORARY TABLE IF EXISTS organizationCareUnitProvider;
+    CREATE TEMPORARY TABLE organizationCareUnitProvider(
+        originalId VARCHAR(50) NOT NULL COLLATE utf8mb3_general_ci,
+        originalName VARCHAR(100) NOT NULL COLLATE utf8mb3_general_ci,
+        updatedId VARCHAR(50) NOT NULL COLLATE utf8mb3_general_ci,
+        updatedName VARCHAR(100) NOT NULL COLLATE utf8mb3_general_ci
+    );
+
+    DROP TEMPORARY TABLE IF EXISTS organizationSubCareUnitProvider;
+    CREATE TEMPORARY TABLE organizationSubCareUnitProvider(
         originalId VARCHAR(50) NOT NULL COLLATE utf8mb3_general_ci,
         originalName VARCHAR(100) NOT NULL COLLATE utf8mb3_general_ci,
         updatedId VARCHAR(50) NOT NULL COLLATE utf8mb3_general_ci,
@@ -49,7 +49,40 @@ BEGIN
     );
 
     -- Insert original care unit IDs into the table variable
-    INSERT INTO organizationProvider
+    INSERT INTO organizationCareUnitProvider
+    VALUES
+        ('SE2321000198-019448', 'Primärvård Södra Hälsingland',                              'SE2321000198-054394', 'VO Alfta Din hälsocentral'),
+        ('SE2321000198-019448', 'Primärvård Södra Hälsingland',                              'SE2321000198-054395', 'VO Arbrå Din hälsocentral'),
+        ('SE2321000198-019448', 'Primärvård Södra Hälsingland',                              'SE2321000198-054396', 'VO Edsbyn Din hälsocentral'),
+        ('SE2321000198-019448', 'Primärvård Södra Hälsingland',                              'SE2321000198-054397', 'VO Kilafors Din hälsocentral'),
+        ('SE2321000198-019448', 'Primärvård Södra Hälsingland',                              'SE2321000198-054398', 'VO Linden Din hälsocentral'),
+        ('SE2321000198-019448', 'Primärvård Södra Hälsingland',                              'SE2321000198-054399', 'VO Söderhamn Din hälsocentral'),
+
+        ('SE2321000198-019315', 'Primärvård Gävle',                                          'SE2321000198-054377', 'VO Andersberg Din hälsocentral'),
+        ('SE2321000198-019315', 'Primärvård Gävle',                                          'SE2321000198-054378', 'VO Gävle Strand Din hälsocentral'),
+        ('SE2321000198-019315', 'Primärvård Gävle',                                          'SE2321000198-054379', 'VO Hamrånge Din hälsocentral'),
+        ('SE2321000198-019315', 'Primärvård Gävle',                                          'SE2321000198-054380', 'VO Hedesunda Färnebo Din hälsocentral'),
+        ('SE2321000198-019315', 'Primärvård Gävle',                                          'SE2321000198-054381', 'VO Strömsbro Din hälsocentral'),
+        ('SE2321000198-019315', 'Primärvård Gävle',                                          'SE2321000198-054382', 'VO Sätra Din hälsocentral'),
+        ('SE2321000198-019315', 'Primärvård Gävle',                                          'SE2321000198-054383', 'VO Södertull Din hälsocentral'),
+        ('SE2321000198-019315', 'Primärvård Gävle',                                          'SE2321000198-054384', 'VO Valbo Din hälsocentral'),
+
+        ('SE2321000198-019340', 'Primärvård Hudiksvall',                                     'SE2321000198-054386', 'VO Delsbo - Friggesund Din hälsocentral'),
+        ('SE2321000198-019340', 'Primärvård Hudiksvall',                                     'SE2321000198-054387', 'VO Hudiksvall din hälsocentral'),
+        ('SE2321000198-019340', 'Primärvård Hudiksvall',                                     'SE2321000198-054388', 'VO Iggesund Din hälsocentral'),
+
+        ('SE2321000198-019363', 'Primärvård Ljusdal',                                        'SE2321000198-054390', 'VO Färila - Los Din hälsocentral'),
+        ('SE2321000198-019363', 'Primärvård Ljusdal',                                        'SE2321000198-054391', 'VO Järvsö Din hälsocentral'),
+        ('SE2321000198-019363', 'Primärvård Ljusdal',                                        'SE2321000198-054392', 'VO Ljusdal - Ramsjö Din hälsocentral'),
+
+        ('SE2321000198-019471', 'Primärvård Västra Gästrikland',                             'SE2321000198-054401', 'VO Hofors Din hälsocentral'),
+        ('SE2321000198-019471', 'Primärvård Västra Gästrikland',                             'SE2321000198-054402', 'VO Ockelbo Din hälsocentral'),
+        ('SE2321000198-019471', 'Primärvård Västra Gästrikland',                             'SE2321000198-054403', 'VO Sandviken Norra Din hälsocentral'),
+        ('SE2321000198-019471', 'Primärvård Västra Gästrikland',                             'SE2321000198-054404', 'VO Sandviken Södra Din hälsocentral'),
+        ('SE2321000198-019471', 'Primärvård Västra Gästrikland',                             'SE2321000198-054405', 'VO Storvik Din hälsocentral');
+
+    -- Insert original care sub-unit IDs into the table variable
+    INSERT INTO organizationSubCareUnitProvider
     VALUES
            ('SE2321000198-019456', 'Alfta Din hälsocentral S',                                  'SE2321000198-054443', 'Alfta Din hälsocentral'),
            ('SE2321000198-021090', 'Barnavårdscentral Alfta Din hälsocentral S',                'SE2321000198-054444', 'Barnavårdscentral Alfta Din hälsocentral'),
@@ -63,11 +96,11 @@ BEGIN
            ('SE2321000198-019350', 'Delsbo - Friggesund Din hälsocentral S',                    'SE2321000198-054428', 'Delsbo - Friggesund Din hälsocentral'),
            ('SE2321000198-021006', 'Barnavårdscentral Delsbo Din hälsocentral S',               'SE2321000198-054429', 'Barnavårdscentral Delsbo Din hälsocentral'),
 
-           ('SE2321000198-019457', 'Edsbyn Din hälsocentral S',                                 'SE2321000198-054448', 'Edsbyn Din hälsocentral'),
+           ('SE2321000198-019457', 'Edsbyn Din hälsocentral S',                                 'SE2321000198-054447', 'Edsbyn Din hälsocentral'),
            ('SE2321000198-021096', 'Barnvårdscentral Edsbyn Din hälsocentral S',                'SE2321000198-054448', 'Barnvårdscentral Edsbyn Din hälsocentral'),
 
-           ('SE2321000198-019370', 'Färila - Los Din hälsocentral S',                           'SE2321000198-054435', 'Barnavårdscentral Färila - Los Din hälsocentral'),
-           ('SE2321000198-021163', 'Barnavårdscentral Färila - Los Din hälsocentral S',         'SE2321000198-054434', 'Färila - Los Din hälsocentral'),
+           ('SE2321000198-019370', 'Färila - Los Din hälsocentral S',                           'SE2321000198-054434', 'Färila - Los Din hälsocentral'),
+           ('SE2321000198-021163', 'Barnavårdscentral Färila - Los Din hälsocentral S',         'SE2321000198-054435', 'Barnavårdscentral Färila - Los Din hälsocentral'),
 
            ('SE2321000198-024141', 'Gävle Strand Din hälsocentral S',                           'SE2321000198-054412', 'Gävle Strand Din hälsocentral'),
            ('SE2321000198-043530', 'Barnavårdscentral Gävle Strand Din hälsocentral S',         'SE2321000198-054413', 'Barnavårdscentral Gävle Strand Din hälsocentral'),
@@ -76,7 +109,7 @@ BEGIN
            ('SE2321000198-020990', 'Barnavårdscentral Hamrånge Din hälsocentral S',             'SE2321000198-054415', 'Barnavårdscentral Hamrånge Din hälsocentral'),
 
            ('SE2321000198-039751', 'Badverksamhet Gävle S',                                     'SE2321000198-054927', 'Badverksamhet Gävle'),
-           ('SE2321000198-020990', 'Barnavårdscentral Hamrånge Din hälsocentral S',             'SE2321000198-054417', 'Barnavårdscentral Hedesunda Din hälsocentral'),
+           ('SE2321000198-020986', 'Barnavårdscentral Hedesunda Din hälsocentral S',            'SE2321000198-054417', 'Barnavårdscentral Hedesunda Din hälsocentral'),
            ('SE2321000198-048874', 'Distriktssköterskemottagning Färnebo Din hälsocentral S',   'SE2321000198-054418', 'Distriktssköterskemottagning Färnebo Din hälsocentral'),
            ('SE2321000198-019319', 'Hedesunda Färnebo Din hälsocentral S',                      'SE2321000198-054416', 'Hedesunda Färnebo Din hälsocentral'),
 
@@ -130,66 +163,13 @@ BEGIN
            ('SE2321000198-048873', 'Handrehabilitering Valbo Din hälsocentral S',               'SE2321000198-054427', 'Handrehabilitering Valbo Din hälsocentral'),
            ('SE2321000198-019317', 'Valbo Din hälsocentral S',                                  'SE2321000198-054425', 'Valbo Din hälsocentral');
 
-    -- List units to update
-    SELECT
-        op.originalId,
-        op.originalName,
-        op.updatedId,
-        op.updatedName,
-        (SELECT COUNT(*) FROM FRAGASVAR f WHERE f.ENHETS_ID = op.originalId) AS fragasvar_count,
-        (SELECT COUNT(*) FROM HANDELSE h WHERE h.ENHETS_ID = op.originalId) AS handelse_count,
-        (SELECT COUNT(*) FROM INTEGRERADE_VARDENHETER iv WHERE iv.ENHETS_ID = op.originalId) AS integrerade_vardenheter_count,
-        (SELECT COUNT(*) FROM INTYG i WHERE i.ENHETS_ID = op.originalId) AS intyg_count
-    FROM organizationProvider op
-    ORDER BY op.originalName;
-
-    -- Verify all records belong to the original care provider
-    SELECT COUNT(*) INTO @invalidFragasvar
-    FROM FRAGASVAR f
-    WHERE f.ENHETS_ID IN (SELECT originalId FROM organizationProvider)
-      AND f.VARDGIVAR_ID != originalCareProviderId;
-
-    IF @invalidFragasvar > 0 THEN
-        SET customError = CONCAT('Some FRAGASVAR records do not belong to the expected care provider ', originalCareProviderId, '. Count: ', @invalidFragasvar);
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = customError;
-    END IF;
-
-    SELECT COUNT(*) INTO @invalidHandelse
-    FROM HANDELSE h
-    WHERE h.ENHETS_ID IN (SELECT originalId FROM organizationProvider)
-      AND h.VARDGIVAR_ID != originalCareProviderId;
-
-    IF @invalidHandelse > 0 THEN
-        SET customError = CONCAT('Some HANDELSE records do not belong to the expected care provider ', originalCareProviderId, '. Count: ', @invalidHandelse);
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = customError;
-    END IF;
-
-    SELECT COUNT(*) INTO @invalidIntegreradeVardenheter
-    FROM INTEGRERADE_VARDENHETER iv
-    WHERE iv.ENHETS_ID IN (SELECT originalId FROM organizationProvider)
-      AND iv.VARDGIVAR_ID != originalCareProviderId;
-
-    IF @invalidIntegreradeVardenheter > 0 THEN
-        SET customError = CONCAT('Some INTEGRERADE_VARDENHETER records do not belong to the expected care provider ', originalCareProviderId, '. Count: ', @invalidIntegreradeVardenheter);
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = customError;
-    END IF;
-
-    SELECT COUNT(*) INTO @invalidIntyg
-    FROM INTYG i
-    WHERE i.ENHETS_ID IN (SELECT originalId FROM organizationProvider)
-      AND i.VARDGIVAR_ID != originalCareProviderId;
-
-    IF @invalidIntyg > 0 THEN
-        SET customError = CONCAT('Some INTYG records do not belong to the expected care provider ', originalCareProviderId, '. Count: ', @invalidIntyg);
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = customError;
-    END IF;
-
     -- Start transaction
     START TRANSACTION;
 
     -- Update FRAGASVAR table
     UPDATE FRAGASVAR f
-    INNER JOIN organizationProvider i ON f.ENHETS_ID = i.originalId
+    INNER JOIN organizationSubCareUnitProvider i ON f.ENHETS_ID = i.originalId
+    INNER JOIN INTYG it ON it.INTYGS_ID = f.INTYGS_ID AND it.SKAPAD >= issueDate
     SET f.ENHETS_ID = i.updatedId,
         f.ENHETSNAMN = i.updatedName,
         f.VARDGIVAR_ID = updatedCareProviderId,
@@ -198,64 +178,66 @@ BEGIN
 
     -- Update HANDELSE table
     UPDATE HANDELSE f
-    INNER JOIN organizationProvider i ON f.ENHETS_ID = i.originalId
+    INNER JOIN organizationSubCareUnitProvider i ON f.ENHETS_ID = i.originalId AND f.TIMESTAMP >= issueDate
     SET f.ENHETS_ID = i.updatedId,
         f.VARDGIVAR_ID = updatedCareProviderId;
     SELECT ROW_COUNT() INTO @handelseUpdated;
 
-    -- Update INTEGRERADE_VARDENHETER table where ENHETS_ID matches originalId
-    UPDATE INTEGRERADE_VARDENHETER f
-    INNER JOIN organizationProvider i ON f.ENHETS_ID = i.originalId
-    SET f.ENHETS_ID = i.updatedId,
-        f.ENHETS_NAMN = i.updatedName,
-        f.VARDGIVAR_ID = updatedCareProviderId,
-        f.VARDGIVAR_NAMN = updatedCareProviderName;
-    SELECT ROW_COUNT() INTO @integreradeVardenheterUpdated;
-
-    -- Insert new records for updatedIds that don't exist yet in INTEGRERADE_VARDENHETER
+    -- Insert new records for updatedIds to INTEGRERADE_VARDENHETER (only if they don't already exist)
     INSERT INTO INTEGRERADE_VARDENHETER (ENHETS_ID, ENHETS_NAMN, VARDGIVAR_ID, VARDGIVAR_NAMN, SKAPAD_DATUM, SCHEMA_VERSION_1, SCHEMA_VERSION_3)
     SELECT i.updatedId, i.updatedName, updatedCareProviderId, updatedCareProviderName, NOW(), schemaVersion1Value, schemaVersion3Value
-    FROM organizationProvider i
+    FROM organizationSubCareUnitProvider i
     WHERE NOT EXISTS (
-        SELECT 1 FROM INTEGRERADE_VARDENHETER f
-        WHERE f.ENHETS_ID = i.updatedId
+        SELECT 1 FROM INTEGRERADE_VARDENHETER iv WHERE iv.ENHETS_ID = i.updatedId
+    );
+    SELECT ROW_COUNT() INTO @integreradeUnderVardenheterInserted;
+
+    -- Insert new records for updatedIds to INTEGRERADE_VARDENHETER (only if they don't already exist)
+    INSERT INTO INTEGRERADE_VARDENHETER (ENHETS_ID, ENHETS_NAMN, VARDGIVAR_ID, VARDGIVAR_NAMN, SKAPAD_DATUM, SCHEMA_VERSION_1, SCHEMA_VERSION_3)
+    SELECT i.updatedId, i.updatedName, updatedCareProviderId, updatedCareProviderName, NOW(), schemaVersion1Value, schemaVersion3Value
+    FROM organizationCareUnitProvider i
+    WHERE NOT EXISTS (
+        SELECT 1 FROM INTEGRERADE_VARDENHETER iv WHERE iv.ENHETS_ID = i.updatedId
     );
     SELECT ROW_COUNT() INTO @integreradeVardenheterInserted;
 
+    -- Insert new sub-unit that didn't exist (only if it doesn't already exist)
+    INSERT INTO INTEGRERADE_VARDENHETER (ENHETS_ID, ENHETS_NAMN, VARDGIVAR_ID, VARDGIVAR_NAMN, SKAPAD_DATUM, SCHEMA_VERSION_1, SCHEMA_VERSION_3)
+    SELECT newSubUnitId, newSubUnitName, updatedCareProviderId, updatedCareProviderName, NOW(), schemaVersion1Value, schemaVersion3Value
+    WHERE NOT EXISTS (
+        SELECT 1 FROM INTEGRERADE_VARDENHETER iv WHERE iv.ENHETS_ID = newSubUnitId
+    );
+    SELECT ROW_COUNT() INTO @newVardenheterInserted;
+
+    -- Update ARENDE table
+    UPDATE ARENDE f
+    INNER JOIN organizationSubCareUnitProvider i ON f.ENHET = i.originalId
+    INNER JOIN INTYG it ON it.INTYGS_ID = f.INTYGS_ID AND it.SKAPAD >= issueDate
+    SET f.ENHET = i.updatedId,
+        f.ENHET_NAME = i.updatedName,
+        f.VARDGIVARE_NAME = updatedCareProviderName;
+    SELECT ROW_COUNT() INTO @arendeUpdated;
+
     -- Update INTYG table
     UPDATE INTYG f
-    INNER JOIN organizationProvider i ON f.ENHETS_ID = i.originalId
+    INNER JOIN organizationSubCareUnitProvider i ON f.ENHETS_ID = i.originalId AND f.SKAPAD >= issueDate
     SET f.ENHETS_ID = i.updatedId,
         f.ENHETS_NAMN = i.updatedName,
         f.VARDGIVAR_ID = updatedCareProviderId,
         f.VARDGIVAR_NAMN = updatedCareProviderName;
     SELECT ROW_COUNT() INTO @intygUpdated;
 
-    -- Summary before commit
-    SELECT
-        op.originalId,
-        op.originalName,
-        op.updatedId,
-        op.updatedName,
-        CASE
-            WHEN EXISTS(SELECT 1 FROM INTEGRERADE_VARDENHETER iv WHERE iv.ENHETS_ID = op.updatedId LIMIT 1) THEN 'Updated'
-            ELSE 'Not Found'
-            END AS update_status,
-        (SELECT COUNT(*) FROM FRAGASVAR f WHERE f.ENHETS_ID = op.updatedId) AS fragasvar_count,
-        (SELECT COUNT(*) FROM HANDELSE h WHERE h.ENHETS_ID = op.updatedId) AS handelse_count,
-        (SELECT COUNT(*) FROM INTEGRERADE_VARDENHETER iv WHERE iv.ENHETS_ID = op.updatedId) AS integrerade_vardenheter_count,
-        (SELECT COUNT(*) FROM INTYG i WHERE i.ENHETS_ID = op.updatedId) AS intyg_count
-    FROM organizationProvider op
-    ORDER BY update_status DESC, op.originalName;
-
+    -- Summary
     SELECT
         @fragasvarUpdated AS total_fragasvar_updated,
         @handelseUpdated AS total_handelse_updated,
-        @integreradeVardenheterUpdated AS total_integrerade_vardenheter_updated,
+        @integreradeUnderVardenheterInserted AS total_integrerade_under_vardenheter_inserted,
         @integreradeVardenheterInserted AS total_integrerade_vardenheter_inserted,
-        @intygUpdated AS total_intyg_updated;
+        @intygUpdated AS total_intyg_updated,
+        @arendeUpdated AS total_arende_updated,
+        @newVardenheterInserted AS total_new_sub_vardenheter_inserted;
 
-    DROP TEMPORARY TABLE IF EXISTS organizationProvider;
+    DROP TEMPORARY TABLE IF EXISTS organizationSubCareUnitProvider;
 
     IF errorCode = '00000' THEN
         COMMIT;
