@@ -35,7 +35,7 @@ BEGIN
 
     SET updatedCareProviderId = 'SE2321000198-054374';
     SET updatedCareProviderName = 'Region Gävleborg Din Hälsocentral AB';
-    SET createdAt = '2026-02-01 00:00:00';
+    SET createdAt = '2026-04-08 00:00:00';
 
     -- Create table with primary care unit and subunits
     DROP TEMPORARY TABLE IF EXISTS organizationProvider;
