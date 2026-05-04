@@ -7,7 +7,7 @@ BEGIN
     -- Declare variables
     DECLARE updatedCareProviderId VARCHAR(50);
     DECLARE errorCode CHAR(5) DEFAULT '00000';
-    DECLARE effectiveFromDate DATE DEFAULT '2026-02-01';
+    DECLARE effectiveFromDate DATE DEFAULT '2026-04-08';
     DECLARE errorMessage TEXT;
 
     -- Declare handler

@@ -11,7 +11,7 @@ BEGIN
     DECLARE schemaVersion3Value TINYINT;
     DECLARE errorCode CHAR(5) DEFAULT '00000';
     DECLARE errorMessage TEXT;
-    DECLARE issueDate DATE DEFAULT DATE('2026-02-01');
+    DECLARE issueDate DATE DEFAULT DATE('2026-04-08');
     DECLARE newSubUnitId VARCHAR(50);
     DECLARE newSubUnitName VARCHAR(100);
 

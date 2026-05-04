@@ -8,7 +8,7 @@ BEGIN
     DECLARE updatedCareProviderId VARCHAR(50);
     DECLARE errorCode CHAR(5) DEFAULT '00000';
     DECLARE errorMessage TEXT;
-    DECLARE issueDate DATE DEFAULT DATE('2026-02-01');
+    DECLARE issueDate DATE DEFAULT DATE('2026-04-08');
 
     -- Declare handler
     DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
