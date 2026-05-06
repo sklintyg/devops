@@ -1,5 +1,5 @@
 # JDK 11 - alpine
-FROM eclipse-temurin:11-alpine
+FROM amazoncorretto:11-alpine
 
 ARG version
 ARG checksum

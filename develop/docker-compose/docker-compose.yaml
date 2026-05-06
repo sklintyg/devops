@@ -1,9 +1,8 @@
-version: "3.8"
-
 services:
 
   mysql:
     image: mysql:8.4.8
+    platform: linux/x86_64
     container_name: mysql
     volumes:
       - ./init-db:/docker-entrypoint-initdb.d
@@ -48,6 +47,7 @@ services:
     volumes:
       - ./activemq/activemq.xml:/opt/apache-activemq-$ACTIVEMQ_VERSION/conf/activemq.xml
   mailhog:
+    platform: linux/x86_64
     container_name: intyg-mailhog
     image: mailhog/mailhog:latest
     restart: on-failure
